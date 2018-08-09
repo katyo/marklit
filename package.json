@@ -1,0 +1,53 @@
+{
+  "name": "marklit",
+  "version": "0.1.0",
+  "description": "Strictly markdown parser in Typescript.",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "module": "es/index.js",
+  "scripts": {
+    "compile": "npm run compile-es && npm run compile-js",
+    "clean": "npm run clean-es && npm run clean-js",
+    "compile-es": "tsc --outDir es --module es6",
+    "clean-es": "rm -rf es",
+    "compile-js": "tsc --outDir .",
+    "clean-js": "rm -rf *.d.ts *.js *.js.map render inline block",
+    "prepublish": "npm run compile",
+    "compile-test": "browserify -d test/index.ts -p [ tsify --noImplicitAny ] -o test-out.js",
+    "clean-test": "rm -f test-out.js",
+    "test": "testem ci",
+    "test-node": "mocha -r ts-node/register test/index.ts -R spec",
+    "test-dev": "testem",
+    "conv-test": "ts-node test/tots"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/katyo/marklit"
+  },
+  "keywords": [
+    "markdown",
+    "markup",
+    "marked",
+    "ast",
+    "render",
+    "next-gen"
+  ],
+  "author": "K. <kayo@illumium.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/katyo/marklit/issues"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5",
+    "@types/node": "^8",
+    "browserify": "^16",
+    "mocha": "^5",
+    "testem": "^2",
+    "ts-node": "^7",
+    "tsify": "^4",
+    "typescript": "^3"
+  },
+  "dependencies": {
+    "tslib": "^1.9"
+  }
+}
