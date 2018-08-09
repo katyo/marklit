@@ -18,7 +18,7 @@ import {
 describe('basic', () => {
     describe('inline', () => {
         describe('normal', () => {
-            const parser = init<InlineContextMap<InlineToken>, InlineContext.Top>(InlineContext.Top, InlineNormal);
+            const parser = init<InlineContextMap<InlineToken, {}>, InlineContext.Top>(InlineContext.Top, InlineNormal);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
@@ -124,7 +124,7 @@ describe('basic', () => {
         });
 
         describe('pedantic', () => {
-            const parser = init<InlineContextMap<InlineToken>, InlineContext.Top>(InlineContext.Top, InlinePedantic);
+            const parser = init<InlineContextMap<InlineToken, {}>, InlineContext.Top>(InlineContext.Top, InlinePedantic);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('link', () => {
@@ -141,7 +141,7 @@ describe('basic', () => {
         });
 
         describe('gfm', () => {
-            const parser = init<InlineContextMap<InlineToken>, InlineContext.Top>(InlineContext.Top, InlineGfm);
+            const parser = init<InlineContextMap<InlineToken, {}>, InlineContext.Top>(InlineContext.Top, InlineGfm);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
@@ -172,7 +172,7 @@ describe('basic', () => {
         });
 
         describe('math', () => {
-            const parser = init<InlineContextMap<InlineToken>, InlineContext.Top>(InlineContext.Top, [...InlineNormal, MathSpan]);
+            const parser = init<InlineContextMap<InlineToken, {}>, InlineContext.Top>(InlineContext.Top, [...InlineNormal, MathSpan]);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             _('Inline $math$', ['Inline ', { $: InlineTag.Math, _: 'math' }]);
