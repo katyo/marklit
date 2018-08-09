@@ -1,3 +1,7 @@
+import { AsUnion } from '../core';
+
+export type InlineTokenType<InlineTokenMap> = AsUnion<InlineTokenMap> | string;
+
 export const enum InlineTag {
     Link,
     Image,
@@ -25,11 +29,11 @@ export const enum InlineOrder {
     Text,
 }
 
-export interface InlineLink<InlineToken> {
+export interface InlineLink<InlineTokenMap> {
     [InlineTag.Link]: {
         l: string;
         t?: string;
-    } & InlinePhrase<InlineToken>;
+    } & InlinePhrase<InlineTokenMap>;
 }
 
 export interface InlineImage {
@@ -40,16 +44,16 @@ export interface InlineImage {
     };
 }
 
-export interface InlineStrong<InlineToken> {
-    [InlineTag.Strong]: InlinePhrase<InlineToken>;
+export interface InlineStrong<InlineTokenMap> {
+    [InlineTag.Strong]: InlinePhrase<InlineTokenMap>;
 }
 
-export interface InlineEm<InlineToken> {
-    [InlineTag.Em]: InlinePhrase<InlineToken>;
+export interface InlineEm<InlineTokenMap> {
+    [InlineTag.Em]: InlinePhrase<InlineTokenMap>;
 }
 
-export interface InlineDel<InlineToken> {
-    [InlineTag.Del]: InlinePhrase<InlineToken>;
+export interface InlineDel<InlineTokenMap> {
+    [InlineTag.Del]: InlinePhrase<InlineTokenMap>;
 }
 
 export interface InlineBr {
@@ -68,22 +72,22 @@ export interface InlineMath {
     };
 }
 
-export interface InlinePhrase<InlineToken> {
-    _: InlineTokenType<InlineToken>[];
+export interface InlinePhrase<InlineTokenMap> {
+    _: InlineTokenType<InlineTokenMap>[];
 }
 
-export interface InlineTokenMap<InlineToken> extends
-    InlineLink<InlineToken>,
+export interface InlineTokenMap<InlineTokenMap> extends
+    InlineLink<InlineTokenMap>,
     InlineImage,
-    InlineStrong<InlineToken>,
-    InlineEm<InlineToken>,
-    InlineDel<InlineToken>,
+    InlineStrong<InlineTokenMap>,
+    InlineEm<InlineTokenMap>,
+    InlineDel<InlineTokenMap>,
     InlineCode,
     InlineMath,
     InlineBr { }
 
-export interface InlineToken extends InlineTokenMap<InlineToken> { }
+// Basics
 
-import { AsUnion } from '../core';
+export interface BasicInlineTokenMap extends InlineTokenMap<BasicInlineTokenMap> { }
 
-export type InlineTokenType<InlineTokenMap> = AsUnion<InlineTokenMap> | string;
+export type BasicInlineToken = InlineTokenType<BasicInlineTokenMap>;
