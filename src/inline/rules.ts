@@ -15,9 +15,9 @@ export interface InlineContextMap<InlineToken, InlineMeta> {
     [InlineContext.Link]: [InlineTokenType<InlineToken>, InlineMeta];
 }
 
-export type InlineRule<InlineToken, InlineMeta> = ParserRule<InlineContextMap<InlineToken, InlineMeta>, InlineContext>;
+export type InlineRule<InlineTokenMap, InlineMeta> = ParserRule<InlineContextMap<InlineTokenMap, InlineMeta>, InlineContext>;
 
-export type InlineHandle<InlineToken, InlineMeta> = ParserHandle<InlineContextMap<InlineToken, InlineMeta>, InlineContext>;
+export type InlineHandle<InlineTokenMap, InlineMeta> = ParserHandle<InlineContextMap<InlineTokenMap, InlineMeta>, InlineContext>;
 
 const escape = /\\([!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{}])/;
 
@@ -223,7 +223,7 @@ function procRefNoLink($: InlineHandle<InlineLink<any>, {}>, src: string, link: 
 
 function parseLink($: InlineHandle<InlineLink<any> | InlineImage, {}>, link: string, text: string, href: string, title?: string): AsUnion<InlineLink<any> & InlineImage> {
     const token: AsUnion<InlineLink<any> & InlineImage> = link.charAt(0) != '!'
-        ? { $: InlineTag.Link, l: href, _: parseNest({ ...$, c: InlineContext.Link }, text, InlineContext.Link) }
+        ? { $: InlineTag.Link, l: href, _: parseNest($, text, InlineContext.Link) }
         : { $: InlineTag.Image, l: href, _: text };
     if (title) (token as AsUnion<InlineLink<any>>).t = title;
     return token;

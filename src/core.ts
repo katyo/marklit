@@ -102,5 +102,5 @@ export function parse<CtxMap, Name extends keyof CtxMap>(parser: Parser<CtxMap, 
 export function parseNest<CtxMap, Name extends keyof CtxMap, NestedName extends keyof CtxMap>($: ParserHandle<CtxMap, Name>, src: string, name: NestedName): ContextToken<CtxMap[NestedName]>[];
 export function parseNest<CtxMap, Name extends keyof CtxMap>($: ParserHandle<CtxMap, Name>, src: string): ContextToken<CtxMap[Name]>[];
 export function parseNest<CtxMap, Name extends keyof CtxMap, NestedName extends keyof CtxMap>($: ParserHandle<CtxMap, Name>, src: string, name: Name | NestedName = $.c): ContextToken<CtxMap[Name | NestedName]>[] {
-    return parseSeq($, $.p[name], src);
+    return parseSeq($.c === name ? $ : { ...$, c: name }, $.p[name], src);
 }
