@@ -19,8 +19,11 @@
   "files": [
     "src/match.ts",
     "src/core.ts",
+    "src/meta.ts",
     "src/inline/model.ts",
     "src/inline/rules.ts",
+    "src/block/model.ts",
+    "src/block/rules.ts",
     "src/index.ts"
   ]
 }
