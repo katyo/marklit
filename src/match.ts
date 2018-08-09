@@ -1,9 +1,16 @@
-export interface Matcher<Type, Self> {
-    (self: Self, source: string): [Type | void, string];
-}
-
 export interface ParseFunc<Type, Self> {
     (ctx: Self, source: string, ...captures: string[]): [Type | void, string];
+}
+
+export type CaptureMatcher<Type, Self> = [
+    number, // starting of match parens
+    ParseFunc<Type, Self> // parser to apply
+];
+
+export interface Matcher<Type, Self> {
+    //(self: Self, source: string): [Type | void, string];
+    r: RegExp;
+    m: CaptureMatcher<Type, Self>[];
 }
 
 export type MatchPath<Type, Self> = [
@@ -11,28 +18,21 @@ export type MatchPath<Type, Self> = [
     ParseFunc<Type, Self> // parser to apply
 ];
 
-type CaptureMatcher<Type, Self> = [
-    number, // starting of match parens
-    ParseFunc<Type, Self> // parser to apply
-];
-
 export function parseSeq<Type, Self>(self: Self, matcher: Matcher<Type, Self>, source: string): Type[] {
     const tokens: Type[] = [];
 
     for (; source.length > 0;) {
-        const result = matcher(self, source);
+        const [token, rest] = doMatch(matcher, self, source);
 
-        if (typeof result[0] == 'string' &&
+        if (typeof token == 'string' &&
             tokens.length > 0 &&
             typeof tokens[tokens.length - 1] == 'string') {
-            (tokens[tokens.length - 1] as any as string) += result[0];
-        } else {
-            if (result[0] != null) {
-                tokens.push(result[0] as Type);
-            }
+            (tokens[tokens.length - 1] as any as string) += token;
+        } else if (token != null) {
+            tokens.push(token as Type);
         }
 
-        source = result[1];
+        source = rest;
     }
 
     return tokens;
@@ -51,26 +51,25 @@ export function matchAny<Type, Self>(matchers: MatchPath<Type, Self>[]): Matcher
     }
 
     const regex = new RegExp(matchers
-        .map((p, i) => '^(' + unwrapRe(p[0])[0]
-            .replace(/\\\\|\\([1-9])/, (_, n) => n ? `\\${+n + match[i][0]}` : _) + ')')
+        .map(([r,], i) => `^(${shiftRe(r, match[i][0])})`)
         .join('|'));
 
-    //console.log(regex);
+    return { r: regex, m: match };
+}
 
-    return (self: Self, source: string) => {
-        const captures = regex.exec(source);
+export function doMatch<Type, Self>({ r: regex, m: match }: Matcher<Type, Self>, self: Self, source: string): [Type | void, string] {
+    const captures = regex.exec(source);
 
-        if (captures != null) {
-            for (const [off, fn] of match) {
-                if (captures[off] != null) {
-                    source = source.substring(captures[0].length);
-                    return fn(self, source, ...captures.slice(off));
-                }
+    if (captures != null) {
+        for (const [off, fn] of match) {
+            if (captures[off] != null) {
+                source = source.substring(captures[0].length);
+                return fn(self, source, ...captures.slice(off));
             }
         }
+    }
 
-        throw `Unable to parse: "${source.substr(0, 80)}"`;
-    };
+    throw `Unable to parse: "${source.substr(0, 80)}"`;
 }
 
 function countCaptures(regexp: RegExp): number {
@@ -88,9 +87,15 @@ export function substRe(regexp: RegExp, substs: Record<string, RegExp | string>)
     return new RegExp(source, flags);
 }
 
-function unwrapRe(regexp: RegExp): [string, string] {
+export function unwrapRe(regexp: RegExp): [string, string] {
     const strexp = regexp.toString();
     const flags = (/[gimuy]*$/.exec(strexp) as RegExpExecArray)[0];
     const source = strexp.substring(1, strexp.length - 1 - flags.length);
     return [source, flags];
+}
+
+export function shiftRe(regex: RegExp, offset: number): string {
+    return unwrapRe(regex)[0]
+        .replace(/\\\\|\\([1-9][0-9]*)/,
+            (_, n) => n ? `\\${+n + offset}` : _);
 }
