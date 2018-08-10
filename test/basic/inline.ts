@@ -23,7 +23,7 @@ interface InlineToken extends InlineTokenMap<InlineToken> { }
 
 interface InlineContext extends ContextMap<any, InlineToken, AnyMeta> { }
 
-describe('basic', () => {
+export default function() {
     describe('inline', () => {
         describe('normal', () => {
             const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal);
@@ -188,4 +188,4 @@ describe('basic', () => {
             _('Inline $$math with $ char$$.', ['Inline ', { $: InlineTag.Math, _: 'math with $ char' }, '.']);
         });
     });
-});
+}
