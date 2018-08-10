@@ -77,22 +77,29 @@ export const Heading: BlockRule<BlockHeading<any>, any, MetaHeadings<any>> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Heading,
     heading,
-    ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src]
+    ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src],
+    initHeading
 ];
 
 export const LHeading: BlockRule<BlockHeading<any>, any, MetaHeadings<any>> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.LHeading,
     lheading,
-    ($, src, _, text, underscore) => [procHeading($, underscore === '=' ? 1 : 2, text), src]
+    ($, src, _, text, underscore) => [procHeading($, underscore === '=' ? 1 : 2, text), src],
+    initHeading
 ];
 
 export const GfmHeading: BlockRule<BlockHeading<any>, any, MetaHeadings<any>> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Heading,
     ' *(#{1,6}) +([^\\n]+?) *#* *(?:\\n+|$)',
-    ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src]
+    ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src],
+    initHeading
 ];
+
+function initHeading(m: MetaHeadings<any>) {
+    m.headings = [];
+}
 
 function procHeading($: BlockHandle<BlockHeading<any>, any, MetaHeadings<any>>, level: number, text: string): AsUnion<BlockHeading<any>> {
     const index = $.m.headings.length;
@@ -266,6 +273,7 @@ export const Def: BlockRule<void, any, MetaLinks> = [
         title: '(?:"(?:\\\\"?|[^"\\\\])*"|\'[^\'\\n]*(?:\\n[^\'\\n]+)*\\n?\'|\\([^()]*\\))'
     }),
     procDef,
+    initDef
 ];
 
 export const PedanticDef: BlockRule<void, any, MetaLinks> = [
@@ -273,7 +281,12 @@ export const PedanticDef: BlockRule<void, any, MetaLinks> = [
     BlockOrder.Def,
     ' *\\[([^\\]]+)\\]: *<?([^\\s>]+)>?(?: +(["(][^\\n]+[")]))? *(?:\\n+|$)',
     procDef,
+    initDef
 ];
+
+function initDef(m: MetaLinks) {
+    m.links = {};
+}
 
 function procDef($: BlockHandle<void, any, MetaLinks>, src: string, tag: string, href: string, title?: string): [void, string] {
     if (title) title = title.substring(1, title.length - 1);
