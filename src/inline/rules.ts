@@ -38,7 +38,7 @@ export const AutoLink: InlineRule<InlineLink<any>, {}> = [
 export const Url: InlineRule<InlineLink<any>, {}> = [
     [ContextTag.InlineTop],
     InlineOrder.Url,
-    substRe(/^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/, { email }),
+    substRe(/((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|email/, { email }),
     ({ }, src, text, url, at) => {
         src = `${text}${src}`;
         let prev_text;
@@ -55,7 +55,7 @@ const label = /(?:\[[^\[\]]*\]|\\[\[\]]?|`[^`]*`|[^\[\]\\])*?/;
 export const Link: InlineRule<InlineLink<any>, {}> = [
     [ContextTag.InlineTop],
     InlineOrder.Link,
-    substRe(/^!?\[(label)\]\(href(?:\s+(title))?\s*\)/, {
+    substRe(/!?\[(label)\]\(href(?:\s+(title))?\s*\)/, {
         label,
         href: /\s*(<(?:\\[<>]?|[^\s<>\\])*>|(?:\\[()]?|\([^\s\x00-\x1f()\\]*\)|[^\s\x00-\x1f()\\])*?)/,
         title: /"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/,
@@ -66,81 +66,81 @@ export const Link: InlineRule<InlineLink<any>, {}> = [
 export const PedanticLink: InlineRule<InlineLink<any>, {}> = [
     [ContextTag.InlineTop],
     InlineOrder.Link,
-    substRe(/^!?\[(label)\]\((.*?)\)/, { label }),
+    substRe(/!?\[(label)\]\((.*?)\)/, { label }),
     procLink
 ];
 
 export const RefLink: InlineRule<InlineLink<any>, {}> = [
     [ContextTag.InlineTop],
     InlineOrder.RefLink,
-    substRe(/^!?\[(label)\]\[(?!\s*\])((?:\\[\[\]]?|[^\[\]\\])+)\]/, { label }),
+    substRe(/!?\[(label)\]\[(?!\s*\])((?:\\[\[\]]?|[^\[\]\\])+)\]/, { label }),
     procRefNoLink
 ];
 
 export const PedanticRefLink: InlineRule<InlineLink<any>, {}> = [
     [ContextTag.InlineTop],
     InlineOrder.RefLink,
-    substRe(/^!?\[(label)\]\s*\[([^\]]*)\]/, { label }),
+    substRe(/!?\[(label)\]\s*\[([^\]]*)\]/, { label }),
     procRefNoLink
 ];
 
 export const NoLink: InlineRule<InlineLink<any>, {}> = [
     [ContextTag.InlineTop],
     InlineOrder.NoLink,
-    /^!?\[(?!\s*\])((?:\[[^\[\]]*\]|\\[\[\]]|[^\[\]])*)\](?:\[\])?/,
+    /!?\[(?!\s*\])((?:\[[^\[\]]*\]|\\[\[\]]|[^\[\]])*)\](?:\[\])?/,
     procRefNoLink
 ];
 
 export const Strong: InlineRule<InlineStrong<any>, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Strong,
-    /^__([^\s][\s\S]*?[^\s])__(?!_)|^\*\*([^\s][\s\S]*?[^\s])\*\*(?!\*)|^__([^\s])__(?!_)|^\*\*([^\s])\*\*(?!\*)/,
+    /__([^\s][\s\S]*?[^\s])__(?!_)|\*\*([^\s][\s\S]*?[^\s])\*\*(?!\*)|__([^\s])__(?!_)|\*\*([^\s])\*\*(?!\*)/,
     procStrong
 ];
 
 export const PedanticStrong: InlineRule<InlineStrong<any>, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Strong,
-    /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
+    /__(?=\S)([\s\S]*?\S)__(?!_)|\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
     procStrong
 ];
 
 export const Em: InlineRule<InlineEm<any>, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Em,
-    /^_([^\s][\s\S]*?[^\s_])_(?!_)|^_([^\s_][\s\S]*?[^\s])_(?!_)|^\*([^\s][\s\S]*?[^\s*])\*(?!\*)|^\*([^\s*][\s\S]*?[^\s])\*(?!\*)|^_([^\s_])_(?!_)|^\*([^\s*])\*(?!\*)/,
+    /_([^\s][\s\S]*?[^\s_])_(?!_)|_([^\s_][\s\S]*?[^\s])_(?!_)|\*([^\s][\s\S]*?[^\s*])\*(?!\*)|\*([^\s*][\s\S]*?[^\s])\*(?!\*)|_([^\s_])_(?!_)|\*([^\s*])\*(?!\*)/,
     procEm
 ];
 
 export const PedanticEm: InlineRule<InlineEm<any>, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Em,
-    /^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/,
+    /_(?=\S)([\s\S]*?\S)_(?!_)|\*(?=\S)([\s\S]*?\S)\*(?!\*)/,
     procEm
 ];
 
 export const Del: InlineRule<InlineDel<any>, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Del,
-    /^~+(?=\S)([\s\S]*?\S)~+/,
+    /~+(?=\S)([\s\S]*?\S)~+/,
     ($, src, { }, text) => [{ $: InlineTag.Del, _: parseNest($, text) }, src]
 ];
 
 export const CodeSpan: InlineRule<InlineCode, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Code,
-    /^(`+)\s*([\s\S]*?[^`]?)\s*\1(?!`)/,
+    /(`+)\s*([\s\S]*?[^`]?)\s*\1(?!`)/,
     ({ }, src, { }, fences, text) => [{ $: InlineTag.Code, _: text.replace(/\s+$/, '') }, src]
 ];
 
 export const MathSpan: InlineRule<InlineMath, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Math,
-    /^(\$+)\s*([\s\S]*?[^\$]?)\s*\1(?!\$)/,
+    /(\$+)\s*([\s\S]*?[^\$]?)\s*\1(?!\$)/,
     ({ }, src, { }, delims, text) => [{ $: InlineTag.Math, _: text.replace(/\s+$/, '') }, src]
 ];
 
-const br = /^(?: {2,}|\\)\n(?!\s*$)/;
+const br = /(?: {2,}|\\)\n(?!\s*$)/;
 
 export const Br: InlineRule<InlineBr, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
@@ -156,7 +156,7 @@ export const GfmBreaksBr: InlineRule<InlineBr, {}> = [
     ({ }, src) => [{ $: InlineTag.Br }, src]
 ];
 
-const text = /^[\s\S]+?(?=[\\<!\[`*$]|\b_| {2,}\n|$)/;
+const text = /[\s\S]+?(?=[\\<!\[`*$]|\b_| {2,}\n|$)/;
 
 export const TextSpan: InlineRule<string, {}> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],

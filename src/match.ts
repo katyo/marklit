@@ -52,8 +52,8 @@ export function matchAny<Type, Self>(matchers: MatchPath<Type, Self>[]): Matcher
         match[i] = [offset, p[1]];
     }
 
-    const regex = new RegExp(matchers
-        .map(([r,], i) => `^(${shiftRe(r, match[i][0])})`)
+    const regex = new RegExp('^' + matchers
+        .map(([r,], i) => `(${shiftRe(r, match[i][0])})`)
         .join('|'));
 
     return { r: regex, m: match };

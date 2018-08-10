@@ -18,13 +18,13 @@ export type BlockRule<BlockTokenMap, InlineTokenMap, Meta> = ParserRule<ContextM
 
 export type BlockHandle<BlockTokenMap, InlineTokenMap, Meta> = ParserHandle<ContextMap<BlockTokenMap, InlineTokenMap, Meta>, ContextTag>;
 
-const hr = /^ {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\* *){3,})(?:\n+|$)/;
+const hr = / {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\* *){3,})(?:\n+|$)/;
 
-const heading = /^ *(#{1,6}) *([^\n]+?) *(?:#+ *)?(?:\n+|$)/;
+const heading = / *(#{1,6}) *([^\n]+?) *(?:#+ *)?(?:\n+|$)/;
 
-const lheading = /^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/;
+const lheading = /([^\n]+)\n *(=|-){2,} *(?:\n+|$)/;
 
-const paragraph = substRe(/^([^\n]+(?:\n(?!hr|heading|lheading| {0,3}>|<\/?(?:tag)(?: +|\n|\/?>)|<(?:script|pre|style|!--))[^\n]+)*)/, {
+const paragraph = substRe(/([^\n]+(?:\n(?!hr|heading|lheading| {0,3}>|<\/?(?:tag)(?: +|\n|\/?>)|<(?:script|pre|style|!--))[^\n]+)*)/, {
     hr,
     heading,
     lheading,
@@ -33,16 +33,16 @@ const paragraph = substRe(/^([^\n]+(?:\n(?!hr|heading|lheading| {0,3}>|<\/?(?:ta
 
 const bullet = /(?:[*+-]|\d+\.)/;
 
-const item = substRe(/^( *)(bullet) [^\n]*(?:\n(?!\1bullet )[^\n]*)*/gm, {
+const item = substRe(/( *)(bullet) [^\n]*(?:\n(?!\1bullet )[^\n]*)*/gm, {
     bullet
 });
 
-const def = substRe(/^ {0,3}\[(label)\]: *\n? *<?([^\s>]+)>?(?:(?: +\n? *| *\n *)(title))? *(?:\n+|$)/, {
+const def = substRe(/ {0,3}\[(label)\]: *\n? *<?([^\s>]+)>?(?:(?: +\n? *| *\n *)(title))? *(?:\n+|$)/, {
     label: /(?!\s*\])(?:\\[\[\]]|[^\[\]])+/,
     title: /(?:"(?:\\"?|[^"\\])*"|'[^'\n]*(?:\n[^'\n]+)*\n?'|\([^()]*\))/,
 });
 
-const list = substRe(/^( *)(bullet) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bullet )\n*|\s*$)/, {
+const list = substRe(/( *)(bullet) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bullet )\n*|\s*$)/, {
     bullet,
     hr: '\\n+(?=\\1?(?:(?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$))',
     def: '\\n+(?=' + unwrapRe(def)[0] + ')'
@@ -51,18 +51,18 @@ const list = substRe(/^( *)(bullet) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bullet )\n
 export const Newline: BlockRule<BlockSpace, any, {}> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Newline,
-    /^\n+/,
+    /\n+/,
     ({ }, src) => [{ $: BlockTag.Space }, src]
 ];
 
 export const CodeBlock: BlockRule<BlockCode, any, {}> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Code,
-    /^( {4}[^\n]+\n*)+/,
+    /( {4}[^\n]+\n*)+/,
     ({ }, src, text) => [{ $: BlockTag.Code, _: text.replace(/^ {4}/gm, '').replace(/\n$/, '') }, src]
 ];
 
-const fences = /^ *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\n? *\1 *(?:\n+|$)/;
+const fences = / *(`{3,}|~{3,})[ \.]*(\S+)? *\n([\s\S]*?)\n? *\1 *(?:\n+|$)/;
 
 export const Fences: BlockRule<BlockCode, any, {}> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
@@ -88,7 +88,7 @@ export const LHeading: BlockRule<BlockHeading<any>, any, MetaHeadings<any>> = [
 export const GfmHeading: BlockRule<BlockHeading<any>, any, MetaHeadings<any>> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Heading,
-    /^ *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/,
+    / *(#{1,6}) +([^\n]+?) *#* *(?:\n+|$)/,
     ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src]
 ];
 
@@ -109,7 +109,7 @@ export const Hr: BlockRule<BlockHr, any, {}> = [
 export const Quote: BlockRule<BlockQuote<any>, any, {}> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Quote,
-    substRe(/^( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/, {
+    substRe(/( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/, {
         paragraph
     }),
     ($, src, text) => [{
@@ -152,7 +152,7 @@ function procParagraph($: BlockHandle<BlockParagraph<any>, any, {}>, src: string
 export const TextBlock: BlockRule<BlockText<any>, any, {}> = [
     [ContextTag.BlockTop, ContextTag.BlockNest],
     BlockOrder.Text,
-    /^[^\n]+/,
+    /[^\n]+/,
     ($, src, text) => [{ $: BlockTag.Text, _: parseNest($, text, ContextTag.InlineTop) }, src]
 ];
 
@@ -259,7 +259,7 @@ export const List: BlockRule<BlockList<any> | BlockOrdList<any>, any, {}> = [
 export const Def: BlockRule<void, any, MetaLinks> = [
     [ContextTag.BlockTop],
     BlockOrder.Def,
-    substRe(/^ {0,3}\[(label)\]: *\n? *<?([^\s>]+)>?(?:(?: +\n? *| *\n *)(title))? *(?:\n+|$)/, {
+    substRe(/ {0,3}\[(label)\]: *\n? *<?([^\s>]+)>?(?:(?: +\n? *| *\n *)(title))? *(?:\n+|$)/, {
         label: /(?!\s*\])(?:\\[\[\]]|[^\[\]])+/,
         title: /(?:"(?:\\"?|[^"\\])*"|'[^'\n]*(?:\n[^'\n]+)*\n?'|\([^()]*\))/
     }),
@@ -269,7 +269,7 @@ export const Def: BlockRule<void, any, MetaLinks> = [
 export const PedanticDef: BlockRule<void, any, MetaLinks> = [
     [ContextTag.BlockTop],
     BlockOrder.Def,
-    /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,
+    / *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,
     procDef,
 ];
 
@@ -285,14 +285,14 @@ function procDef($: BlockHandle<void, any, MetaLinks>, src: string, tag: string,
 export const NpTable: BlockRule<BlockTable<any>, any, {}> = [
     [ContextTag.BlockTop],
     BlockOrder.List,
-    /^( *([^|\n ].*\|.*)\n *([-:]+ *\|[-| :]*)(?:\n((?:.*[^>\n ].*(?:\n|$))*)\n*|$))/,
+    /( *([^|\n ].*\|.*)\n *([-:]+ *\|[-| :]*)(?:\n((?:.*[^>\n ].*(?:\n|$))*)\n*|$))/,
     procTable,
 ];
 
 export const Table: BlockRule<BlockTable<any>, any, {}> = [
     [ContextTag.BlockTop],
     BlockOrder.List,
-    /^( *\|(.+)\n *\|?( *[-:]+[-| :]*)(?:\n((?: *[^>\n ].*(?:\n|$))*)\n*|$))/,
+    /( *\|(.+)\n *\|?( *[-:]+[-| :]*)(?:\n((?: *[^>\n ].*(?:\n|$))*)\n*|$))/,
     procTable,
 ];
 
