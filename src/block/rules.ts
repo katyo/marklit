@@ -287,9 +287,9 @@ function initDef(m: MetaLinks) {
     m.links = {};
 }
 
-function procDef($: BlockHandle<void, UnknownInlineToken, MetaLinks>, src: string, tag: string, href: string, title?: string): [void, string] {
+function procDef($: BlockHandle<void, UnknownInlineToken, MetaLinks>, src: string, { }: string, label: string, href: string, title?: string): [void, string] {
     if (title) title = title.substring(1, title.length - 1);
-    $.m.links[tag.toLowerCase().replace(/\s+/g, ' ')] = {
+    $.m.links[label.toLowerCase().replace(/\s+/g, ' ')] = {
         l: href,
         t: title
     };
