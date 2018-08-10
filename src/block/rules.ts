@@ -1,6 +1,6 @@
 import { ParserHandle, ParserRule, AsUnion, parseNest } from '../core';
 import { MetaLinks, MetaHeadings } from '../meta';
-import { substRe, unwrapRe, shiftRe } from '../match';
+import { substRe, unwrapRe, shiftRe } from '../regex';
 import {
     BlockTag, BlockOrder, BlockTokenType,
     BlockAlign,

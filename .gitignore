@@ -3,4 +3,3 @@ es/
 *.js
 *.js.map
 *.d.ts
-src/**/regex.ts

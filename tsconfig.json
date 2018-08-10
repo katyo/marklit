@@ -17,6 +17,7 @@
     ]
   },
   "files": [
+    "src/regex.ts",
     "src/match.ts",
     "src/core.ts",
     "src/meta.ts",

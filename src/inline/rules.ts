@@ -1,5 +1,5 @@
 import { ParserHandle, ParserRule, AsUnion, parseNest } from '../core';
-import { substRe } from '../match';
+import { substRe } from '../regex';
 import {
     InlineTag, InlineOrder, InlineTokenType,
     InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr

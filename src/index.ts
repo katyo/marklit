@@ -1,3 +1,4 @@
+export * from './regex';
 export * from './match';
 export * from './core';
 
