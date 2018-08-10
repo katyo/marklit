@@ -5,23 +5,23 @@ export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: {
 export type ContextToken<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Token : never;
 export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Meta : never;
 
-export interface ParserHandle<CtxMap, Name extends keyof CtxMap> {
+export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap> {
     p: ParserMatchers<CtxMap>; // parser matchers
-    c: Name; // current context
-    m: ContextMeta<CtxMap[Name]>; // parser meta
+    c: Ctx; // current context
+    m: ContextMeta<CtxMap[Ctx]>; // parser meta
 }
 
-export type ParserRule<CtxMap, Name extends keyof CtxMap> = [
-    Name[], // contexts
+export type ParserRule<CtxMap, Ctx extends keyof CtxMap> = [
+    Ctx[], // contexts
     number, // weight
     RegExp, // regexp to match
-    ParseFunc<ContextToken<CtxMap[Name]>, ParserHandle<CtxMap, Name>> // parser function
+    ParseFunc<ContextToken<CtxMap[Ctx]>, ParserHandle<CtxMap, Ctx>> // parser function
 ];
 
 export type ParserRules<CtxMap> = ParserRule<CtxMap, keyof CtxMap>[];
 
 export type ParserMatchers<CtxMap> = {
-    [Name in keyof CtxMap]: Matcher<ContextToken<CtxMap[Name]>, ParserHandle<CtxMap, Name>>
+    [Ctx in keyof CtxMap]: Matcher<ContextToken<CtxMap[Ctx]>, ParserHandle<CtxMap, Ctx>>
 };
 
 function buildRules<CtxMap>(rules: ParserRules<CtxMap>): ParserMatchers<CtxMap> {
@@ -60,24 +60,24 @@ function listContexts<CtxMap>(rules: ParserRules<CtxMap>): FoundContexts<CtxMap>
     return found;
 }
 
-export interface Parser<CtxMap, Name extends keyof CtxMap> {
+export interface Parser<CtxMap, Ctx extends keyof CtxMap> {
     p: ParserMatchers<CtxMap>; // matchers
-    s: Name; // starting context
+    s: Ctx; // starting context
 }
 
-export function init<CtxMap, Name extends keyof CtxMap>(start: Name, rules: ParserRules<CtxMap>): Parser<CtxMap, Name> {
+export function init<CtxMap, Ctx extends keyof CtxMap = keyof CtxMap>(start: Ctx, ...rules: ParserRules<CtxMap>): Parser<CtxMap, Ctx> {
     return {
         p: buildRules(rules),
         s: start,
     };
 }
 
-export type ParserResult<CtxMap, Name extends keyof CtxMap> =
-    CtxMap extends { [Key in Name]: [infer Token, infer Meta]; } ?
+export type ParserResult<CtxMap, Ctx extends keyof CtxMap> =
+    CtxMap extends { [Key in Ctx]: [infer Token, infer Meta]; } ?
     ({ $: 1, _: [Meta, Token[]]; } | { $: 0, _: string }) :
     never;
 
-export function parse<CtxMap, Name extends keyof CtxMap>(parser: Parser<CtxMap, Name>, source: string): ParserResult<CtxMap, Name> {
+export function parse<CtxMap, Ctx extends keyof CtxMap>(parser: Parser<CtxMap, Ctx>, source: string): ParserResult<CtxMap, Ctx> {
     const handle: ParserHandle<CtxMap, typeof parser.s> = {
         p: parser.p,
         c: parser.s,
@@ -93,14 +93,14 @@ export function parse<CtxMap, Name extends keyof CtxMap>(parser: Parser<CtxMap, 
                 .replace(/\u2424/g, '\n') // replace unicode NL by newline
             /*.replace(/^\s+$/gm, '')*/ // replace space-only lines by empty lines
         );
-        return { $: 1, _: [handle.m, tokens] } as any as ParserResult<CtxMap, Name>;
+        return { $: 1, _: [handle.m, tokens] } as any as ParserResult<CtxMap, Ctx>;
     } catch (e) {
-        return { $: 0, _: e.message } as ParserResult<CtxMap, Name>;
+        return { $: 0, _: e.message } as ParserResult<CtxMap, Ctx>;
     }
 }
 
-export function parseNest<CtxMap, Name extends keyof CtxMap, NestedName extends keyof CtxMap>($: ParserHandle<CtxMap, Name>, src: string, name: NestedName): ContextToken<CtxMap[NestedName]>[];
-export function parseNest<CtxMap, Name extends keyof CtxMap>($: ParserHandle<CtxMap, Name>, src: string): ContextToken<CtxMap[Name]>[];
-export function parseNest<CtxMap, Name extends keyof CtxMap, NestedName extends keyof CtxMap>($: ParserHandle<CtxMap, Name>, src: string, name: Name | NestedName = $.c): ContextToken<CtxMap[Name | NestedName]>[] {
-    return parseSeq($.c === name ? $ : { ...$, c: name }, $.p[name], src);
+export function parseNest<CtxMap, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx>, src: string, ctx: NestedCtx): ContextToken<CtxMap[NestedCtx]>[];
+export function parseNest<CtxMap, Ctx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx>, src: string): ContextToken<CtxMap[Ctx]>[];
+export function parseNest<CtxMap, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx>, src: string, ctx: Ctx | NestedCtx = $.c): ContextToken<CtxMap[Ctx | NestedCtx]>[] {
+    return parseSeq($.c === ctx ? $ : { ...$, c: ctx }, $.p[ctx], src);
 }
