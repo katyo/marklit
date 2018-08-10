@@ -1,35 +1,26 @@
 import { ParserHandle, ParserRule, AsUnion, parseNest } from '../core';
 import { substRe } from '../regex';
+import { ContextTag, ContextMap } from '../model';
 import {
-    InlineTag, InlineOrder, InlineTokenType,
+    InlineTag, InlineOrder,
     InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr
 } from './model';
 
-export const enum InlineContext {
-    Top = 5,
-    Link = 6,
-}
+export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<any, InlineTokenMap, Meta>, ContextTag>;
 
-export interface InlineContextMap<InlineToken, InlineMeta> {
-    [InlineContext.Top]: [InlineTokenType<InlineToken>, InlineMeta];
-    [InlineContext.Link]: [InlineTokenType<InlineToken>, InlineMeta];
-}
-
-export type InlineRule<InlineTokenMap, InlineMeta> = ParserRule<InlineContextMap<InlineTokenMap, InlineMeta>, InlineContext>;
-
-export type InlineHandle<InlineTokenMap, InlineMeta> = ParserHandle<InlineContextMap<InlineTokenMap, InlineMeta>, InlineContext>;
+export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<any, InlineTokenMap, Meta>, ContextTag>;
 
 const escape = /\\([!"#$%&'()*+,\-.\/:;<=>?@\[\]\\^_`{}])/;
 
 export const Escape: InlineRule<string, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Escape,
     escape,
     procEscape
 ];
 
 export const GfmEscape: InlineRule<string, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Escape,
     substRe(escape, { '\\]\\)': '~|])' }),
     procEscape
@@ -38,14 +29,14 @@ export const GfmEscape: InlineRule<string, {}> = [
 const email = /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/;
 
 export const AutoLink: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.AutoLink,
     substRe(/<(scheme:[^\s\x00-\x1f<>]*|email)>/, { scheme: /[a-zA-Z][a-zA-Z0-9+.-]{1,31}/, email }),
     ({ }, src, { }, url, at) => [{ $: InlineTag.Link, l: (at ? 'mailto:' : '') + url, _: [url] }, src]
 ];
 
 export const Url: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.Url,
     substRe(/^((?:ftp|https?):\/\/|www\.)(?:[a-zA-Z0-9\-]+\.?)+[^\s<]*|^email/, { email }),
     ({ }, src, text, url, at) => {
@@ -62,7 +53,7 @@ export const Url: InlineRule<InlineLink<any>, {}> = [
 const label = /(?:\[[^\[\]]*\]|\\[\[\]]?|`[^`]*`|[^\[\]\\])*?/;
 
 export const Link: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.Link,
     substRe(/^!?\[(label)\]\(href(?:\s+(title))?\s*\)/, {
         label,
@@ -73,77 +64,77 @@ export const Link: InlineRule<InlineLink<any>, {}> = [
 ];
 
 export const PedanticLink: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.Link,
     substRe(/^!?\[(label)\]\((.*?)\)/, { label }),
     procLink
 ];
 
 export const RefLink: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.RefLink,
     substRe(/^!?\[(label)\]\[(?!\s*\])((?:\\[\[\]]?|[^\[\]\\])+)\]/, { label }),
     procRefNoLink
 ];
 
 export const PedanticRefLink: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.RefLink,
     substRe(/^!?\[(label)\]\s*\[([^\]]*)\]/, { label }),
     procRefNoLink
 ];
 
 export const NoLink: InlineRule<InlineLink<any>, {}> = [
-    [InlineContext.Top],
+    [ContextTag.InlineTop],
     InlineOrder.NoLink,
     /^!?\[(?!\s*\])((?:\[[^\[\]]*\]|\\[\[\]]|[^\[\]])*)\](?:\[\])?/,
     procRefNoLink
 ];
 
 export const Strong: InlineRule<InlineStrong<any>, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Strong,
     /^__([^\s][\s\S]*?[^\s])__(?!_)|^\*\*([^\s][\s\S]*?[^\s])\*\*(?!\*)|^__([^\s])__(?!_)|^\*\*([^\s])\*\*(?!\*)/,
     procStrong
 ];
 
 export const PedanticStrong: InlineRule<InlineStrong<any>, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Strong,
     /^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,
     procStrong
 ];
 
 export const Em: InlineRule<InlineEm<any>, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Em,
     /^_([^\s][\s\S]*?[^\s_])_(?!_)|^_([^\s_][\s\S]*?[^\s])_(?!_)|^\*([^\s][\s\S]*?[^\s*])\*(?!\*)|^\*([^\s*][\s\S]*?[^\s])\*(?!\*)|^_([^\s_])_(?!_)|^\*([^\s*])\*(?!\*)/,
     procEm
 ];
 
 export const PedanticEm: InlineRule<InlineEm<any>, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Em,
     /^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/,
     procEm
 ];
 
 export const Del: InlineRule<InlineDel<any>, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Del,
     /^~+(?=\S)([\s\S]*?\S)~+/,
     ($, src, { }, text) => [{ $: InlineTag.Del, _: parseNest($, text) }, src]
 ];
 
 export const CodeSpan: InlineRule<InlineCode, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Code,
     /^(`+)\s*([\s\S]*?[^`]?)\s*\1(?!`)/,
     ({ }, src, { }, fences, text) => [{ $: InlineTag.Code, _: text.replace(/\s+$/, '') }, src]
 ];
 
 export const MathSpan: InlineRule<InlineMath, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Math,
     /^(\$+)\s*([\s\S]*?[^\$]?)\s*\1(?!\$)/,
     ({ }, src, { }, delims, text) => [{ $: InlineTag.Math, _: text.replace(/\s+$/, '') }, src]
@@ -152,14 +143,14 @@ export const MathSpan: InlineRule<InlineMath, {}> = [
 const br = /^(?: {2,}|\\)\n(?!\s*$)/;
 
 export const Br: InlineRule<InlineBr, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Br,
     br,
     ({ }, src) => [{ $: InlineTag.Br }, src]
 ];
 
 export const GfmBreaksBr: InlineRule<InlineBr, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Br,
     substRe(br, { '\\{2,\\}': '*' }),
     ({ }, src) => [{ $: InlineTag.Br }, src]
@@ -168,7 +159,7 @@ export const GfmBreaksBr: InlineRule<InlineBr, {}> = [
 const text = /^[\s\S]+?(?=[\\<!\[`*$]|\b_| {2,}\n|$)/;
 
 export const TextSpan: InlineRule<string, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Text,
     text,
     procText
@@ -177,14 +168,14 @@ export const TextSpan: InlineRule<string, {}> = [
 const gfm_text = substRe(text, { '\\]\\|': '~]|https?://|ftp:\\/\\/|www\\.|[a-zA-Z0-9.!#$%&\'*+/=?^_`{\\|}~-]+@|' });
 
 export const GfmTextSpan: InlineRule<string, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Text,
     gfm_text,
     procText
 ];
 
 export const GfmBreaksTextSpan: InlineRule<string, {}> = [
-    [InlineContext.Top, InlineContext.Link],
+    [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Text,
     substRe(gfm_text, { '\\{2,\\}': '*' }),
     procText
@@ -223,7 +214,7 @@ function procRefNoLink($: InlineHandle<InlineLink<any>, {}>, src: string, link: 
 
 function parseLink($: InlineHandle<InlineLink<any> | InlineImage, {}>, link: string, text: string, href: string, title?: string): AsUnion<InlineLink<any> & InlineImage> {
     const token: AsUnion<InlineLink<any> & InlineImage> = link.charAt(0) != '!'
-        ? { $: InlineTag.Link, l: href, _: parseNest($, text, InlineContext.Link) }
+        ? { $: InlineTag.Link, l: href, _: parseNest($, text, ContextTag.InlineLink) }
         : { $: InlineTag.Image, l: href, _: text };
     if (title) (token as AsUnion<InlineLink<any>>).t = title;
     return token;

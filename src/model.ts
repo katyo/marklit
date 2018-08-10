@@ -1,3 +1,20 @@
+import { InlineTokenType } from './inline/model';
+import { BlockTokenType } from './block/model';
+
+export const enum ContextTag {
+    BlockTop,
+    BlockNest,
+    InlineTop,
+    InlineLink,
+}
+
+export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
+    [ContextTag.BlockTop]: [BlockTokenType<BlockTokenMap>, Meta];
+    [ContextTag.BlockNest]: [BlockTokenType<BlockTokenMap>, Meta];
+    [ContextTag.InlineTop]: [InlineTokenType<InlineTokenMap>, Meta];
+    [ContextTag.InlineLink]: [InlineTokenType<InlineTokenMap>, Meta];
+}
+
 export interface MetaLink {
     l: string; // href
     t?: string; // title
