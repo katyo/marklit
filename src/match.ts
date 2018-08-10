@@ -10,13 +10,12 @@ export type CaptureMatcher<Type, Self> = [
 ];
 
 export interface Matcher<Type, Self> {
-    //(self: Self, source: string): [Type | void, string];
     r: RegExp;
     m: CaptureMatcher<Type, Self>[];
 }
 
 export type MatchPath<Type, Self> = [
-    RegExp, // regular expression to match
+    string, // regular expression to match
     ParseFunc<Type, Self> // parser to apply
 ];
 
@@ -44,19 +43,17 @@ export function matchAny<Type, Self>(matchers: MatchPath<Type, Self>[]): Matcher
     let captures = 0;
 
     const match: CaptureMatcher<Type, Self>[] = new Array(matchers.length);
+    const exprs: string[] = new Array(matchers.length);
 
     for (let i = 0; i < matchers.length; i++) {
-        const p = matchers[i];
+        const [regexp, parser] = matchers[i];
         const offset = captures + 1;
-        captures += countRe(p[0]) + 1;
-        match[i] = [offset, p[1]];
+        captures += countRe(regexp) + 1;
+        match[i] = [offset, parser];
+        exprs[i] = `(${shiftRe(regexp, offset)})`;
     }
 
-    const regex = new RegExp('^' + matchers
-        .map(([r,], i) => `(${shiftRe(r, match[i][0])})`)
-        .join('|'));
-
-    return { r: regex, m: match };
+    return { r: new RegExp(`^${exprs.join('|')}`), m: match };
 }
 
 export function doMatch<Type, Self>({ r: regex, m: match }: Matcher<Type, Self>, self: Self, source: string): [Type | void, string] {

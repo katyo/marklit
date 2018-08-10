@@ -14,7 +14,7 @@ export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap> {
 export type ParserRule<CtxMap, Ctx extends keyof CtxMap> = [
     Ctx[], // contexts
     number, // weight
-    RegExp, // regexp to match
+    string, // regexp to match
     ParseFunc<ContextToken<CtxMap[Ctx]>, ParserHandle<CtxMap, Ctx>> // parser function
 ];
 
@@ -29,7 +29,7 @@ function buildRules<CtxMap>(rules: ParserRules<CtxMap>): ParserMatchers<CtxMap> 
     for (const context in listContexts(rules)) {
         type MatchPathWithWeight = [
             number, // weight
-            RegExp, // regexp to match
+            string, // regexp to match
             ParseFunc<ContextToken<CtxMap[keyof CtxMap]>, ParserHandle<CtxMap, keyof CtxMap>> // parser function
         ];
         const paths = [] as MatchPathWithWeight[];
