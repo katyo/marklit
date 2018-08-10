@@ -118,6 +118,7 @@ export interface BlockCode {
 
 export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
     BlockHeading<InlineTokenMap>,
+    BlockParagraph<InlineTokenMap>,
     BlockText<InlineTokenMap>,
     BlockQuote<BlockTokenMap>,
     BlockList<BlockTokenMap>,
