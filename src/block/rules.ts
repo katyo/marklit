@@ -153,7 +153,7 @@ function procParagraph($: BlockHandle<BlockParagraph<any>, {}, any, {}>, src: st
     }, src];
 }
 
-export const Text: BlockRule<BlockText<any>, {}, any, {}> = [
+export const TextBlock: BlockRule<BlockText<any>, {}, any, {}> = [
     [BlockContext.Top, BlockContext.Nest],
     BlockOrder.Text,
     /^[^\n]+/,
@@ -343,10 +343,10 @@ function procRow($: BlockHandle<BlockTable<any>, {}, any, {}>, srcRow: string, c
         BlockContext.Nest));
 }
 
-export const BlockNormal = [Newline, CodeBlock, Heading, Hr, Quote, List, Def, LHeading, Paragraph, Text];
+export const BlockNormal = [Newline, CodeBlock, Heading, Hr, Quote, List, Def, LHeading, Paragraph, TextBlock];
 
-export const BlockPedantic = [Newline, CodeBlock, Heading, Hr, Quote, List, PedanticDef, LHeading, Paragraph, Text];
+export const BlockPedantic = [Newline, CodeBlock, Heading, Hr, Quote, List, PedanticDef, LHeading, Paragraph, TextBlock];
 
-export const BlockGfm = [Newline, CodeBlock, Fences, GfmHeading, Hr, Quote, List, Def, LHeading, GfmParagraph, Text];
+export const BlockGfm = [Newline, CodeBlock, Fences, GfmHeading, Hr, Quote, List, Def, LHeading, GfmParagraph, TextBlock];
 
 export const BlockGfmTables = [...BlockGfm, NpTable, Table];

@@ -167,7 +167,7 @@ export const GfmBreaksBr: InlineRule<InlineBr, {}> = [
 
 const text = /^[\s\S]+?(?=[\\<!\[`*$]|\b_| {2,}\n|$)/;
 
-export const Text: InlineRule<string, {}> = [
+export const TextSpan: InlineRule<string, {}> = [
     [InlineContext.Top, InlineContext.Link],
     InlineOrder.Text,
     text,
@@ -176,14 +176,14 @@ export const Text: InlineRule<string, {}> = [
 
 const gfm_text = substRe(text, { '\\]\\|': '~]|https?://|ftp:\\/\\/|www\\.|[a-zA-Z0-9.!#$%&\'*+/=?^_`{\\|}~-]+@|' });
 
-export const GfmText: InlineRule<string, {}> = [
+export const GfmTextSpan: InlineRule<string, {}> = [
     [InlineContext.Top, InlineContext.Link],
     InlineOrder.Text,
     gfm_text,
     procText
 ];
 
-export const GfmBreaksText: InlineRule<string, {}> = [
+export const GfmBreaksTextSpan: InlineRule<string, {}> = [
     [InlineContext.Top, InlineContext.Link],
     InlineOrder.Text,
     substRe(gfm_text, { '\\{2,\\}': '*' }),
@@ -230,10 +230,10 @@ function parseLink($: InlineHandle<InlineLink<any> | InlineImage, {}>, link: str
 }
 
 // rulesets
-export const InlineNormal = [Escape, AutoLink, Link, RefLink, NoLink, Strong, Em, CodeSpan, Br, Text];
+export const InlineNormal = [Escape, AutoLink, Link, RefLink, NoLink, Strong, Em, CodeSpan, Br, TextSpan];
 
-export const InlinePedantic = [Escape, AutoLink, PedanticLink, PedanticRefLink, NoLink, PedanticStrong, PedanticEm, CodeSpan, Br, Text];
+export const InlinePedantic = [Escape, AutoLink, PedanticLink, PedanticRefLink, NoLink, PedanticStrong, PedanticEm, CodeSpan, Br, TextSpan];
 
-export const InlineGfm = [GfmEscape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, Br, GfmText];
+export const InlineGfm = [GfmEscape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, Br, GfmTextSpan];
 
-export const InlineGfmBreaks = [GfmEscape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, GfmBreaksBr, GfmBreaksText];
+export const InlineGfmBreaks = [GfmEscape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, GfmBreaksBr, GfmBreaksTextSpan];
