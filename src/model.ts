@@ -28,23 +28,23 @@ export interface MetaAbbrevs {
     abbrevs: Record<string, string>;
 }
 
-export interface MetaFootnotes<BlockToken> {
-    footnotes: Record<string, BlockToken[]>;
+export interface MetaFootnotes<BlockTokenMap> {
+    footnotes: Record<string, BlockTokenType<BlockTokenMap>[]>;
 }
 
-export interface MetaHeadings<InlineToken> {
+export interface MetaHeadings<InlineTokenMap> {
     headings: {
         t: string; // text
         n: number; // level
-        _: InlineToken;
+        _: InlineTokenType<InlineTokenMap>[];
     }[];
 }
 
-export interface MetaData<BlockToken, InlineToken> extends
+export interface MetaData<BlockTokenMap, InlineTokenMap> extends
     MetaLinks,
     MetaAbbrevs,
-    MetaFootnotes<BlockToken>,
-    MetaHeadings<InlineToken> { }
+    MetaFootnotes<BlockTokenMap>,
+    MetaHeadings<InlineTokenMap> { }
 
 export interface AnyMeta {
     [key: string]: any;
