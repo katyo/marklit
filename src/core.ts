@@ -8,7 +8,7 @@ export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Met
 export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap> {
     p: ParserMatchers<CtxMap>; // parser matchers
     c: Ctx; // current context
-    m: ContextMeta<CtxMap[Ctx]>; // parser meta
+    m: ContextMeta<CtxMap[Ctx]> | { [key: string]: any }; // parser meta
 }
 
 export interface InitFunc<CtxMap, Ctx extends keyof CtxMap> {
@@ -19,9 +19,14 @@ export type ParserRule<CtxMap, Ctx extends keyof CtxMap> = [
     Ctx[], // contexts
     number, // weight
     string, // regexp to match
-    ParseFunc<ContextToken<CtxMap[Ctx]>, ParserHandle<CtxMap, Ctx>>, // parser function
-    InitFunc<CtxMap, Ctx>?
-];
+    ParseFunc<ContextToken<CtxMap[Ctx]>, ParserHandle<CtxMap, Ctx>> // parser function
+] | [
+        Ctx[], // contexts
+        number, // weight
+        string, // regexp to match
+        ParseFunc<ContextToken<CtxMap[Ctx]>, ParserHandle<CtxMap, Ctx>>, // parser function
+        InitFunc<CtxMap, Ctx>
+    ];
 
 export type ParserRules<CtxMap> = ParserRule<CtxMap, keyof CtxMap>[];
 

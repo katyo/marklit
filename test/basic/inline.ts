@@ -12,6 +12,7 @@ import {
 
     ContextTag,
     ContextMap,
+    AnyMeta,
 
     init, parse,
 
@@ -20,10 +21,12 @@ import {
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
 
+interface InlineContext extends ContextMap<any, InlineToken, AnyMeta> { }
+
 describe('basic', () => {
     describe('inline', () => {
         describe('normal', () => {
-            const parser = init<ContextMap<any, InlineToken, {}>, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal);
+            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
@@ -129,7 +132,7 @@ describe('basic', () => {
         });
 
         describe('pedantic', () => {
-            const parser = init<ContextMap<any, InlineToken, {}>, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlinePedantic);
+            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlinePedantic);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('link', () => {
@@ -146,7 +149,7 @@ describe('basic', () => {
         });
 
         describe('gfm', () => {
-            const parser = init<ContextMap<any, InlineToken, {}>, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineGfm);
+            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineGfm);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
@@ -177,7 +180,7 @@ describe('basic', () => {
         });
 
         describe('math', () => {
-            const parser = init<ContextMap<any, InlineToken, {}>, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal, MathSpan);
+            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal, MathSpan);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             _('Inline $math$', ['Inline ', { $: InlineTag.Math, _: 'math' }]);

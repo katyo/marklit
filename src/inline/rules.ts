@@ -1,25 +1,30 @@
 import { ParserHandle, ParserRule, AsUnion, parseNest } from '../core';
 import { substRe } from '../regex';
-import { ContextTag, ContextMap } from '../model';
+import {
+    ContextTag, ContextMap,
+    AnyMeta
+} from '../model';
 import {
     InlineTag, InlineOrder,
     InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr
 } from './model';
 
-export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<any, InlineTokenMap, Meta>, ContextTag>;
+export type UnknownInlineToken = any;
 
-export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<any, InlineTokenMap, Meta>, ContextTag>;
+export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag>;
+
+export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag>;
 
 const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{}])';
 
-export const Escape: InlineRule<string, {}> = [
+export const Escape: InlineRule<string, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Escape,
     escape,
     procEscape
 ];
 
-export const GfmEscape: InlineRule<string, {}> = [
+export const GfmEscape: InlineRule<string, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Escape,
     substRe(escape, { '\\]\\)': '~|])' }),
@@ -28,7 +33,7 @@ export const GfmEscape: InlineRule<string, {}> = [
 
 const email = '[a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])';
 
-export const AutoLink: InlineRule<InlineLink<any>, {}> = [
+export const AutoLink: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.AutoLink,
     substRe('<(scheme:[^\\s\\x00-\\x1f<>]*|email)>', {
@@ -38,7 +43,7 @@ export const AutoLink: InlineRule<InlineLink<any>, {}> = [
     ({ }, src, { }, url, at) => [{ $: InlineTag.Link, l: (at ? 'mailto:' : '') + url, _: [url] }, src]
 ];
 
-export const Url: InlineRule<InlineLink<any>, {}> = [
+export const Url: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.Url,
     substRe('((?:ftp|https?):\\/\\/|www\\.)(?:[a-zA-Z0-9\\-]+\\.?)+[^\\s<]*|email', { email }),
@@ -55,7 +60,7 @@ export const Url: InlineRule<InlineLink<any>, {}> = [
 
 const label = '(?:\\[[^\\[\\]]*\\]|\\\\[\\[\\]]?|`[^`]*`|[^\\[\\]\\\\])*?';
 
-export const Link: InlineRule<InlineLink<any>, {}> = [
+export const Link: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.Link,
     substRe('!?\\[(label)\\]\\(href(?:\\s+(title))?\\s*\\)', {
@@ -66,77 +71,77 @@ export const Link: InlineRule<InlineLink<any>, {}> = [
     procLink
 ];
 
-export const PedanticLink: InlineRule<InlineLink<any>, {}> = [
+export const PedanticLink: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.Link,
     substRe('!?\\[(label)\\]\\((.*?)\\)', { label }),
     procLink
 ];
 
-export const RefLink: InlineRule<InlineLink<any>, {}> = [
+export const RefLink: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.RefLink,
     substRe('!?\\[(label)\\]\\[(?!\\s*\\])((?:\\\\[\\[\\]]?|[^\\[\\]\\\\])+)\\]', { label }),
     procRefNoLink
 ];
 
-export const PedanticRefLink: InlineRule<InlineLink<any>, {}> = [
+export const PedanticRefLink: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.RefLink,
     substRe('!?\\[(label)\\]\\s*\\[([^\\]]*)\\]', { label }),
     procRefNoLink
 ];
 
-export const NoLink: InlineRule<InlineLink<any>, {}> = [
+export const NoLink: InlineRule<InlineLink<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop],
     InlineOrder.NoLink,
     '!?\\[(?!\\s*\\])((?:\\[[^\\[\\]]*\\]|\\\\[\\[\\]]|[^\\[\\]])*)\\](?:\\[\\])?',
     procRefNoLink
 ];
 
-export const Strong: InlineRule<InlineStrong<any>, {}> = [
+export const Strong: InlineRule<InlineStrong<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Strong,
     '__([^\\s][\\s\\S]*?[^\\s])__(?!_)|\\*\\*([^\\s][\\s\\S]*?[^\\s])\\*\\*(?!\\*)|__([^\\s])__(?!_)|\\*\\*([^\\s])\\*\\*(?!\\*)',
     procStrong
 ];
 
-export const PedanticStrong: InlineRule<InlineStrong<any>, {}> = [
+export const PedanticStrong: InlineRule<InlineStrong<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Strong,
     '__(?=\\S)([\\s\\S]*?\\S)__(?!_)|\\*\\*(?=\\S)([\\s\\S]*?\\S)\\*\\*(?!\\*)',
     procStrong
 ];
 
-export const Em: InlineRule<InlineEm<any>, {}> = [
+export const Em: InlineRule<InlineEm<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Em,
     '_([^\\s][\\s\\S]*?[^\\s_])_(?!_)|_([^\\s_][\\s\\S]*?[^\\s])_(?!_)|\\*([^\\s][\\s\\S]*?[^\\s*])\\*(?!\\*)|\\*([^\\s*][\\s\\S]*?[^\\s])\\*(?!\\*)|_([^\\s_])_(?!_)|\\*([^\\s*])\\*(?!\\*)',
     procEm
 ];
 
-export const PedanticEm: InlineRule<InlineEm<any>, {}> = [
+export const PedanticEm: InlineRule<InlineEm<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Em,
     '_(?=\\S)([\\s\\S]*?\\S)_(?!_)|\\*(?=\\S)([\\s\\S]*?\\S)\\*(?!\\*)',
     procEm
 ];
 
-export const Del: InlineRule<InlineDel<any>, {}> = [
+export const Del: InlineRule<InlineDel<UnknownInlineToken>, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Del,
     '~+(?=\\S)([\\s\\S]*?\\S)~+',
     ($, src, { }, text) => [{ $: InlineTag.Del, _: parseNest($, text) }, src]
 ];
 
-export const CodeSpan: InlineRule<InlineCode, {}> = [
+export const CodeSpan: InlineRule<InlineCode, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Code,
     '(`+)\\s*([\\s\\S]*?[^`]?)\\s*\\1(?!`)',
     ({ }, src, { }, fences, text) => [{ $: InlineTag.Code, _: text.replace(/\s+$/, '') }, src]
 ];
 
-export const MathSpan: InlineRule<InlineMath, {}> = [
+export const MathSpan: InlineRule<InlineMath, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Math,
     '(\\$+)\\s*([\\s\\S]*?[^\\$]?)\\s*\\1(?!\\$)',
@@ -145,14 +150,14 @@ export const MathSpan: InlineRule<InlineMath, {}> = [
 
 const br = '(?: {2,}|\\\\)\\n(?!\\s*$)';
 
-export const Br: InlineRule<InlineBr, {}> = [
+export const Br: InlineRule<InlineBr, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Br,
     br,
     ({ }, src) => [{ $: InlineTag.Br }, src]
 ];
 
-export const GfmBreaksBr: InlineRule<InlineBr, {}> = [
+export const GfmBreaksBr: InlineRule<InlineBr, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Br,
     substRe(br, { '\\{2,\\}': '*' }),
@@ -161,7 +166,7 @@ export const GfmBreaksBr: InlineRule<InlineBr, {}> = [
 
 const text = '[\\s\\S]+?(?=[\\\\<!\\[`*$]|\\b_| {2,}\\n|$)';
 
-export const TextSpan: InlineRule<string, {}> = [
+export const TextSpan: InlineRule<string, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Text,
     text,
@@ -170,56 +175,56 @@ export const TextSpan: InlineRule<string, {}> = [
 
 const gfm_text = substRe(text, { '\\]\\|': '~]|https?://|ftp:\\/\\/|www\\.|[a-zA-Z0-9.!#$%&\'*+/=?^_`{\\|}~-]+@|' });
 
-export const GfmTextSpan: InlineRule<string, {}> = [
+export const GfmTextSpan: InlineRule<string, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Text,
     gfm_text,
     procText
 ];
 
-export const GfmBreaksTextSpan: InlineRule<string, {}> = [
+export const GfmBreaksTextSpan: InlineRule<string, AnyMeta> = [
     [ContextTag.InlineTop, ContextTag.InlineLink],
     InlineOrder.Text,
     substRe(gfm_text, { '\\{2,\\}': '*' }),
     procText
 ];
 
-function procEscape({ }: InlineHandle<string, {}>, src: string, { }: string, char: string): [string, string] {
+function procEscape({ }: InlineHandle<string, AnyMeta>, src: string, { }: string, char: string): [string, string] {
     return [char, src];
 }
 
-function procText({ }: InlineHandle<string, {}>, src: string, text: string): [string, string] {
+function procText({ }: InlineHandle<string, AnyMeta>, src: string, text: string): [string, string] {
     return [text, src];
 }
 
-function procStrong($: InlineHandle<InlineStrong<any>, {}>, src: string, { }: string, _1: string, _2: string, _3: string, _4: string): [AsUnion<InlineStrong<any>>, string] {
+function procStrong($: InlineHandle<InlineStrong<UnknownInlineToken>, AnyMeta>, src: string, { }: string, _1: string, _2: string, _3: string, _4: string): [AsUnion<InlineStrong<UnknownInlineToken>>, string] {
     return [{ $: InlineTag.Strong, _: parseNest($, _4 || _3 || _2 || _1) }, src];
 }
 
-function procEm($: InlineHandle<InlineEm<any>, {}>, src: string, { }: string, _1: string, _2: string, _3: string, _4: string, _5: string, _6: string): [AsUnion<InlineEm<any>>, string] {
+function procEm($: InlineHandle<InlineEm<UnknownInlineToken>, AnyMeta>, src: string, { }: string, _1: string, _2: string, _3: string, _4: string, _5: string, _6: string): [AsUnion<InlineEm<UnknownInlineToken>>, string] {
     return [{ $: InlineTag.Em, _: parseNest($, _6 || _5 || _4 || _3 || _2 || _1) }, src];
 }
 
-function procLink($: InlineHandle<InlineLink<any>, {}>, src: string, link: string, text: string, href: string, title?: string): [AsUnion<InlineLink<any>>, string] {
+function procLink($: InlineHandle<InlineLink<UnknownInlineToken>, AnyMeta>, src: string, link: string, text: string, href: string, title?: string): [AsUnion<InlineLink<UnknownInlineToken>>, string] {
     return [
-        parseLink($, link, text, href.trim().replace(/^<([\s\S]*)>$/, '$1'), title ? title.slice(1, -1) : '') as AsUnion<InlineLink<any>>,
+        parseLink($, link, text, href.trim().replace(/^<([\s\S]*)>$/, '$1'), title ? title.slice(1, -1) : '') as AsUnion<InlineLink<UnknownInlineToken>>,
         src
     ];
 }
 
-function procRefNoLink($: InlineHandle<InlineLink<any>, {}>, src: string, link: string, text: string, text2: string): [AsUnion<InlineLink<any>>, string] {
+function procRefNoLink($: InlineHandle<InlineLink<UnknownInlineToken>, AnyMeta>, src: string, link: string, text: string, text2: string): [AsUnion<InlineLink<UnknownInlineToken>>, string] {
     const ref = (text2 || text).replace(/\s+/g, ' ').toLowerCase();
     return [
-        parseLink($, link, text, ref) as AsUnion<InlineLink<any>>,
+        parseLink($, link, text, ref) as AsUnion<InlineLink<UnknownInlineToken>>,
         src
     ];
 }
 
-function parseLink($: InlineHandle<InlineLink<any> | InlineImage, {}>, link: string, text: string, href: string, title?: string): AsUnion<InlineLink<any> & InlineImage> {
-    const token: AsUnion<InlineLink<any> & InlineImage> = link.charAt(0) != '!'
+function parseLink($: InlineHandle<InlineLink<UnknownInlineToken> | InlineImage, AnyMeta>, link: string, text: string, href: string, title?: string): AsUnion<InlineLink<UnknownInlineToken> & InlineImage> {
+    const token: AsUnion<InlineLink<UnknownInlineToken> & InlineImage> = link.charAt(0) != '!'
         ? { $: InlineTag.Link, l: href, _: parseNest($, text, ContextTag.InlineLink) }
         : { $: InlineTag.Image, l: href, _: text };
-    if (title) (token as AsUnion<InlineLink<any>>).t = title;
+    if (title) (token as AsUnion<InlineLink<UnknownInlineToken>>).t = title;
     return token;
 }
 

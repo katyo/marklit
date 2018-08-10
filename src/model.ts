@@ -45,3 +45,7 @@ export interface MetaData<BlockToken, InlineToken> extends
     MetaAbbrevs,
     MetaFootnotes<BlockToken>,
     MetaHeadings<InlineToken> { }
+
+export interface AnyMeta {
+    [key: string]: any;
+}
