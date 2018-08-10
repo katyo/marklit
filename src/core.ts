@@ -65,7 +65,10 @@ export interface Parser<CtxMap, Ctx extends keyof CtxMap> {
     s: Ctx; // starting context
 }
 
-export function init<CtxMap, Ctx extends keyof CtxMap = keyof CtxMap>(start: Ctx, ...rules: ParserRules<CtxMap>): Parser<CtxMap, Ctx> {
+export function init<CtxMap extends { [0]: any }>(...rules: ParserRules<CtxMap>): Parser<CtxMap, 0>;
+export function init<CtxMap, Ctx extends keyof CtxMap>(start: Ctx, ...rules: ParserRules<CtxMap>): Parser<CtxMap, Ctx>;
+export function init<CtxMap>(...rules: ParserRules<CtxMap>): Parser<CtxMap, any> {
+    let start = typeof rules[0] == 'number' ? rules.shift() : 0;
     return {
         p: buildRules(rules),
         s: start,

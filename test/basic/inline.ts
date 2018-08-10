@@ -23,7 +23,7 @@ interface InlineToken extends InlineTokenMap<InlineToken> { }
 describe('basic', () => {
     describe('inline', () => {
         describe('normal', () => {
-            const parser = init<ContextMap<any, InlineToken, {}>>(ContextTag.InlineTop, ...InlineNormal);
+            const parser = init<ContextMap<any, InlineToken, {}>, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
