@@ -1,7 +1,7 @@
 {
   "name": "marklit",
   "version": "0.1.0",
-  "description": "Strictly markdown parser in Typescript.",
+  "description": "Modern markdown parser in Typescript",
   "main": "index.js",
   "typings": "index.d.ts",
   "module": "es/index.js",
