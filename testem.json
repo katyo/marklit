@@ -1,5 +1,6 @@
 {
-  "framework": "mocha",
+  "framework": "custom",
+  "test_page": "testem.html",
   "src_files": [
     "src/**/*.ts",
     "src/**/*.coffee",
