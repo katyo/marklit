@@ -17,7 +17,7 @@
     "compile-test": "browserify -d test/index.ts -p [ tsify --noImplicitAny ] -o test-out.js",
     "clean-test": "rm -f test-out.js",
     "test": "testem ci",
-    "test-node": "mocha -r ts-node/register test/index.ts -R spec",
+    "test-node": "TS_NODE_TYPE_CHECK=y mocha -r ts-node/register test/index.ts -R spec",
     "test-dev": "testem",
     "conv-test": "ts-node test/tots"
   },
