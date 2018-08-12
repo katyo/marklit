@@ -274,7 +274,61 @@ paragraph`, {
             });
 
             describe('def links', () => {
-                _('simple', `[This link][1]
+                _('simple', `[Def Link]
+
+[Def Link]: http://example.com/`, {
+                        headings: [], links: {
+                            "def link": {
+                                l: "http://example.com/",
+                                t: undefined
+                            }
+                        }
+                    }, [
+                        {
+                            $: BlockTag.Paragraph, _: [
+                                { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
+                            ]
+                        },
+                        { $: BlockTag.Space }
+                    ]);
+
+                _('with title in double quotes', `[Def Link]
+
+[Def Link]: http://example.com/ "Link title"`, {
+                        headings: [], links: {
+                            "def link": {
+                                l: "http://example.com/",
+                                t: "Link title"
+                            }
+                        }
+                    }, [
+                        {
+                            $: BlockTag.Paragraph, _: [
+                                { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
+                            ]
+                        },
+                        { $: BlockTag.Space }
+                    ]);
+
+                _('with title in paren', `[Def Link]
+
+[Def Link]: http://example.com/ (Link title)`, {
+                        headings: [], links: {
+                            "def link": {
+                                l: "http://example.com/",
+                                t: "Link title"
+                            }
+                        }
+                    }, [
+                        {
+                            $: BlockTag.Paragraph, _: [
+                                { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
+                            ]
+                        },
+                        { $: BlockTag.Space }
+                    ]);
+
+                _('single', `[This link][1]
 
 [1]: http://example.com/`, {
                         headings: [], links: {
@@ -290,6 +344,102 @@ paragraph`, {
                             ]
                         },
                         { $: BlockTag.Space }
+                    ]);
+
+                _('multiple', `[Some link][some] [Other link][-other-]
+
+ [some]: http://somewhere.tld/path/to
+ [-other-]:https://another.tld/
+`, {
+                        headings: [], links: {
+                            some: {
+                                l: "http://somewhere.tld/path/to",
+                                t: undefined
+                            },
+                            "-other-": {
+                                l: "https://another.tld/",
+                                t: undefined
+                            }
+                        }
+                    }, [
+                        {
+                            $: BlockTag.Paragraph, _: [
+                                { $: InlineTag.Link, l: "some", _: ["Some link"] },
+                                " ",
+                                { $: InlineTag.Link, l: "-other-", _: ["Other link"] }
+                            ]
+                        },
+                        { $: BlockTag.Space }
+                    ]);
+
+                _('multiple same', `[Some link][some] [Other link][some]
+
+ [some]: http://somewhere.tld/path/to
+ [-other-]:https://another.tld/`, {
+                        headings: [], links: {
+                            some: {
+                                l: "http://somewhere.tld/path/to",
+                                t: undefined
+                            },
+                            "-other-": {
+                                l: "https://another.tld/",
+                                t: undefined
+                            }
+                        }
+                    }, [
+                        {
+                            $: BlockTag.Paragraph, _: [
+                                { $: InlineTag.Link, l: "some", _: ["Some link"] },
+                                " ",
+                                { $: InlineTag.Link, l: "some", _: ["Other link"] }
+                            ]
+                        },
+                        { $: BlockTag.Space }
+                    ]);
+
+                _('in blockquote', `> Link below
+>[This link][ql]
+
+[ql]: http://example.com/`, {
+                        headings: [], links: {
+                            "ql": {
+                                l: "http://example.com/",
+                                t: undefined
+                            }
+                        }
+                    }, [
+                        {
+                            $: BlockTag.Quote, _: [
+                                {
+                                    $: BlockTag.Paragraph, _: [
+                                        "Link below\n",
+                                        { $: InlineTag.Link, l: "ql", _: ["This link"] }
+                                    ]
+                                },
+                                { $: BlockTag.Space }
+                            ]
+                        },
+                        { $: BlockTag.Space }
+                    ]);
+
+                _('in code', `Link below
+[This link][ql]
+
+    [ql]: http://example.com/
+`, {
+                        headings: [], links: {}
+                    }, [
+                        {
+                            $: BlockTag.Paragraph, _: [
+                                "Link below\n",
+                                { $: InlineTag.Link, l: "ql", _: ["This link"] }
+                            ]
+                        },
+                        { $: BlockTag.Space },
+                        {
+                            $: BlockTag.Code,
+                            _: "[ql]: http://example.com/"
+                        }
                     ]);
             });
         });
