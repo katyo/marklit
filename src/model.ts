@@ -20,6 +20,8 @@ export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: {
 export type ContextToken<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Token : never;
 export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Meta : never;
 
+export type ContextResult<CtxMap, Ctx extends keyof CtxMap> = [ContextMeta<CtxMap[Ctx]>, ContextToken<CtxMap[Ctx]>[]];
+
 export interface MetaLink {
     l: string; // href
     t?: string; // title

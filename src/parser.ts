@@ -1,5 +1,5 @@
 import { ParseFunc, MatchPath, Matcher, matchAny, parseSeq } from './match';
-import { ContextToken, ContextMeta } from './model';
+import { ContextToken, ContextMeta, ContextResult } from './model';
 
 export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap> {
     p: ParserMatchers<CtxMap>; // parser matchers
@@ -81,10 +81,14 @@ export function init<CtxMap>(...rules: ParserRules<CtxMap>): Parser<CtxMap, any>
     };
 }
 
+export type ParserSuccess<CtxMap, Ctx extends keyof CtxMap> = {
+    $: 1, _: ContextResult<CtxMap, Ctx>;
+};
+
+export type ParserError = { $: 0, _: string; };
+
 export type ParserResult<CtxMap, Ctx extends keyof CtxMap> =
-    CtxMap extends { [Key in Ctx]: [infer Token, infer Meta]; } ?
-    ({ $: 1, _: [Meta, Token[]]; } | { $: 0, _: string }) :
-    never;
+    ParserSuccess<CtxMap, Ctx> | ParserError;
 
 export function parse<CtxMap, Ctx extends keyof CtxMap>({ p, s, m }: Parser<CtxMap, Ctx>, source: string): ParserResult<CtxMap, Ctx> {
     const meta = {} as ContextMeta<CtxMap[Ctx]>;
@@ -111,8 +115,8 @@ export function parse<CtxMap, Ctx extends keyof CtxMap>({ p, s, m }: Parser<CtxM
     }
 }
 
-export function parseNest<CtxMap, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx>, src: string, ctx: NestedCtx): ContextToken<CtxMap[NestedCtx]>[];
+export function parseNest<CtxMap, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx | NestedCtx>, src: string, ctx: NestedCtx): ContextToken<CtxMap[NestedCtx]>[];
 export function parseNest<CtxMap, Ctx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx>, src: string): ContextToken<CtxMap[Ctx]>[];
-export function parseNest<CtxMap, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx>, src: string, ctx: Ctx | NestedCtx = $.c): ContextToken<CtxMap[Ctx | NestedCtx]>[] {
+export function parseNest<CtxMap, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx | NestedCtx>, src: string, ctx: Ctx | NestedCtx = $.c): ContextToken<CtxMap[Ctx | NestedCtx]>[] {
     return parseSeq($.c === ctx ? $ : { ...$, c: ctx }, $.p[ctx], src);
 }

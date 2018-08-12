@@ -133,3 +133,5 @@ export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
 export interface BasicBlockTokenMap extends BlockTokenMap<BasicBlockTokenMap, BasicInlineTokenMap> { }
 
 export type BasicBlockToken = BlockTokenType<BasicBlockTokenMap>;
+
+export type UnknownBlockToken = any;

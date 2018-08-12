@@ -6,14 +6,13 @@ import {
 } from '../model';
 import {
     InlineTag, InlineOrder,
-    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr
+    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr,
+    UnknownInlineToken
 } from './model';
 
-export type UnknownInlineToken = any;
+export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag.Inline | ContextTag.InlineLink>;
 
-export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag>;
-
-export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag>;
+export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag.Inline | ContextTag.InlineLink>;
 
 const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{}])';
 

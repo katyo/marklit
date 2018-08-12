@@ -4,6 +4,7 @@ import {
     ContextTag, ContextMap, AsUnion,
     AnyMeta, MetaLinks, MetaHeadings
 } from '../model';
+import { UnknownInlineToken } from '../inline/model';
 import {
     BlockTag, BlockOrder,
     BlockAlign,
@@ -12,14 +13,12 @@ import {
     BlockHr, BlockQuote,
     BlockList, BlockListItem,
     BlockParagraph, BlockText, BlockOrdList,
+    UnknownBlockToken
 } from './model';
-import { UnknownInlineToken } from '../inline/rules';
 
-export type UnknownBlockToken = any;
+export type BlockRule<BlockTokenMap, InlineTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, InlineTokenMap, Meta>, ContextTag.Block | ContextTag.BlockNest>;
 
-export type BlockRule<BlockTokenMap, InlineTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, InlineTokenMap, Meta>, ContextTag>;
-
-export type BlockHandle<BlockTokenMap, InlineTokenMap, Meta> = ParserHandle<ContextMap<BlockTokenMap, InlineTokenMap, Meta>, ContextTag>;
+export type BlockHandle<BlockTokenMap, InlineTokenMap, Meta> = ParserHandle<ContextMap<BlockTokenMap, InlineTokenMap, Meta>, ContextTag.Block | ContextTag.BlockNest>;
 
 const hr = ' {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)';
 
