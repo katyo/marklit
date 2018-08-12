@@ -2,16 +2,16 @@ import { InlineTokenType } from './inline/model';
 import { BlockTokenType } from './block/model';
 
 export const enum ContextTag {
-    BlockTop,
+    Block,
     BlockNest,
-    InlineTop,
+    Inline,
     InlineLink,
 }
 
 export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
-    [ContextTag.BlockTop]: [BlockTokenType<BlockTokenMap>, Meta];
+    [ContextTag.Block]: [BlockTokenType<BlockTokenMap>, Meta];
     [ContextTag.BlockNest]: [BlockTokenType<BlockTokenMap>, Meta];
-    [ContextTag.InlineTop]: [InlineTokenType<InlineTokenMap>, Meta];
+    [ContextTag.Inline]: [InlineTokenType<InlineTokenMap>, Meta];
     [ContextTag.InlineLink]: [InlineTokenType<InlineTokenMap>, Meta];
 }
 
