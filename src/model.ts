@@ -15,6 +15,11 @@ export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
     [ContextTag.InlineLink]: [InlineTokenType<InlineTokenMap>, Meta];
 }
 
+export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map];
+
+export type ContextToken<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Token : never;
+export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Meta : never;
+
 export interface MetaLink {
     l: string; // href
     t?: string; // title

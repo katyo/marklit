@@ -1,7 +1,7 @@
-import { ParserHandle, ParserRule, AsUnion, parseNest } from '../core';
+import { ParserHandle, ParserRule, parseNest } from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
-    ContextTag, ContextMap,
+    ContextTag, ContextMap, AsUnion,
     AnyMeta, MetaLinks, MetaHeadings
 } from '../model';
 import {

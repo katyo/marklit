@@ -1,8 +1,8 @@
-import { ParserHandle, ParserRule, AsUnion, parseNest } from '../core';
+import { ParserHandle, ParserRule, parseNest } from '../parser';
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
-    AnyMeta
+    AnyMeta, AsUnion
 } from '../model';
 import {
     InlineTag, InlineOrder,

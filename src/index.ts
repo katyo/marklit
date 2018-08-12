@@ -1,6 +1,6 @@
 export * from './regex';
 export * from './match';
-export * from './core';
+export * from './parser';
 
 export * from './model';
 

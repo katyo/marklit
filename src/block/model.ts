@@ -1,4 +1,4 @@
-import { AsUnion } from '../core';
+import { AsUnion } from '../model';
 import { InlineTokenType, BasicInlineTokenMap } from '../inline/model';
 
 export type BlockTokenType<BlockTokenMap> = AsUnion<BlockTokenMap>;

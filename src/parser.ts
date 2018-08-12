@@ -1,9 +1,5 @@
 import { ParseFunc, MatchPath, Matcher, matchAny, parseSeq } from './match';
-
-export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map];
-
-export type ContextToken<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Token : never;
-export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Meta : never;
+import { ContextToken, ContextMeta } from './model';
 
 export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap> {
     p: ParserMatchers<CtxMap>; // parser matchers

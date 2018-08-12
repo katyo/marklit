@@ -1,4 +1,4 @@
-import { AsUnion } from '../core';
+import { AsUnion } from '../model';
 
 export type InlineTokenType<InlineTokenMap> = AsUnion<InlineTokenMap> | string;
 
