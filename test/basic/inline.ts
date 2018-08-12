@@ -26,7 +26,7 @@ interface InlineContext extends ContextMap<any, InlineToken, AnyMeta> { }
 export default function() {
     describe('inline', () => {
         describe('normal', () => {
-            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal);
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
@@ -132,7 +132,7 @@ export default function() {
         });
 
         describe('pedantic', () => {
-            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlinePedantic);
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlinePedantic);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('link', () => {
@@ -149,7 +149,7 @@ export default function() {
         });
 
         describe('gfm', () => {
-            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineGfm);
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineGfm);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             describe('escape', () => {
@@ -180,7 +180,7 @@ export default function() {
         });
 
         describe('math', () => {
-            const parser = init<InlineContext, ContextTag.InlineTop>(ContextTag.InlineTop, ...InlineNormal, MathSpan);
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, MathSpan);
             const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
 
             _('Inline $math$', ['Inline ', { $: InlineTag.Math, _: 'math' }]);
