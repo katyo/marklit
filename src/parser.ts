@@ -31,8 +31,16 @@ export type ParserMatchers<CtxMap> = {
 };
 
 function buildRules<CtxMap>(rules: ParserRules<CtxMap>): ParserMatchers<CtxMap> {
+    const ctxs: (keyof CtxMap)[] = [];
+    for (const [ctxl] of rules) {
+        for (const ctx of ctxl) {
+            if (ctxs.indexOf(ctx) < 0) {
+                ctxs.push(ctx);
+            }
+        }
+    }
     const matchers = {} as ParserMatchers<CtxMap>;
-    for (const context in listContexts(rules)) {
+    for (const context of ctxs) {
         type MatchPathWithWeight = [
             number, // weight
             string, // regexp to match
@@ -40,7 +48,7 @@ function buildRules<CtxMap>(rules: ParserRules<CtxMap>): ParserMatchers<CtxMap> 
         ];
         const paths = [] as MatchPathWithWeight[];
         for (const [contexts, ...path] of rules) {
-            if (contexts.indexOf(((context as number) | 0) as keyof CtxMap) > -1) {
+            if (contexts.indexOf(context as keyof CtxMap) > -1) {
                 paths.push(path as MatchPathWithWeight);
             }
         }
@@ -52,18 +60,6 @@ function buildRules<CtxMap>(rules: ParserRules<CtxMap>): ParserMatchers<CtxMap> 
                 path as MatchPath<ContextToken<CtxMap[keyof CtxMap]>, ParserHandle<CtxMap, keyof CtxMap>>));
     }
     return matchers;
-}
-
-type FoundContexts<CtxMap> = { [ctx in keyof CtxMap]: 1 };
-
-function listContexts<CtxMap>(rules: ParserRules<CtxMap>): FoundContexts<CtxMap> {
-    const found = {} as FoundContexts<CtxMap>;
-    for (const [contexts,] of rules) {
-        for (const context of contexts) {
-            found[context] = 1;
-        }
-    }
-    return found;
 }
 
 export type ParserInits<CtxMap> = InitFunc<CtxMap, keyof CtxMap>[];
