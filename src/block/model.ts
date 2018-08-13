@@ -117,16 +117,16 @@ export interface BlockCode {
 }
 
 export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
+    BlockSpace,
+    BlockCode,
     BlockHeading<InlineTokenMap>,
-    BlockParagraph<InlineTokenMap>,
-    BlockText<InlineTokenMap>,
+    BlockHr,
     BlockQuote<BlockTokenMap>,
     BlockList<BlockTokenMap>,
     BlockOrdList<BlockTokenMap>,
-    BlockTable<BlockTokenMap>,
-    BlockCode,
-    BlockSpace,
-    BlockHr { }
+    BlockParagraph<InlineTokenMap>,
+    BlockText<InlineTokenMap>,
+    BlockTable<BlockTokenMap> { }
 
 // Basics
 

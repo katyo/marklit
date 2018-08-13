@@ -20,11 +20,15 @@
     "src/regex.ts",
     "src/match.ts",
     "src/parser.ts",
+    "src/render.ts",
     "src/model.ts",
     "src/inline/model.ts",
     "src/inline/rules.ts",
     "src/block/model.ts",
     "src/block/rules.ts",
+    "src/render/str.ts",
+    "src/render/html/inline.ts",
+    "src/render/html/block.ts",
     "src/index.ts"
   ]
 }

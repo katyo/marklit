@@ -1,10 +1,10 @@
 import { ParseFunc, MatchPath, Matcher, matchAny, parseSeq } from './match';
-import { ContextToken, ContextMeta, ContextResult } from './model';
+import { ContextToken, ContextMeta, ContextResult, AnyMeta } from './model';
 
 export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap> {
     p: ParserMatchers<CtxMap>; // parser matchers
     c: Ctx; // current context
-    m: ContextMeta<CtxMap[Ctx]> | { [key: string]: any }; // parser meta
+    m: ContextMeta<CtxMap[Ctx]> | AnyMeta; // parser meta
 }
 
 export interface InitFunc<CtxMap, Ctx extends keyof CtxMap> {
