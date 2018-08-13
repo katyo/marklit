@@ -91,5 +91,3 @@ export interface InlineTokenMap<InlineTokenMap> extends
 export interface BasicInlineTokenMap extends InlineTokenMap<BasicInlineTokenMap> { }
 
 export type BasicInlineToken = InlineTokenType<BasicInlineTokenMap>;
-
-export type UnknownInlineToken = any;

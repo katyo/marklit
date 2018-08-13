@@ -2,17 +2,17 @@ import { ParserHandle, ParserRule, parseNest } from '../parser';
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
-    AnyMeta, AsUnion
+    AnyMeta, AsUnion,
+    UnknownBlockToken, UnknownInlineToken
 } from '../model';
 import {
     InlineTag, InlineOrder,
-    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr,
-    UnknownInlineToken
+    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr
 } from './model';
 
-export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag.Inline | ContextTag.InlineLink>;
+export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownBlockToken, InlineTokenMap, Meta>, ContextTag.Inline | ContextTag.InlineLink>;
 
-export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownInlineToken, InlineTokenMap, Meta>, ContextTag.Inline | ContextTag.InlineLink>;
+export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownBlockToken, InlineTokenMap, Meta>, ContextTag.Inline | ContextTag.InlineLink>;
 
 const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{}])';
 

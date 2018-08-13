@@ -22,6 +22,10 @@ export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Met
 
 export type ContextResult<CtxMap, Ctx extends keyof CtxMap> = [ContextMeta<CtxMap[Ctx]>, ContextToken<CtxMap[Ctx]>[]];
 
+export type UnknownBlockToken = any;
+
+export type UnknownInlineToken = any;
+
 export interface MetaLink {
     l: string; // href
     t?: string; // title
