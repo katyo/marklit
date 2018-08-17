@@ -1,16 +1,16 @@
 import { RenderRule, RenderHandle, makeRender } from '../render';
 import {
     ContextTag, ContextMap,
-    UnknownInlineToken, UnknownBlockToken
+    UnknownToken
 } from '../model';
 
-export type InlineRenderRuleStr<InlineTokenMap, Meta> = RenderRule<string, ContextMap<UnknownBlockToken, InlineTokenMap, Meta>, ContextTag.Inline>;
+export type InlineRenderRuleStr<InlineTokenMap, Meta> = RenderRule<string, ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline, Meta>;
 
-export type InlineRenderHandleStr<InlineTokenMap, Meta> = RenderHandle<string, ContextMap<UnknownBlockToken, InlineTokenMap, Meta>, ContextTag.Inline>;
+export type InlineRenderHandleStr<InlineTokenMap, Meta> = RenderHandle<string, ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline, Meta>;
 
-export type BlockRenderRuleStr<BlockTokenMap, Meta> = RenderRule<string, ContextMap<BlockTokenMap, UnknownInlineToken, Meta>, ContextTag.Block>;
+export type BlockRenderRuleStr<BlockTokenMap, Meta> = RenderRule<string, ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block, Meta>;
 
-export type BlockRenderHandleStr<BlockTokenMap, Meta> = RenderHandle<string, ContextMap<BlockTokenMap, UnknownInlineToken, Meta>, ContextTag.Block>;
+export type BlockRenderHandleStr<BlockTokenMap, Meta> = RenderHandle<string, ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block, Meta>;
 
 export const initRenderHtml = makeRender(escapeHtml, joinStrings);
 

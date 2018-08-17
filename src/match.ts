@@ -1,12 +1,12 @@
 import { countRe, shiftRe } from './regex';
 
-export interface ParseFunc<Type, Self> {
+export interface MatchFunc<Type, Self> {
     (ctx: Self, source: string, ...captures: string[]): [Type | void, string];
 }
 
 export type CaptureMatcher<Type, Self> = [
     number, // starting of match parens
-    ParseFunc<Type, Self> // parser to apply
+    MatchFunc<Type, Self> // parser to apply
 ];
 
 export interface Matcher<Type, Self> {
@@ -16,7 +16,7 @@ export interface Matcher<Type, Self> {
 
 export type MatchPath<Type, Self> = [
     string, // regular expression to match
-    ParseFunc<Type, Self> // parser to apply
+    MatchFunc<Type, Self> // parser to apply
 ];
 
 export function parseSeq<Type, Self>(self: Self, matcher: Matcher<Type, Self>, source: string): Type[] {

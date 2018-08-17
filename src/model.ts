@@ -1,6 +1,8 @@
 import { InlineTokenType } from './inline/model';
 import { BlockTokenType } from './block/model';
 
+export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map];
+
 export const enum ContextTag {
     Block,
     BlockNest,
@@ -8,23 +10,29 @@ export const enum ContextTag {
     InlineLink,
 }
 
-export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
-    [ContextTag.Block]: [BlockTokenType<BlockTokenMap>, Meta];
-    [ContextTag.BlockNest]: [BlockTokenType<BlockTokenMap>, Meta];
-    [ContextTag.Inline]: [InlineTokenType<InlineTokenMap>, Meta];
-    [ContextTag.InlineLink]: [InlineTokenType<InlineTokenMap>, Meta];
+export interface HasMeta<Meta> {
+    _: Meta;
 }
 
-export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map];
+export type InitTag = 0;
 
-export type ContextToken<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Token : never;
-export type ContextMeta<CtxDef> = CtxDef extends [infer Token, infer Meta] ? Meta : never;
+export interface HasInit<Token> {
+    [0]: Token;
+}
 
-export type ContextResult<CtxMap, Ctx extends keyof CtxMap> = [ContextMeta<CtxMap[Ctx]>, ContextToken<CtxMap[Ctx]>[]];
+export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> extends HasMeta<Meta> {
+    [ContextTag.Block]: BlockTokenType<BlockTokenMap>;
+    [ContextTag.BlockNest]: BlockTokenType<BlockTokenMap>;
+    [ContextTag.Inline]: InlineTokenType<InlineTokenMap>;
+    [ContextTag.InlineLink]: InlineTokenType<InlineTokenMap>;
+}
 
-export type UnknownBlockToken = any;
+export type ContextToken<CtxMap, Ctx extends keyof CtxMap> = CtxMap[Ctx];
+export type ContextMeta<CtxMap extends HasMeta<any>> = CtxMap extends HasMeta<infer Meta> ? Meta : never;
 
-export type UnknownInlineToken = any;
+export type ContextResult<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
+
+export type UnknownToken = any;
 
 export interface MetaLink {
     l: string; // href
@@ -57,6 +65,4 @@ export interface MetaData<BlockTokenMap, InlineTokenMap> extends
     MetaFootnotes<BlockTokenMap>,
     MetaHeadings<InlineTokenMap> { }
 
-export interface AnyMeta {
-    [key: string]: any;
-}
+export interface NoMeta { }

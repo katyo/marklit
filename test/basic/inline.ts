@@ -12,7 +12,7 @@ import {
 
     ContextTag,
     ContextMap,
-    AnyMeta,
+    NoMeta,
 
     init, parse,
 
@@ -21,7 +21,7 @@ import {
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
 
-interface InlineContext extends ContextMap<any, InlineToken, AnyMeta> { }
+interface InlineContext extends ContextMap<any, InlineToken, NoMeta> { }
 
 export default function() {
     describe('inline', () => {

@@ -23,7 +23,7 @@ interface BlockToken extends BlockTokenMap<BlockToken, InlineToken> { }
 interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
 
 export default function() {
-    const renderer = initRenderHtml<Context>(...BlockHtml as any, ...InlineHtml as any);
+    const renderer = initRenderHtml<Context>(...BlockHtml, ...InlineHtml);
     const _ = (test: string, meta: Meta, tokens: BlockTokenType<BlockToken>[], html: string) => it(test, () => se(render(renderer, [meta, tokens]), html));
 
     describe('render html', () => {

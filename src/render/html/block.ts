@@ -1,8 +1,8 @@
 import { renderNest } from '../../render';
 import {
     ContextTag,
-    AnyMeta, MetaHeadings,
-    UnknownInlineToken, UnknownBlockToken
+    NoMeta, MetaHeadings,
+    UnknownToken
 } from '../../model';
 import {
     BlockTag,
@@ -23,37 +23,37 @@ import {
     textAlign,
 } from '../str';
 
-export const NewlineHtml: BlockRenderRuleStr<BlockSpace, AnyMeta> = [
+export const NewlineHtml: BlockRenderRuleStr<BlockSpace, NoMeta> = [
     ContextTag.Block,
     BlockTag.Space,
     ({ }, { }) => '\n'
 ];
 
-export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, AnyMeta> = [
+export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
     ContextTag.Block,
     BlockTag.Code,
     ({ }, { _ }) => '<pre><code>' + escapeCode(_) + '</code></pre>\n'
 ];
 
-export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownInlineToken>, MetaHeadings<UnknownInlineToken>> = [
+export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     ContextTag.Block,
     BlockTag.Heading,
     ($, { n, _ }) => `<h${n}>` + renderNest($, _, ContextTag.Inline) + `</h${n}>\n`
 ];
 
-export const HrHtml: BlockRenderRuleStr<BlockHr, AnyMeta> = [
+export const HrHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
     ContextTag.Block,
     BlockTag.Hr,
     ({ }, { }) => '<hr/>\n'
 ];
 
-export const QuoteHtml: BlockRenderRuleStr<BlockQuote<UnknownBlockToken>, AnyMeta> = [
+export const QuoteHtml: BlockRenderRuleStr<BlockQuote<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Quote,
     ($, { _ }) => '<blockquote>\n' + renderNest($, _) + '</blockquote>\n'
 ];
 
-export const ListHtml: BlockRenderRuleStr<BlockList<UnknownBlockToken>, AnyMeta> = [
+export const ListHtml: BlockRenderRuleStr<BlockList<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.List,
     ($, { _ }) => '<ul>\n' +
@@ -61,7 +61,7 @@ export const ListHtml: BlockRenderRuleStr<BlockList<UnknownBlockToken>, AnyMeta>
         '</ul>\n'
 ];
 
-export const OrdListHtml: BlockRenderRuleStr<BlockOrdList<UnknownBlockToken>, AnyMeta> = [
+export const OrdListHtml: BlockRenderRuleStr<BlockOrdList<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.OrdList,
     ($, { s, _ }) => '<ol' + (s != 1 ? 'start="' + s + '"' : '') + '>\n' +
@@ -69,7 +69,7 @@ export const OrdListHtml: BlockRenderRuleStr<BlockOrdList<UnknownBlockToken>, An
         '</ol>\n'
 ];
 
-function renderListItems($: BlockRenderHandleStr<BlockList<UnknownBlockToken> | BlockOrdList<UnknownBlockToken>, AnyMeta>, items: BlockListItem<UnknownBlockToken>[]): string {
+function renderListItems($: BlockRenderHandleStr<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta>, items: BlockListItem<UnknownToken>[]): string {
     let out = '';
     for (const item of items) {
         out += '<li>' +
@@ -80,19 +80,19 @@ function renderListItems($: BlockRenderHandleStr<BlockList<UnknownBlockToken> | 
     return out;
 }
 
-export const ParagraphHtml: BlockRenderRuleStr<BlockParagraph<UnknownInlineToken>, AnyMeta> = [
+export const ParagraphHtml: BlockRenderRuleStr<BlockParagraph<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Paragraph,
     ($, { _ }) => '<p>' + renderNest($, _, ContextTag.Inline) + '</p>\n'
 ];
 
-export const TextBlockHtml: BlockRenderRuleStr<BlockText<UnknownInlineToken>, AnyMeta> = [
+export const TextBlockHtml: BlockRenderRuleStr<BlockText<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Text,
     ($, { _ }) => '<p>' + renderNest($, _, ContextTag.Inline) + '</p>\n'
 ];
 
-export const TableHtml: BlockRenderRuleStr<BlockTable<UnknownBlockToken>, AnyMeta> = [
+export const TableHtml: BlockRenderRuleStr<BlockTable<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Table,
     ($, { h, a, _ }) => '<table>\n<thead>\n' +
@@ -104,7 +104,7 @@ export const TableHtml: BlockRenderRuleStr<BlockTable<UnknownBlockToken>, AnyMet
         '</table>'
 ];
 
-function renderTableRows($: BlockRenderHandleStr<BlockTable<UnknownBlockToken>, AnyMeta>, rows: BlockTableRow<UnknownBlockToken>[], align: BlockAlign[]): string {
+function renderTableRows($: BlockRenderHandleStr<BlockTable<UnknownToken>, NoMeta>, rows: BlockTableRow<UnknownToken>[], align: BlockAlign[]): string {
     let out = '';
     for (const row of rows) {
         out += '<tr>\n' +
@@ -114,7 +114,7 @@ function renderTableRows($: BlockRenderHandleStr<BlockTable<UnknownBlockToken>, 
     return out;
 }
 
-function renderTableCells($: BlockRenderHandleStr<BlockTable<UnknownBlockToken>, AnyMeta>, cells: BlockTableCell<UnknownBlockToken>[], tag: string, align: BlockAlign[]): string {
+function renderTableCells($: BlockRenderHandleStr<BlockTable<UnknownToken>, NoMeta>, cells: BlockTableCell<UnknownToken>[], tag: string, align: BlockAlign[]): string {
     let out = '';
     for (let i = 0; i < cells.length; i++) {
         const a = textAlign[align[i]];

@@ -2,8 +2,8 @@ import { ParserHandle, ParserRule, parseNest } from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap, AsUnion,
-    AnyMeta, MetaLinks, MetaHeadings,
-    UnknownInlineToken, UnknownBlockToken
+    NoMeta, MetaLinks, MetaHeadings,
+    UnknownToken
 } from '../model';
 import {
     BlockTag, BlockOrder,
@@ -15,9 +15,9 @@ import {
     BlockParagraph, BlockText, BlockOrdList
 } from './model';
 
-export type BlockRule<BlockTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, UnknownInlineToken, Meta>, ContextTag.Block | ContextTag.BlockNest>;
+export type BlockRule<BlockTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block | ContextTag.BlockNest, Meta>;
 
-export type BlockHandle<BlockTokenMap, Meta> = ParserHandle<ContextMap<BlockTokenMap, UnknownInlineToken, Meta>, ContextTag.Block | ContextTag.BlockNest>;
+export type BlockHandle<BlockTokenMap, Meta> = ParserHandle<ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block | ContextTag.BlockNest, Meta>;
 
 const hr = ' {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)';
 
@@ -51,14 +51,14 @@ const list = substRe('( *)(bull) [\\s\\S]+?(?:hr|def|\\n{2,}(?! )(?!\\1bull )\\n
     def: '\\n+(?=' + def + ')'
 });
 
-export const Newline: BlockRule<BlockSpace, AnyMeta> = [
+export const Newline: BlockRule<BlockSpace, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Newline,
     '\\n+',
     ({ }, src) => [{ $: BlockTag.Space }, src]
 ];
 
-export const CodeBlock: BlockRule<BlockCode, AnyMeta> = [
+export const CodeBlock: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Code,
     '( {4}[^\\n]+\\n*)+',
@@ -67,14 +67,14 @@ export const CodeBlock: BlockRule<BlockCode, AnyMeta> = [
 
 const fences = ' *(`{3,}|~{3,})[ \\.]*(\\S+)? *\\n([\\s\\S]*?)\\n? *\\1 *(?:\\n+|$)';
 
-export const Fences: BlockRule<BlockCode, AnyMeta> = [
+export const Fences: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Code,
     fences,
     ({ }, src, { }, lang, text) => [{ $: BlockTag.Code, _: text ? text.replace(/^ {4}/gm, '') : '' }, src]
 ];
 
-export const Heading: BlockRule<BlockHeading<UnknownInlineToken>, MetaHeadings<UnknownInlineToken>> = [
+export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
     heading,
@@ -82,7 +82,7 @@ export const Heading: BlockRule<BlockHeading<UnknownInlineToken>, MetaHeadings<U
     initHeading
 ];
 
-export const LHeading: BlockRule<BlockHeading<UnknownInlineToken>, MetaHeadings<UnknownInlineToken>> = [
+export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.LHeading,
     lheading,
@@ -90,7 +90,7 @@ export const LHeading: BlockRule<BlockHeading<UnknownInlineToken>, MetaHeadings<
     initHeading
 ];
 
-export const GfmHeading: BlockRule<BlockHeading<UnknownInlineToken>, MetaHeadings<UnknownInlineToken>> = [
+export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
     ' *(#{1,6}) +([^\\n]+?) *#* *(?:\\n+|$)',
@@ -98,25 +98,25 @@ export const GfmHeading: BlockRule<BlockHeading<UnknownInlineToken>, MetaHeading
     initHeading
 ];
 
-function initHeading(m: MetaHeadings<UnknownInlineToken>) {
+function initHeading(m: MetaHeadings<UnknownToken>) {
     m.headings = [];
 }
 
-function procHeading($: BlockHandle<BlockHeading<UnknownInlineToken>, MetaHeadings<UnknownInlineToken>>, level: number, text: string): AsUnion<BlockHeading<UnknownInlineToken>> {
+function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string): AsUnion<BlockHeading<UnknownToken>> {
     const index = $.m.headings.length;
     const content = parseNest({ ...$ }, text, ContextTag.Inline);
     $.m.headings.push({ t: text, n: level, _: content });
     return { $: BlockTag.Heading, i: index, n: level, _: content };
 }
 
-export const Hr: BlockRule<BlockHr, AnyMeta> = [
+export const Hr: BlockRule<BlockHr, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Hr,
     hr,
     ({ }, src) => [{ $: BlockTag.Hr }, src]
 ];
 
-export const Quote: BlockRule<BlockQuote<UnknownInlineToken>, AnyMeta> = [
+export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Quote,
     substRe('( {0,3}> ?(paragraph|[^\\n]*)(?:\\n|$))+', {
@@ -128,14 +128,14 @@ export const Quote: BlockRule<BlockQuote<UnknownInlineToken>, AnyMeta> = [
     }, src]
 ];
 
-export const Paragraph: BlockRule<BlockParagraph<UnknownInlineToken>, AnyMeta> = [
+export const Paragraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.Paragraph,
     paragraph,
     procParagraph
 ];
 
-export const GfmParagraph: BlockRule<BlockParagraph<UnknownInlineToken>, AnyMeta> = [
+export const GfmParagraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.Paragraph,
     substRe(paragraph, {
@@ -144,7 +144,7 @@ export const GfmParagraph: BlockRule<BlockParagraph<UnknownInlineToken>, AnyMeta
     procParagraph
 ];
 
-function procParagraph($: BlockHandle<BlockParagraph<UnknownInlineToken>, AnyMeta>, src: string, { }: string, text: string): [AsUnion<BlockParagraph<any>>, string] {
+function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, src: string, { }: string, text: string): [AsUnion<BlockParagraph<any>>, string] {
     return [{
         $: BlockTag.Paragraph,
         _: parseNest($,
@@ -155,20 +155,20 @@ function procParagraph($: BlockHandle<BlockParagraph<UnknownInlineToken>, AnyMet
     }, src];
 }
 
-export const TextBlock: BlockRule<BlockText<UnknownInlineToken>, AnyMeta> = [
+export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Text,
     '[^\\n]+',
     ($, src, text) => [{ $: BlockTag.Text, _: parseNest($, text, ContextTag.Inline) }, src]
 ];
 
-export const List: BlockRule<BlockList<UnknownBlockToken> | BlockOrdList<UnknownBlockToken>, AnyMeta> = [
+export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.List,
     list,
     ($, src, str, { }, bull) => {
         const ordered = bull.length > 1;
-        const items: BlockListItem<UnknownBlockToken>[] = [];
+        const items: BlockListItem<UnknownToken>[] = [];
 
         // Get each top-level item.
         const cap = str.match(item_re);
@@ -294,21 +294,21 @@ function procDef($: BlockHandle<void, MetaLinks>, src: string, { }: string, labe
     return [undefined, src];
 }
 
-export const NpTable: BlockRule<BlockTable<UnknownBlockToken>, AnyMeta> = [
+export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.List,
     '( *([^|\\n ].*\\|.*)\\n *([-:]+ *\\|[-| :]*)(?:\\n((?:.*[^>\\n ].*(?:\\n|$))*)\\n*|$))',
     procTable,
 ];
 
-export const Table: BlockRule<BlockTable<UnknownBlockToken>, AnyMeta> = [
+export const Table: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.List,
     '( *\\|(.+)\\n *\\|?( *[-:]+[-| :]*)(?:\\n((?: *[^>\\n ].*(?:\\n|$))*)\\n*|$))',
     procTable,
 ];
 
-function procTable($: BlockHandle<BlockTable<UnknownBlockToken>, AnyMeta>, src: string, str: string, header: string, align: string, cells: string): [AsUnion<BlockTable<any>> | undefined, string] {
+function procTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, src: string, str: string, header: string, align: string, cells: string): [AsUnion<BlockTable<any>> | undefined, string] {
     const h = procRow($, header.replace(/^ *| *\| *$/g, ''));
     const a = align.replace(/^ *|\| *$/g, '').split(/ *\| */)
         .map(hint => /^ *-+: *$/.test(hint) ? BlockAlign.Right :
@@ -324,7 +324,7 @@ function procTable($: BlockHandle<BlockTable<UnknownBlockToken>, AnyMeta>, src: 
     }, src] : [undefined, str + src];
 }
 
-function procRow($: BlockHandle<BlockTable<UnknownBlockToken>, AnyMeta>, srcRow: string, count?: number): BlockTableRow<any> {
+function procRow($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, srcRow: string, count?: number): BlockTableRow<any> {
     // ensure that every cell-delimiting pipe has a space
     // before it to distinguish it from an escaped pipe
     const cells = srcRow.replace(/\|/g, (match, offset, str) => {
