@@ -1,7 +1,7 @@
 import { renderNest } from '../../render';
 import {
     ContextTag,
-    NoMeta, MetaLinks,
+    NoMeta, MetaLinks, MetaLink,
     UnknownToken
 } from '../../model';
 import {
@@ -22,9 +22,9 @@ export const LinkHtml: InlineRenderRuleStr<InlineLink<UnknownToken>, MetaLinks> 
     ContextTag.Inline,
     InlineTag.Link,
     ($, { l, t, _ }) => '<a href="' +
-        escapeAttr(l || $.m.links[l]) +
+        getLinkProp(l, l, 'l', $.m) +
         '"' +
-        (t ? ' title="' + escapeAttr(t) + '"' : '') +
+        (t ? ' title="' + getLinkProp(l, t, 't', $.m) + '"' : '') +
         '>' + renderNest($, _) + '</a>'
 ];
 
@@ -32,12 +32,22 @@ export const ImageHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
     ContextTag.Inline,
     InlineTag.Image,
     ($, { l, t, _ }) => '<img src="' +
-        escapeAttr(l || $.m.links[l]) +
+        getLinkProp(l, l, 'l', $.m) +
         '"' +
         (_ ? ' alt="' + escapeHtml(_) + '"' : '') +
-        (t ? ' title="' + escapeAttr(t) + '"' : '') +
+        (t ? ' title="' + getLinkProp(l, t, 't', $.m) + '"' : '') +
         '>'
 ];
+
+function getLinkProp(l: string, v: string | undefined, n: keyof MetaLink, m: MetaLinks): string | undefined {
+    if (v) return escapeAttr(v);
+    if (m.links) {
+        const $ = m.links[l];
+        if ($ && $[n]) {
+            return escapeAttr($[n] as string);
+        }
+    }
+}
 
 export const StrongHtml: InlineRenderRuleStr<InlineStrong<UnknownToken>, NoMeta> = [
     ContextTag.Inline,
