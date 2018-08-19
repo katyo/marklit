@@ -3,3 +3,7 @@ es/
 *.js
 *.js.map
 *.d.ts
+!src/*.d.ts
+!test/*.d.ts
+test/*-out.ts
+
