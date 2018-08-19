@@ -69,7 +69,7 @@ function renderListItems($: BlockRenderHandleStr<BlockList<UnknownToken> | Block
         out += '<li>' +
             (item.t ? '<input type="checkbox"' + (item.c ? ' checked' : '') + ' disabled> ' : '') +
             renderNest($, item._) +
-            + '</li>\n';
+            '</li>\n';
     }
     return out;
 }
@@ -83,7 +83,7 @@ export const ParagraphHtml: BlockRenderRuleStr<BlockParagraph<UnknownToken>, NoM
 export const TextBlockHtml: BlockRenderRuleStr<BlockText<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Text,
-    ($, { _ }) => '<p>' + renderNest($, _, ContextTag.Inline) + '</p>\n'
+    ($, { _ }) => renderNest($, _, ContextTag.Inline)
 ];
 
 export const TableHtml: BlockRenderRuleStr<BlockTable<UnknownToken>, NoMeta> = [
