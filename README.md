@@ -39,7 +39,7 @@ The architecture of **marked** does not allows you to add new rules. You may onl
 
 The **[marked-ast]** partially solves the problem of renderer but still doesn't allows add new rules.
 
-The **[simple-markdown]** from Khan academy have good extendability but it is not so fast parser as marked.
+The **[simple-markdown]** from Khan academy have good extensibility but it is not so fast parser as marked.
 
 Because one of important goal of this project is parsing speed it required solution, which gives extensibility without worsening of speed.
 
@@ -54,6 +54,10 @@ So you need a little bit of handwork with types here.
 The __marked__ iterates over matching regexps for each rules until first match occured. It's not so fast as it can be because JS engine does multiple matching for multiple regexps.
 
 The __marklit__ constructs single regexp using all rules to do matching for all rules at once. This technique moves workload from JS side to embedded RegExp engine.
+
+#### Benchmarking
+
+Because the operation flow of marklit includes ADT stage it is too differs from other md-to-html parsers so the benchmarking won't give comparable results.
 
 [markdown]: https://www.markdownguide.org/
 [marked]: https://marked.js.org/
