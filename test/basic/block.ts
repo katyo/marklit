@@ -433,6 +433,222 @@ paragraph`, {
                         }
                     ]);
             });
+
+            describe('list', () => {
+                _('unordered simple', `* Item 1
+* Item 2
+* Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('unordered loose item', `* Item 1
+
+* Item 2
+* Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, l: 1, _: [
+                                { l: 1, _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                { l: 1, _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
+                                { l: 1, _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('unordered mutiline', `* Item 1
+  Item 1 Line 2
+* Item 2
+* Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }, { $: BlockTag.Text, _: ['Item 1 Line 2'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('unordered mutiline loose', `* Item 1
+  Item 1 Line 2
+
+* Item 2
+* Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, l: 1, _: [
+                                { l: 1, _: [{ $: BlockTag.Text, _: ['Item 1'] }, { $: BlockTag.Text, _: ['Item 1 Line 2'] }] },
+                                { l: 1, _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
+                                { l: 1, _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('unordered task', `* [ ] Task 1
+* [x] Task 2
+* [ ] Task 3
+* Item 4`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, _: [
+                                { t: 1, _: [{ $: BlockTag.Text, _: ['Task 1'] }] },
+                                { t: 1, c: 1, _: [{ $: BlockTag.Text, _: ['Task 2'] }] },
+                                { t: 1, _: [{ $: BlockTag.Text, _: ['Task 3'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 4'] }] }
+                            ]
+                        }
+                    ]);
+
+                _('ordered simple', `1. Item 1
+1. Item 2
+1. Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.OrdList, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('ordered with start', `2. Item 1
+1. Item 2
+1. Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.OrdList, s: 2, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('ordered multiline', `1. Item 1
+1. Item 2
+   Item 2 Line 2
+   Item 2 Line 3
+1. Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.OrdList, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 2'] }, { $: BlockTag.Text, _: ['Item 2 Line 2'] }, { $: BlockTag.Text, _: ['Item 2 Line 3'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('ordered task', `1. [ ] Task 1
+2. [x] Task 2
+3. [ ] Task 3
+4. Item 4`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.OrdList, _: [
+                                { t: 1, _: [{ $: BlockTag.Text, _: ['Task 1'] }] },
+                                { t: 1, c: 1, _: [{ $: BlockTag.Text, _: ['Task 2'] }] },
+                                { t: 1, _: [{ $: BlockTag.Text, _: ['Task 3'] }] },
+                                { _: [{ $: BlockTag.Text, _: ['Item 4'] }] }
+                            ]
+                        }
+                    ]);
+
+                _('unordered nested unordered', `* Item 1
+* Item 2
+  - Subitem 1
+  - Subitem 2
+* Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                {
+                                    _: [
+                                        { $: BlockTag.Text, _: ['Item 2'] },
+                                        {
+                                            $: BlockTag.List, _: [
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('unordered nested ordered', `* Item 1
+* Item 2
+  1. Subitem 1
+  2. Subitem 2
+* Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.List, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                {
+                                    _: [
+                                        { $: BlockTag.Text, _: ['Item 2'] },
+                                        {
+                                            $: BlockTag.OrdList, _: [
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('ordered nested ordered', `1. Item 1
+2. Item 2
+  1. Subitem 1
+  2. Subitem 2
+3. Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.OrdList, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                {
+                                    _: [
+                                        { $: BlockTag.Text, _: ['Item 2'] },
+                                        {
+                                            $: BlockTag.OrdList, _: [
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+
+                _('ordered nested unordered', `1. Item 1
+1. Item 2
+  * Subitem 1
+  * Subitem 2
+1. Item 3`, { headings: [], links: {} }, [
+                        {
+                            $: BlockTag.OrdList, _: [
+                                { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                                {
+                                    _: [
+                                        { $: BlockTag.Text, _: ['Item 2'] },
+                                        {
+                                            $: BlockTag.List, _: [
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
+                                                { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            ]
+                        }
+                    ]);
+            });
         });
     });
 }
