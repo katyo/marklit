@@ -19,7 +19,7 @@
     "test": "testem ci",
     "test-node": "TS_NODE_TYPE_CHECK=y mocha -r ts-node/register test/index.ts -R spec",
     "test-dev": "testem",
-    "conv-test": "ts-node test/tots"
+    "conv-test": "ts-node test/to"
   },
   "repository": {
     "type": "git",
