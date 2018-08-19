@@ -6,7 +6,7 @@ import {
     UnknownToken
 } from '../model';
 import {
-    BlockTag, BlockOrder,
+    BlockTag, BlockOrder, BlockTokenType,
     BlockAlign,
     BlockCode, BlockHeading,
     BlockTable, BlockTableRow,
@@ -180,21 +180,21 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
         const l = cap.length;
 
         for (let i = 0; i < l; i++) {
-            let item = cap[i];
+            let item_src = cap[i];
 
             // Remove the list item's bullet
             // so it is seen as the next token.
-            let space = item.length;
-            item = item.replace(/^ *([*+-]|\d+\.) +/, '');
+            let space = item_src.length;
+            item_src = item_src.replace(/^ *([*+-]|\d+\.) +/, '');
 
             // Outdent whatever the
             // list item contains. Hacky.
-            if (~item.indexOf('\n ')) {
-                space -= item.length;
-                item = //!this.options.pedantic
+            if (~item_src.indexOf('\n ')) {
+                space -= item_src.length;
+                item_src = //!this.options.pedantic
                     //?
-                    item.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
-                    //: item.replace(/^ {1,4}/gm, '')
+                    item_src.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
+                    //: item_src.replace(/^ {1,4}/gm, '')
                     ;
             }
 
@@ -211,54 +211,50 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
                 }
             }
 
+            const item = {} as BlockListItem<UnknownToken>;
+
             // Determine whether item is loose or not.
             // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
             // for discount behavior.
-            let item_loose: true | undefined = next || /\n\n(?!\s*$)/.test(item) || undefined;
+            if (next || /\n\n(?!\s*$)/.test(item_src)) item.l = 1;
 
             if (i !== l - 1) {
-                next = item.charAt(item.length - 1) === '\n';
-                if (!item_loose && next) item_loose = true;
+                next = item_src.charAt(item_src.length - 1) === '\n';
+                if (!item.l && next) item.l = 1;
             }
 
-            if (item_loose) {
-                loose = true;
-            }
+            if (item.l) loose = true;
 
             // Check for task list items
-            const is_task: true | undefined = /^\[[ xX]\] /.test(item) || undefined;
-            let is_checked: true | undefined = undefined;
-            if (is_task) {
-                if (item[1] !== ' ') is_checked = true;
-                item = item.replace(/^\[[ xX]\] +/, '');
+            if (/^\[[ xX]\] /.test(item_src)) {
+                item.t = 1;
+                if (item_src.charAt(1) !== ' ') item.c = 1;
+                item_src = item_src.replace(/^\[[ xX]\] +/, '');
             }
 
-            items.push({
-                t: is_task,
-                c: is_checked,
-                l: item_loose,
-                _: parseNest($, item, ContextTag.BlockNest)
-            });
+            item._ = parseNest($, item_src, ContextTag.BlockNest);
+
+            items.push(item);
         }
 
         if (loose) {
             for (let i = 0; i < items.length; i++) {
-                items[i].l = true;
+                items[i].l = 1;
             }
         }
 
-        return [
-            ordered ? {
-                $: BlockTag.OrdList,
-                s: +bull,
-                l: loose,
+        const list: BlockTokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>> = ordered ? {
+            $: BlockTag.OrdList,
+            s: +bull,
+            _: items,
+        } : {
+                $: BlockTag.List,
                 _: items,
-            } : {
-                    $: BlockTag.List,
-                    l: loose,
-                    _: items,
-                }, src
-        ];
+            };
+
+        if (loose) list.l = 1;
+
+        return [list, src];
     }
 ];
 
