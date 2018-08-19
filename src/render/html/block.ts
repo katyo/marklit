@@ -7,7 +7,7 @@ import {
 import {
     BlockTag,
     BlockCode, BlockHeading,
-    BlockSpace, BlockHr, BlockQuote,
+    BlockHr, BlockQuote,
     BlockList, BlockOrdList,
     BlockParagraph, BlockText,
     BlockTable,
@@ -22,12 +22,6 @@ import {
     escapeCode,
     textAlign,
 } from '../str';
-
-export const NewlineHtml: BlockRenderRuleStr<BlockSpace, NoMeta> = [
-    ContextTag.Block,
-    BlockTag.Space,
-    ({ }, { }) => '\n'
-];
 
 export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
     ContextTag.Block,
@@ -126,6 +120,6 @@ function renderTableCells($: BlockRenderHandleStr<BlockTable<UnknownToken>, NoMe
     return out;
 }
 
-export const BlockHtml = [NewlineHtml, CodeBlockHtml, HeadingHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
+export const BlockHtml = [CodeBlockHtml, HeadingHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
 
 export const BlockTablesHtml = [...BlockHtml, TableHtml];

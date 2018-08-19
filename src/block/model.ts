@@ -12,8 +12,7 @@ export const enum BlockTag {
     Table,
     Code,
     Hr,
-    Text,
-    Space,
+    Text
 }
 
 export const enum BlockOrder {
@@ -99,10 +98,6 @@ export type BlockTableCell<BlockTokenMap> = BlockTokenType<BlockTokenMap>[];
 
 export type BlockTableRow<BlockTokenMap> = BlockTableCell<BlockTokenMap>[];
 
-export interface BlockSpace {
-    [BlockTag.Space]: BlockEmpty;
-}
-
 export interface BlockHr {
     [BlockTag.Hr]: BlockEmpty;
 }
@@ -117,7 +112,6 @@ export interface BlockCode {
 }
 
 export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
-    BlockSpace,
     BlockCode,
     BlockHeading<InlineTokenMap>,
     BlockHr,

@@ -14,7 +14,13 @@ import {
 
     ContextMap,
 
-    init, parse, MetaHeadings, MetaLinks, BlockTag, InlineTag, //InlineTag,
+    init, parse,
+
+    MetaHeadings,
+    MetaLinks,
+
+    BlockTag,
+    InlineTag
 } from '../../src/index';
 
 interface Meta extends MetaHeadings<InlineToken>, MetaLinks { }
@@ -47,8 +53,7 @@ export default function() {
                             $: BlockTag.Paragraph, _: [
                                 "Simple and short paragraph with space"
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
                 _('multiline', `The first line
 and the second`,
@@ -67,8 +72,7 @@ and the second with space
                             $: BlockTag.Paragraph, _: [
                                 "The first line\nand the second with space"
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
                 _('two paragraphs', `The first paragraph
 
@@ -80,7 +84,6 @@ one`,
                                 "The first paragraph"
                             ]
                         },
-                        { $: BlockTag.Space },
                         {
                             $: BlockTag.Paragraph, _: [
                                 "And the second\none"
@@ -207,7 +210,6 @@ paragraph`, {
                     }, [
                         { $: BlockTag.Heading, i: 0, n: 3, _: ["First heading"] },
                         { $: BlockTag.Paragraph, _: ["First paragraph"] },
-                        { $: BlockTag.Space },
                         { $: BlockTag.Heading, i: 1, n: 2, _: ["Second one"] },
                         { $: BlockTag.Paragraph, _: ["Next\nparagraph"] }
                     ]);
@@ -256,11 +258,9 @@ paragraph`, {
                         {
                             $: BlockTag.Quote, _: [
                                 { $: BlockTag.Paragraph, _: ['Block quote'] },
-                                { $: BlockTag.Space },
                                 {
                                     $: BlockTag.Quote, _: [
                                         { $: BlockTag.Paragraph, _: ['nested block quote'] },
-                                        { $: BlockTag.Space },
                                         {
                                             $: BlockTag.Quote, _: [
                                                 { $: BlockTag.Paragraph, _: ['and next nested'] }
@@ -288,8 +288,7 @@ paragraph`, {
                             $: BlockTag.Paragraph, _: [
                                 { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('with title in double quotes', `[Def Link]
@@ -306,8 +305,7 @@ paragraph`, {
                             $: BlockTag.Paragraph, _: [
                                 { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('with title in paren', `[Def Link]
@@ -324,8 +322,7 @@ paragraph`, {
                             $: BlockTag.Paragraph, _: [
                                 { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('single', `[This link][1]
@@ -342,8 +339,7 @@ paragraph`, {
                             $: BlockTag.Paragraph, _: [
                                 { $: InlineTag.Link, l: "1", _: ["This link"] }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('multiple', `[Some link][some] [Other link][-other-]
@@ -368,8 +364,7 @@ paragraph`, {
                                 " ",
                                 { $: InlineTag.Link, l: "-other-", _: ["Other link"] }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('multiple same', `[Some link][some] [Other link][some]
@@ -393,8 +388,7 @@ paragraph`, {
                                 " ",
                                 { $: InlineTag.Link, l: "some", _: ["Other link"] }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('in blockquote', `> Link below
@@ -415,11 +409,9 @@ paragraph`, {
                                         "Link below\n",
                                         { $: InlineTag.Link, l: "ql", _: ["This link"] }
                                     ]
-                                },
-                                { $: BlockTag.Space }
+                                }
                             ]
-                        },
-                        { $: BlockTag.Space }
+                        }
                     ]);
 
                 _('in code', `Link below
@@ -435,7 +427,6 @@ paragraph`, {
                                 { $: InlineTag.Link, l: "ql", _: ["This link"] }
                             ]
                         },
-                        { $: BlockTag.Space },
                         {
                             $: BlockTag.Code,
                             _: "[ql]: http://example.com/"
