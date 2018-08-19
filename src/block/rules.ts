@@ -243,14 +243,12 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
             }
         }
 
-        const list: BlockTokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>> = ordered ? {
-            $: BlockTag.OrdList,
-            s: +bull,
-            _: items,
-        } : {
-                $: BlockTag.List,
-                _: items,
-            };
+        const list = {
+            $: ordered ? BlockTag.OrdList : BlockTag.List,
+            _: items
+        } as BlockTokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>;
+
+        if (ordered && bull != '1.') (list as BlockTokenType<BlockOrdList<UnknownToken>>).s = +bull;
 
         if (loose) list.l = 1;
 

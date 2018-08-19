@@ -73,7 +73,7 @@ export interface BlockList<BlockTokenMap> {
 
 export interface BlockOrdList<BlockTokenMap> {
     [BlockTag.OrdList]: {
-        s: number; // start number
+        s?: number; // start number
         l?: 1; // loose list
         _: BlockListItem<BlockTokenMap>[];
     };
