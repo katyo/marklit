@@ -429,7 +429,7 @@ paragraph`, {
                         },
                         {
                             $: BlockTag.Code,
-                            _: "[ql]: http://example.com/"
+                            _: "[ql]: http://example.com/\n"
                         }
                     ]);
             });
