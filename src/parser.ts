@@ -107,11 +107,11 @@ export function parse<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap>({ p
     try {
         const tokens = parseNest(
             $,
-            source.replace(/\r\n|\r/g, '\n') // unify line feeds
+            source
+                .replace(/\r\n|\r/g, '\n') // unify line feeds
                 .replace(/\t/g, '    ') // replace tabs by four spaces
                 .replace(/\u00a0/g, ' ') // replace non-break space by space
                 .replace(/\u2424/g, '\n') // replace unicode NL by newline
-            /*.replace(/^\s+$/gm, '')*/ // replace space-only lines by empty lines
         );
         return { $: 1, _: [meta, tokens] } as any as ParserResult<CtxMap, Ctx>;
     } catch (e) {
@@ -122,5 +122,6 @@ export function parse<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap>({ p
 export function parseNest<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx | NestedCtx, ContextMeta<CtxMap>>, src: string, ctx: NestedCtx): ContextToken<CtxMap, NestedCtx>[];
 export function parseNest<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, src: string): ContextToken<CtxMap, Ctx>[];
 export function parseNest<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx | NestedCtx, ContextMeta<CtxMap>>, src: string, ctx: Ctx | NestedCtx = $.c): ContextToken<CtxMap, Ctx | NestedCtx>[] {
-    return parseSeq($.c === ctx ? $ : { ...$, c: ctx }, $.p[ctx], src);
+    return parseSeq($.c === ctx ? $ : { ...$, c: ctx }, $.p[ctx],
+        src.replace(/^ +$/gm, '')); // remove spaces on empty lines which has spaces only
 }
