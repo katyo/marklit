@@ -19,17 +19,92 @@ export type BlockRule<BlockTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap
 
 export type BlockHandle<BlockTokenMap, Meta> = ParserHandle<ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block | ContextTag.BlockNest, Meta>;
 
+/*
+HTML Tags:
+
+(replace-regexp "^const tag = .*;$"
+ (concat "const tag = \""
+  (replace-regexp-in-string "\\\\" ""
+   (regexp-opt '(
+       "address"
+       "article"
+       "aside"
+       "base"
+       "basefont"
+       "blockquote"
+       "body"
+       "caption"
+       "center"
+       "col"
+       "colgroup"
+       "dd"
+       "details"
+       "dialog"
+       "dir"
+       "div"
+       "dl"
+       "dt"
+       "fieldset"
+       "figcaption"
+       "figure"
+       "footer"
+       "form"
+       "frame"
+       "frameset"
+       "h1"
+       "h2"
+       "h3"
+       "h4"
+       "h5"
+       "h6"
+       "head"
+       "header"
+       "hr"
+       "html"
+       "iframe"
+       "legend"
+       "li"
+       "link"
+       "main"
+       "menu"
+       "menuitem"
+       "meta"
+       "nav"
+       "noframes"
+       "ol"
+       "optgroup"
+       "option"
+       "p"
+       "param"
+       "section"
+       "source"
+       "summary"
+       "table"
+       "tbody"
+       "td"
+       "tfoot"
+       "th"
+       "thead"
+       "title"
+       "tr"
+       "track"
+       "ul"
+   ))) "\";"))
+*/
+
+const tag = "(?:a(?:ddress|(?:rticl|sid)e)|b(?:ase(?:font)?|lockquote|ody)|c(?:aption|enter|ol(?:group)?)|d(?:etails|i(?:alog|[rv])|[dlt])|f(?:i(?:eldset|g(?:caption|ure))|o(?:oter|rm)|rame(?:set)?)|h(?:ead(?:er)?|tml|[1-6r])|iframe|l(?:egend|i(?:nk)?)|m(?:ain|e(?:nu(?:item)?|ta))|n(?:av|oframes)|o(?:l|pt(?:group|ion))|p(?:aram)?|s(?:ection|ource|ummary)|t(?:able|body|foot|head|itle|rack|[dhr])|ul)";
+
 const hr = ' {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)';
 
 const heading = ' *(#{1,6}) *([^\\n]+?) *(?:#+ *)?(?:\\n+|$)';
 
 const lheading = '([^\\n]+)\\n *(=|-){2,} *(?:\\n+|$)';
 
-const paragraph = substRe('([^\\n]+(?:\\n(?!hr|heading|lheading| {0,3}>|<\\/?(?:tag)(?: +|\\n|\\/?>)|<(?:script|pre|style|!--))[^\\n]+)*)', {
-    hr,
-    heading,
+const paragraph = substRe('[^\\n]+(?:\\n(?!hr|heading|lheading| {0,3}>|<\\/?tag(?: +|\\n|\\/?>)|<(?:script|pre|style|!--))[^\\n]+)*', {
     lheading,
-    tag: '[a-z]+[0-9]?'
+    heading,
+    hr,
+    tag,
 });
 
 const bull = '(?:[*+-]|\\d+\\.)';
@@ -144,15 +219,16 @@ export const GfmParagraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     procParagraph
 ];
 
-function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, src: string, { }: string, text: string): [AsUnion<BlockParagraph<any>>, string] {
-    return [{
+function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, src: string, text: string): [AsUnion<BlockParagraph<any>> | void, string] {
+    const contents = parseNest($,
+        text
+            //.replace(/^ +/, '')
+            .replace(/\n$/, ''),
+        ContextTag.Inline);
+    return [contents.length ? {
         $: BlockTag.Paragraph,
-        _: parseNest($,
-            text.charAt(text.length - 1) === '\n'
-                ? text.slice(0, -1)
-                : text,
-            ContextTag.Inline)
-    }, src];
+        _: contents
+    } : undefined, src];
 }
 
 export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
