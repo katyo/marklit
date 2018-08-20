@@ -1,7 +1,7 @@
 import { RenderRule, RenderHandle, makeRender } from '../render';
 import {
     ContextTag, ContextMap,
-    UnknownToken
+    UnknownToken, NoMeta
 } from '../model';
 
 export type InlineRenderRuleStr<InlineTokenMap, Meta> = RenderRule<string, ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline, Meta>;
@@ -12,7 +12,7 @@ export type BlockRenderRuleStr<BlockTokenMap, Meta> = RenderRule<string, Context
 
 export type BlockRenderHandleStr<BlockTokenMap, Meta> = RenderHandle<string, ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block, Meta>;
 
-export const initRenderHtml = makeRender(escapeHtml, joinStrings);
+export const initRenderHtml = makeRender(wrapHtml, joinHtml);
 
 export const textAlign: string[] = [
     '',
@@ -21,8 +21,12 @@ export const textAlign: string[] = [
     'right',
 ];
 
-export function joinStrings(strs: string[]): string {
-    return strs.join('');
+export function wrapHtml($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunk: string): string {
+    return escapeHtml(chunk);
+}
+
+export function joinHtml($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunks: string[]): string {
+    return chunks.join($.c == ContextTag.Inline ? '' : '\n');
 }
 
 export function escapeCode(str: string): string {
