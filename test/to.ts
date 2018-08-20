@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 
-const { stringify: tojs } = JSON;
+const { stringify } = JSON;
 
 const { argv } = process;
 
@@ -42,10 +42,30 @@ function convdir(path: string) {
         }
         src += `    ${test}: [\n`;
         src += `        ${tojs(opts)},\n`;
-        src += `        ${tojs(md)},\n`;
-        src += `        ${tojs(html)},\n`;
+        src += `${tojs(md)},\n`;
+        src += `${tojs(html)},\n`;
         src += '    ],\n';
     }
     src += '};\n\nexport default tests;\n';
     return src;
+}
+
+function tojs(data: string | Record<string, any>): string {
+    if (typeof data == 'string') {
+        return stringify(data)
+            .replace(/`/g, '\\`')
+            .replace(/\\n/g, '\n')
+            //.replace(/\\t/g, '\t')
+            .replace(/\$\{/g, '\\${')
+            .replace(/\\"/g, '"')
+            .replace(/^"/, '`')
+            .replace(/"$/, '`');
+    } else {
+        let out: string[] = [];
+        for (const name in data as Record<string, any>) {
+            const val = stringify(data[name]);
+            out.push(name + ': ' + val);
+        }
+        return '{ ' + out.join(', ') + ' }';
+    }
 }
