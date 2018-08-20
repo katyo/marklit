@@ -25,12 +25,19 @@ export function parseSeq<Type, Self>(self: Self, matcher: Matcher<Type, Self>, s
     for (; source.length > 0;) {
         const [token, rest] = doMatch(matcher, self, source);
 
-        if (typeof token == 'string' &&
-            tokens.length > 0 &&
-            typeof tokens[tokens.length - 1] == 'string') {
-            (tokens[tokens.length - 1] as any as string) += token;
-        } else if (token != null) {
-            tokens.push(token as Type);
+        if (token != null) {
+            if (typeof token != 'string') {
+                tokens.push(token as Type);
+            } else {
+                if ((token as string).length) {
+                    if (tokens.length &&
+                        typeof tokens[tokens.length - 1] == 'string') {
+                        (tokens[tokens.length - 1] as any as string) += token;
+                    } else {
+                        tokens.push(token as Type);
+                    }
+                }
+            }
         }
 
         source = rest;
