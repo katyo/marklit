@@ -38,7 +38,7 @@ export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHea
 export const HrHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
     ContextTag.Block,
     BlockTag.Hr,
-    ({ }, { }) => '<hr/>\n'
+    ({ }, { }) => '<hr>\n'
 ];
 
 export const QuoteHtml: BlockRenderRuleStr<BlockQuote<UnknownToken>, NoMeta> = [
