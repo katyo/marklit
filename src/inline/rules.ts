@@ -120,7 +120,7 @@ function procRefNoLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, src: s
 export const Strong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Strong,
-    '__([^\\s][\\s\\S]*?[^\\s])__(?!_)|\\*\\*([^\\s][\\s\\S]*?[^\\s])\\*\\*(?!\\*)|__([^\\s])__(?!_)|\\*\\*([^\\s])\\*\\*(?!\\*)',
+    '__([^\\s])__(?!_)|^\\*\\*([^\\s])\\*\\*(?!\\*)|^__([^\\s][\\s\\S]*?[^\\s])__(?!_)|^\\*\\*([^\\s][\\s\\S]*?[^\\s])\\*\\*(?!\\*)',
     procStrong
 ];
 
@@ -138,7 +138,7 @@ function procStrong($: InlineHandle<InlineStrong<UnknownToken>, NoMeta>, src: st
 export const Em: InlineRule<InlineEm<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Em,
-    '_([^\\s][\\s\\S]*?[^\\s_])_(?!_)|_([^\\s_][\\s\\S]*?[^\\s])_(?!_)|\\*([^\\s][\\s\\S]*?[^\\s*])\\*(?!\\*)|\\*([^\\s*][\\s\\S]*?[^\\s])\\*(?!\\*)|_([^\\s_])_(?!_)|\\*([^\\s*])\\*(?!\\*)',
+    '_([^\\s_])_(?!_)|^\\*([^\\s*"<\\[])\\*(?!\\*)|^_([^\\s][\\s\\S]*?[^\\s_])_(?!_)|^_([^\\s_][\\s\\S]*?[^\\s])_(?!_)|^\\*([^\\s"<\\[][\\s\\S]*?[^\\s*])\\*(?!\\*)|^\\*([^\\s*"<\\[][\\s\\S]*?[^\\s])\\*(?!\\*)',
     procEm
 ];
 
