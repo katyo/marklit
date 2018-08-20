@@ -70,5 +70,6 @@ export function testMarked(tests: Record<string, [Record<string, any>, string, s
 const normalizer = Normalizer();
 
 function normalizeHtml(html: string): string {
+    //return html;
     return normalizer.domString(html);
 }

@@ -649,6 +649,16 @@ paragraph`, {
                         }
                     ]);
             });
+
+            describe('code', () => {
+                _('empty line at end', `    code block
+    
+regular text`,
+                    { links: {}, headings: [] }, [
+                        { $: BlockTag.Code, _: 'code block\n\n' },
+                        { $: BlockTag.Paragraph, _: ['regular text'] }
+                    ]);
+            });
         });
     });
 }

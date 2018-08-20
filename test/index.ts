@@ -15,7 +15,6 @@ describe('marked', () => {
     describe('original', () => {
         testMarked(originalTests, [
             'backslash_escapes',
-            'code_blocks',
             'code_spans',
             'horizontal_rules',
             'inline_html_advanced',
