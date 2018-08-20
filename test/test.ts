@@ -1,7 +1,16 @@
-/// <reference path="html-normalizer.d.ts" />
-import Normalizer from 'html-normalizer';
+/// <reference path="chai-html.d.ts" />
+import { use, expect } from 'chai';
+import chaiHtml from 'chai-html';
 
-import { strictEqual } from 'assert';
+declare global {
+    namespace Chai {
+        interface Assertion {
+            html: ChaiHtml.HtmlAssertion;
+        }
+    }
+}
+
+use(chaiHtml);
 
 import {
     InlineTokenMap,
@@ -61,15 +70,8 @@ export function testMarked(tests: Record<string, [Record<string, any>, string, s
 
                 const actual_html = render(renderer, actual_adt);
 
-                strictEqual(normalizeHtml(actual_html), normalizeHtml(expected_html));
+                expect(actual_html).html.to.equal(expected_html);
             });
         }
     }
-}
-
-const normalizer = Normalizer();
-
-function normalizeHtml(html: string): string {
-    //return html;
-    return normalizer.domString(html);
 }

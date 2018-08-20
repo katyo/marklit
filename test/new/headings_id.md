@@ -1,3 +1,6 @@
+---
+gfm: true
+---
 ### Heading with a [link](http://github.com/)
 
 ### Heading with some _italic text_

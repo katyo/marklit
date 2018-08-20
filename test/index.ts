@@ -20,7 +20,9 @@ describe('marked', () => {
             'inline_html_advanced',
             'inline_html_comments',
             'inline_html_simple',
+            'links_inline_style',
             'links_reference_style',
+            'literal_quotes_in_titles',
             'markdown_documentation_basics',
             'markdown_documentation_syntax',
             'ordered_and_unordered_lists',
@@ -31,6 +33,7 @@ describe('marked', () => {
     describe('new', () => {
         testMarked(newTests, [
             'blockquote_list_item',
+            'cm_autolinks',
             'cm_blockquotes',
             'cm_html_blocks',
             'cm_link_defs',
@@ -47,6 +50,7 @@ describe('marked', () => {
             'hr_list_break',
             'html_comments',
             'links',
+            'link_lt',
             'list_item_text',
             'main',
             'redos_html_closing',

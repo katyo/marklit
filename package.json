@@ -39,11 +39,12 @@
     "url": "https://github.com/katyo/marklit/issues"
   },
   "devDependencies": {
+    "@types/chai": "^4",
     "@types/mocha": "^5",
     "@types/node": "^8",
     "browserify": "^16",
-    "html-normalizer": "^7",
-    "jsdom": "^9",
+    "chai": "^4",
+    "chai-html": "^1",
     "mocha": "^5",
     "testem": "^2",
     "ts-node": "^7",
