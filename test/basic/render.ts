@@ -30,14 +30,15 @@ export default function() {
         describe('block', () => {
             _('headings', {
                 links: {}, headings: [
-                    { t: "Heading1", n: 1, _: ["Heading1"] },
-                    { t: "Heading2", n: 2, _: ["Heading2"] }
+                    { t: "Heading 1", n: 1, _: ["Heading 1"] },
+                    { t: "Heading 2", n: 2, _: ["Heading 2"] }
                 ]
             }, [
-                    { $: BlockTag.Heading, i: 0, n: 1, _: ["Heading1"] },
-                    { $: BlockTag.Heading, i: 1, n: 2, _: ["Heading2"] }
-                ], `<h1>Heading1</h1>
-<h2>Heading2</h2>
+                    { $: BlockTag.Heading, i: 0, n: 1, _: ["Heading 1"] },
+                    { $: BlockTag.Heading, i: 1, n: 2, _: ["Heading 2"] }
+                ], `<h1 id="heading-1">Heading 1</h1>
+
+<h2 id="heading-2">Heading 2</h2>
 `);
         });
 

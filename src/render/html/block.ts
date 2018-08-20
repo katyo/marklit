@@ -32,7 +32,8 @@ export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
 export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     ContextTag.Block,
     BlockTag.Heading,
-    ($, { n, _ }) => `<h${n}>` + renderNest($, _, ContextTag.Inline) + `</h${n}>\n`
+    ($, { n, i, _ }) => `<h${n} id="${$.m.headings[i].t.toLowerCase().replace(/[^\w]+/g, '-')}">` +
+        renderNest($, _, ContextTag.Inline) + `</h${n}>\n`
 ];
 
 export const HrHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
