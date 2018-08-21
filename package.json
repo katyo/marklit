@@ -14,10 +14,10 @@
     "clean-js": "rm -rf *.d.ts *.js *.js.map render inline block",
     "prepack": "npm run compile",
     "postpack": "npm run clean",
-    "compile-test": "npm run conv-test && browserify -d test/index.ts -p [ tsify --noImplicitAny ] -o test-out.js",
+    "compile-test": "npm run conv-test && browserify -d test/index.ts -p [ tsify --resolveJsonModule ] -o test-out.js",
     "clean-test": "rm -f test-out.js test/*-out.ts",
     "test": "testem ci",
-    "test-node": "TS_NODE_TYPE_CHECK=y npm run conv-test && mocha -r ts-node/register test/index.ts -R spec",
+    "test-node": "TS_NODE_TYPE_CHECK=y TS_NODE_COMPILER_OPTIONS='{\"resolveJsonModule\":true}' mocha -r ts-node/register test/index.ts -R spec",
     "test-dev": "testem",
     "conv-test": "ts-node test/to test/original test/original-out.ts; ts-node test/to test/new test/new-out.ts"
   },
@@ -39,12 +39,10 @@
     "url": "https://github.com/katyo/marklit/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4",
     "@types/mocha": "^5",
     "@types/node": "^8",
     "browserify": "^16",
-    "chai": "^4",
-    "chai-html": "^1",
+    "html-differ": "^1",
     "mocha": "^5",
     "testem": "^2",
     "ts-node": "^7",

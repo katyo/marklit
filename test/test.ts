@@ -1,16 +1,6 @@
-/// <reference path="chai-html.d.ts" />
-import { use, expect } from 'chai';
-import chaiHtml from 'chai-html';
-
-declare global {
-    namespace Chai {
-        interface Assertion {
-            html: ChaiHtml.HtmlAssertion;
-        }
-    }
-}
-
-use(chaiHtml);
+/// <reference path="html-differ.d.ts" />
+import { HtmlDiffer } from 'html-differ';
+import { inspect } from 'util';
 
 import {
     InlineTokenMap,
@@ -32,9 +22,14 @@ import {
     MetaHeadings, MetaLinks,
 
     BlockHtml,
+    BlockXHtml,
     BlockTablesHtml,
+    BlockTablesXHtml,
+    HeadingHtml,
     InlineHtml,
+    InlineXHtml,
     InlineGfmHtml,
+    InlineGfmXHtml,
 
     initRenderHtml, render
 } from '../src/index';
@@ -47,31 +42,110 @@ interface BlockToken extends BlockTokenMap<BlockToken, InlineToken> { }
 
 interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
 
-export function testMarked(tests: Record<string, [Record<string, any>, string, string]>, disabled: string[] = []) {
+/*
+export interface Options {
+    pedantic: boolean;
+    gfm: boolean;
+    breaks: boolean;
+    tables: boolean;
+    smatrypants: boolean;
+    baseUrl: string;
+    xhtml: boolean;
+    mangle: boolean;
+    sanitize: boolean;
+}
+*/
+
+export type Options = Record<string, any>;
+
+const htmlDiffer = new HtmlDiffer();
+
+const enum HL {
+    Def = '\x1b[0m', // default
+    Err = '\x1b[31m', // red
+    Ok = '\x1b[32m', // green
+    Pre = '\x1b[36m', // preformatted
+    Cap = '\x1b[4m', // caption
+}
+
+export function htmlEq(actual_html: string, expected_html: string, actual_adt?: any[], source_md?: string) {
+    if (!htmlDiffer.isEqual(actual_html, expected_html)) {
+        const diffs = htmlDiffer.diffHtml(actual_html, expected_html);
+
+        throw {
+            message: 'Result error: \n' + HL.Def +
+                (source_md ? HL.Cap + 'Source' + HL.Def + ':   ' + HL.Pre + prettyPrint(source_md) + HL.Def + '\n' : '') +
+                (actual_adt ? HL.Cap + 'ADT' + HL.Def + ':      ' + inspect(actual_adt, { depth: 10, colors: true }) + HL.Def + '\n' : '') +
+                HL.Cap + 'Actual' + HL.Def + ':   ' + HL.Err + prettyPrint(actual_html) + HL.Def + '\n' +
+                HL.Cap + 'Expected' + HL.Def + ': ' + HL.Ok + prettyPrint(expected_html) + HL.Def + '\n' +
+                HL.Cap + 'Diffs' + HL.Def + ':    ' + diffs.map(({ value, added, removed }) =>
+                    (added ? HL.Ok : removed ? HL.Err : HL.Def) + prettyPrint(value)
+                ).join('') + HL.Def
+        };
+    }
+}
+
+function doTest({ pedantic, gfm, breaks, tables, headingId, xhtml,/*, smartypants, baseUrl, mangle, sanitize*/ }: Options, source_md: string, expected_html: string) {
+    const parser = init<Context>(
+        ...(pedantic ? BlockPedantic : tables ? BlockGfmTables : gfm ? BlockGfm : BlockNormal),
+        ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal)
+    );
+
+    const renderer = initRenderHtml<Context>(
+        ...(tables ? (xhtml ? BlockTablesXHtml : BlockTablesHtml) : (xhtml ? BlockXHtml : BlockHtml)),
+        ...(headingId === false ? [HeadingHtml] : []),
+        ...(gfm ? (xhtml ? InlineGfmXHtml : InlineGfmHtml) : (xhtml ? InlineXHtml : InlineHtml))
+    );
+
+    const result = parse(parser, source_md);
+
+    if (!result.$) throw new Error(`Parser error: ${result._}`);
+
+    const actual_adt = result._;
+
+    const actual_html = render(renderer, actual_adt);
+
+    htmlEq(actual_html, expected_html, actual_adt, source_md);
+}
+
+function prettyPrint(str: string): string {
+    return str ? str
+        .replace(/ /g, '␣') // highlight spaces
+        .replace(/\t/g, '→') // highlight tabs
+        .replace(/\n/g, '⤶') // highlight line-feeds
+        .replace(/\r/g, '⇠') // highlight carriage returns
+        : '∅'; // highlight empty contents
+}
+
+export function testMarked(tests: Record<string, [Options, string, string]>, blacklist: string[] = []) {
     for (const name in tests) {
-        if (disabled.indexOf(name) < 0) {
+        if (blacklist.indexOf(name) < 0) {
             it(name, () => {
-                const [{ pedantic, gfm, breaks, tables/*, smartypants, baseUrl, xhtml, mangle, sanitize*/ }, source_md, expected_html] = tests[name];
-
-                const parser = init<Context>(
-                    ...(pedantic ? BlockPedantic : tables ? BlockGfmTables : gfm ? BlockGfm : BlockNormal),
-                    ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal)
-                );
-                const renderer = initRenderHtml<Context>(
-                    ...(tables ? BlockTablesHtml : BlockHtml),
-                    ...(gfm ? InlineGfmHtml : InlineHtml)
-                );
-
-                const result = parse(parser, source_md);
-
-                if (!result.$) throw new Error(`Parser failed: ${result._}`);
-
-                const actual_adt = result._;
-
-                const actual_html = render(renderer, actual_adt);
-
-                expect(actual_html).html.to.equal(expected_html);
+                doTest(...tests[name]);
             });
         }
+    }
+}
+
+export function testSpecs(options: Options, specs: { section: string, html: string, markdown: string, example: number }[], blacklist: number[] = []) {
+    const sections: string[] = [];
+
+    for (const { section, example } of specs) {
+        if (blacklist.indexOf(example) < 0 &&
+            sections.indexOf(section) < 0)
+            sections.push(section);
+    }
+
+    for (const section_ of sections) {
+        describe(section_, () => {
+            for (const { section, html, markdown, example } of specs) {
+                if (section == section_ &&
+                    blacklist.indexOf(example) < 0) {
+                    it(`example ${example}`, () => {
+                        doTest(options, markdown, html);
+                    });
+                }
+            }
+        });
     }
 }
