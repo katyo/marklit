@@ -1,14 +1,30 @@
-import { MatchPath, Matcher, matchAny, parseSeq } from './match';
+import { MatchPath, MatchState, Matcher, matchAny, parseSeq } from './match';
 import { InitTag, HasMeta, HasInit, ContextToken, ContextMeta, ContextResult } from './model';
 
 export interface ParseFunc<CtxMap, Ctx extends keyof CtxMap, Meta> {
-    <MetaType extends Meta>(ctx: ParserHandle<CtxMap, Ctx, MetaType>, source: string, ...captures: string[]): [ContextToken<CtxMap, Ctx> | void, string];
+    <MetaType extends Meta>(ctx: ParserHandle<CtxMap, Ctx, MetaType>, ...captures: string[]): void;
 }
 
-export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap, Meta> {
+export interface ParserHandle<CtxMap, Ctx extends keyof CtxMap, Meta> extends MatchState {
     p: ParserMatchers<CtxMap, Meta>; // parser matchers
     c: Ctx; // current context
     m: Meta; // parser meta
+    t: ContextToken<CtxMap, Ctx>[];
+}
+
+export function pushToken<CtxMap, Ctx extends keyof CtxMap, Meta>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>, token: ContextToken<CtxMap, Ctx>) {
+    tokens.push(token);
+}
+
+export function pushText<CtxMap, Ctx extends keyof CtxMap, Meta, Token extends string & ContextToken<CtxMap, Ctx>>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>, token: Token) {
+    if (token.length) {
+        if (tokens.length &&
+            typeof tokens[tokens.length - 1] == 'string') {
+            (tokens[tokens.length - 1] as any as string) += token;
+        } else {
+            tokens.push(token as Token);
+        }
+    }
 }
 
 export interface InitFunc<CtxMap, Ctx extends keyof CtxMap, Meta> {
@@ -31,7 +47,7 @@ export type ParserRule<CtxMap, Ctx extends keyof CtxMap, Meta> = [
 export type ParserRules<CtxMap, Meta> = ParserRule<CtxMap, keyof CtxMap, Meta>[];
 
 export type ParserMatchers<CtxMap, Meta> = {
-    [Ctx in keyof CtxMap]: Matcher<ContextToken<CtxMap, Ctx>, ParserHandle<CtxMap, Ctx, Meta>>
+    [Ctx in keyof CtxMap]: Matcher<ParserHandle<CtxMap, Ctx, Meta>>
 };
 
 function buildRules<CtxMap extends HasMeta<any>>(rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): ParserMatchers<CtxMap, ContextMeta<CtxMap>> {
@@ -61,7 +77,7 @@ function buildRules<CtxMap extends HasMeta<any>>(rules: ParserRules<CtxMap, Cont
                 weight_a < weight_b ? -1 :
                     weight_b < weight_a ? 1 : 0)
             .map(([, ...path]) =>
-                path as MatchPath<ContextToken<CtxMap, keyof CtxMap>, ParserHandle<CtxMap, keyof CtxMap, ContextMeta<CtxMap>>>));
+                path as MatchPath<ParserHandle<CtxMap, keyof CtxMap, ContextMeta<CtxMap>>>));
     }
     return matchers;
 }
@@ -99,29 +115,38 @@ export function parse<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap>({ p
     for (const init of m) {
         init(meta);
     }
-    const $: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>> = {
+    const $ = {
         p,
-        c: s,
         m: meta,
-    };
+    } as ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>;
     try {
-        const tokens = parseNest(
-            $,
-            source
-                .replace(/\r\n|\r/g, '\n') // unify line feeds
-                .replace(/\t/g, '    ') // replace tabs by four spaces
-                .replace(/\u00a0/g, ' ') // replace non-break space by space
-                .replace(/\u2424/g, '\n') // replace unicode NL by newline
-        );
-        return { $: 1, _: [meta, tokens] } as any as ParserResult<CtxMap, Ctx>;
+        return {
+            $: 1, _: [$.m, parseNest(
+                $,
+                source
+                    .replace(/\r\n|\r/g, '\n') // unify line feeds
+                    .replace(/\t/g, '    ') // replace tabs by four spaces
+                    .replace(/\u00a0/g, ' ') // replace non-break space by space
+                    .replace(/\u2424/g, '\n'), // replace unicode NL by newline
+                s
+            )]
+        };
     } catch (e) {
-        return { $: 0, _: e.message } as ParserResult<CtxMap, Ctx>;
+        return { $: 0, _: e.message };
     }
 }
 
 export function parseNest<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx | NestedCtx, ContextMeta<CtxMap>>, src: string, ctx: NestedCtx): ContextToken<CtxMap, NestedCtx>[];
 export function parseNest<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, src: string): ContextToken<CtxMap, Ctx>[];
 export function parseNest<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap, NestedCtx extends keyof CtxMap>($: ParserHandle<CtxMap, Ctx | NestedCtx, ContextMeta<CtxMap>>, src: string, ctx: Ctx | NestedCtx = $.c): ContextToken<CtxMap, Ctx | NestedCtx>[] {
-    return parseSeq($.c === ctx ? $ : { ...$, c: ctx }, $.p[ctx],
-        src.replace(/^ +$/gm, '')); // remove spaces on empty lines which has spaces only
+    const $$ = {
+        ...$,
+        t: [],
+        c: ctx,
+        s: src.replace(/^ +$/gm, ''), // remove spaces on empty lines which has spaces only
+        r: true
+    };
+    parseSeq($$, $.p[ctx]);
+    if ($$.r && $$.s.length) throw new Error(`Unable to parse: ${$$.s}...`);
+    return $$.t;
 }

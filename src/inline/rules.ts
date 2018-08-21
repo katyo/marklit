@@ -1,4 +1,5 @@
-import { ParserHandle, ParserRule, parseNest } from '../parser';
+import { backpedal } from '../match';
+import { ParserHandle, ParserRule, parseNest, pushToken, pushText } from '../parser';
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
@@ -30,8 +31,8 @@ export const GfmEscape: InlineRule<string, NoMeta> = [
     procEscape
 ];
 
-function procEscape({ }: InlineHandle<string, NoMeta>, src: string, { }: string, char: string): [string, string] {
-    return [char, src];
+function procEscape($: InlineHandle<string, NoMeta>, _: string, char: string) {
+    pushText($, char);
 }
 
 const email = '[a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])';
@@ -43,21 +44,38 @@ export const AutoLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
         scheme: '[a-zA-Z][a-zA-Z0-9+.-]{1,31}',
         email
     }),
-    ({ }, src, { }, url, at) => [{ $: InlineTag.Link, l: (at ? 'mailto:' : '') + url, _: [url] }, src]
+    ($, _, url, at) => {
+        pushToken($, {
+            $: InlineTag.Link,
+            l: (at ? 'mailto:' : '') + url,
+            _: [url]
+        });
+    }
 ];
 
 export const Url: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     [ContextTag.Inline],
     InlineOrder.Url,
     substRe('((?:ftp|https?):\\/\\/|www\\.)(?:[a-zA-Z0-9\\-]+\\.?)+[^\\s<]*|email', { email }),
-    ({ }, src, text, url, at) => {
-        src = `${text}${src}`;
-        let prev_text;
-        do {
-            prev_text = text;
+    ($, text, url, at) => {
+        const _text = text;
+        for (; ;) {
+            const text_ = text;
             ([text] = /(?:[^?!.,:;*_~()&]+|\([^)]*\)|&(?![a-zA-Z0-9]+;$)|[?!.,:;*_~)]+(?!$))+/.exec(text) as RegExpMatchArray);
-        } while (prev_text !== text);
-        return [{ $: InlineTag.Link, l: at ? `mailto:${text}` : url == 'www.' ? `http://${text}` : text, _: [text] }, src.substring(text.length)];
+            if (text_ === text) {
+                break;
+            }
+        }
+
+        if (_text != text) {
+            backpedal($, _text.substring(text.length));
+        }
+
+        pushToken($, {
+            $: InlineTag.Link,
+            l: at ? `mailto:${text}` : url == 'www.' ? `http://${text}` : text,
+            _: [text]
+        });
     }
 ];
 
@@ -81,11 +99,8 @@ export const PedanticLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     procLink
 ];
 
-function procLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, src: string, link: string, text: string, href: string, title?: string): [AsUnion<InlineLink<UnknownToken>>, string] {
-    return [
-        parseLink($, link, text, href.trim().replace(/^<([\s\S]*)>$/, '$1'), title ? title.slice(1, -1) : '') as AsUnion<InlineLink<UnknownToken>>,
-        src
-    ];
+function procLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: string, text: string, href: string, title?: string) {
+    parseLink($, link, text, href.trim().replace(/^<([\s\S]*)>$/, '$1'), title ? title.slice(1, -1) : '');
 }
 
 export const RefLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
@@ -109,12 +124,8 @@ export const NoLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     procRefNoLink
 ];
 
-function procRefNoLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, src: string, link: string, text: string, text2: string): [AsUnion<InlineLink<UnknownToken>>, string] {
-    const ref = (text2 || text).replace(/\s+/g, ' ').toLowerCase();
-    return [
-        parseLink($, link, text, ref) as AsUnion<InlineLink<UnknownToken>>,
-        src
-    ];
+function procRefNoLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: string, text: string, text2: string) {
+    parseLink($, link, text, (text2 || text).replace(/\s+/g, ' ').toLowerCase());
 }
 
 export const Strong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
@@ -131,8 +142,8 @@ export const PedanticStrong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
     procStrong
 ];
 
-function procStrong($: InlineHandle<InlineStrong<UnknownToken>, NoMeta>, src: string, { }: string, _1: string, _2: string, _3: string, _4: string): [AsUnion<InlineStrong<UnknownToken>>, string] {
-    return [{ $: InlineTag.Strong, _: parseNest($, _4 || _3 || _2 || _1) }, src];
+function procStrong($: InlineHandle<InlineStrong<UnknownToken>, NoMeta>, { }: string, _1: string, _2: string, _3: string, _4: string) {
+    pushToken($, { $: InlineTag.Strong, _: parseNest($, _4 || _3 || _2 || _1) });
 }
 
 export const Em: InlineRule<InlineEm<UnknownToken>, NoMeta> = [
@@ -149,29 +160,35 @@ export const PedanticEm: InlineRule<InlineEm<UnknownToken>, NoMeta> = [
     procEm
 ];
 
-function procEm($: InlineHandle<InlineEm<UnknownToken>, NoMeta>, src: string, { }: string, _1: string, _2: string, _3: string, _4: string, _5: string, _6: string): [AsUnion<InlineEm<UnknownToken>>, string] {
-    return [{ $: InlineTag.Em, _: parseNest($, _6 || _5 || _4 || _3 || _2 || _1) }, src];
+function procEm($: InlineHandle<InlineEm<UnknownToken>, NoMeta>, { }: string, _1: string, _2: string, _3: string, _4: string, _5: string, _6: string) {
+    pushToken($, { $: InlineTag.Em, _: parseNest($, _6 || _5 || _4 || _3 || _2 || _1) });
 }
 
 export const Del: InlineRule<InlineDel<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Del,
     '~+(?=\\S)([\\s\\S]*?\\S)~+',
-    ($, src, { }, text) => [{ $: InlineTag.Del, _: parseNest($, text) }, src]
+    ($, { }, text) => {
+        pushToken($, { $: InlineTag.Del, _: parseNest($, text) });
+    }
 ];
 
 export const CodeSpan: InlineRule<InlineCode, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Code,
     '(`+)\\s*([\\s\\S]*?[^`]?)\\s*\\1(?!`)',
-    ({ }, src, { }, fences, text) => [{ $: InlineTag.Code, _: text.replace(/\s+$/, '') }, src]
+    ($, { }, fences, text) => {
+        pushToken($, { $: InlineTag.Code, _: text.replace(/\s+$/, '') });
+    }
 ];
 
 export const MathSpan: InlineRule<InlineMath, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Math,
     '(\\$+)\\s*([\\s\\S]*?[^\\$]?)\\s*\\1(?!\\$)',
-    ({ }, src, { }, delims, text) => [{ $: InlineTag.Math, _: text.replace(/\s+$/, '') }, src]
+    ($, { }, delims, text) => {
+        pushToken($, { $: InlineTag.Math, _: text.replace(/\s+$/, '') });
+    }
 ];
 
 const br = '(?: {2,}|\\\\)\\n(?!\\s*$)';
@@ -180,15 +197,19 @@ export const Br: InlineRule<InlineBr, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Br,
     br,
-    ({ }, src) => [{ $: InlineTag.Br }, src]
+    procBr
 ];
 
 export const GfmBreaksBr: InlineRule<InlineBr, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Br,
     substRe(br, { '\\{2,\\}': '*' }),
-    ({ }, src) => [{ $: InlineTag.Br }, src]
+    procBr
 ];
+
+function procBr($: InlineHandle<InlineBr, NoMeta>) {
+    pushToken($, { $: InlineTag.Br });
+}
 
 const text = '[\\s\\S]+?(?=[\\\\<!\\[`*$]|\\b_| {2,}\\n|$)';
 
@@ -215,16 +236,16 @@ export const GfmBreaksTextSpan: InlineRule<string, NoMeta> = [
     procText
 ];
 
-function procText({ }: InlineHandle<string, NoMeta>, src: string, text: string): [string, string] {
-    return [text, src];
+function procText($: InlineHandle<string, NoMeta>, text: string) {
+    pushText($, text);
 }
 
-function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage, NoMeta>, link: string, text: string, href: string, title?: string): AsUnion<InlineLink<UnknownToken> & InlineImage> {
+function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage, NoMeta>, link: string, text: string, href: string, title?: string) {
     const token: AsUnion<InlineLink<UnknownToken> & InlineImage> = link.charAt(0) != '!'
         ? { $: InlineTag.Link, l: href, _: parseNest($, text, ContextTag.InlineLink) }
         : { $: InlineTag.Image, l: href, _: text };
-    if (title) (token as AsUnion<InlineLink<UnknownToken>>).t = title;
-    return token;
+    if (title) token.t = title;
+    pushToken($, token);
 }
 
 // rulesets

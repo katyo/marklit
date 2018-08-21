@@ -1,7 +1,8 @@
-import { ParserHandle, ParserRule, parseNest } from '../parser';
+import { backpedal, reject } from '../match';
+import { ParserHandle, ParserRule, parseNest, pushToken } from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
-    ContextTag, ContextMap, AsUnion,
+    ContextTag, ContextMap,
     NoMeta, MetaLinks, MetaHeadings,
     UnknownToken
 } from '../model';
@@ -130,14 +131,16 @@ export const Newline: BlockRule<void, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Newline,
     '\\n+',
-    ({ }, src) => [undefined, src]
+    () => { }
 ];
 
 export const CodeBlock: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Code,
     '( {4}[^\\n]+\\n*)+',
-    ({ }, src, text) => [{ $: BlockTag.Code, _: text.replace(/^ {4}/gm, '') }, src]
+    ($, text) => {
+        pushToken($, { $: BlockTag.Code, _: text.replace(/^ {4}/gm, '') });
+    }
 ];
 
 const fences = ' *(`{3,}|~{3,})[ \\.]*(\\S+)? *\\n([\\s\\S]*?)\\n? *\\1 *(?:\\n+|$)';
@@ -146,14 +149,22 @@ export const Fences: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Code,
     fences,
-    ({ }, src, { }, lang, text) => [{ $: BlockTag.Code, _: text ? text.replace(/^ {4}/gm, '') : '' }, src]
+    ($, _, lang, text) => {
+        pushToken($, { $: BlockTag.Code, _: text ? text.replace(/^ {4}/gm, '') : '' });
+    }
 ];
 
 export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
     heading,
-    ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src],
+    ($, _, sharps, text) => {
+        if (text.charAt(0) == '#') {
+            reject($);
+        } else {
+            procHeading($, sharps.length, text);
+        }
+    },
     initHeading
 ];
 
@@ -161,7 +172,9 @@ export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unknow
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.LHeading,
     lheading,
-    ($, src, _, text, underscore) => [procHeading($, underscore === '=' ? 1 : 2, text), src],
+    ($, _, text, underscore) => {
+        procHeading($, underscore == '=' ? 1 : 2, text);
+    },
     initHeading
 ];
 
@@ -169,7 +182,9 @@ export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unkn
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
     ' *(#{1,6}) +([^\\n]+?) *#* *(?:\\n+|$)',
-    ($, src, _, sharps, text) => [procHeading($, sharps.length, text), src],
+    ($, _, sharps, text) => {
+        procHeading($, sharps.length, text);
+    },
     initHeading
 ];
 
@@ -177,18 +192,20 @@ function initHeading(m: MetaHeadings<UnknownToken>) {
     m.headings = [];
 }
 
-function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string): AsUnion<BlockHeading<UnknownToken>> {
+function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string) {
     const index = $.m.headings.length;
     const content = parseNest({ ...$ }, text, ContextTag.Inline);
     $.m.headings.push({ t: text, n: level, _: content });
-    return { $: BlockTag.Heading, i: index, n: level, _: content };
+    pushToken($, { $: BlockTag.Heading, i: index, n: level, _: content });
 }
 
 export const Hr: BlockRule<BlockHr, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Hr,
     hr,
-    ({ }, src) => [{ $: BlockTag.Hr }, src]
+    $ => {
+        pushToken($, { $: BlockTag.Hr });
+    }
 ];
 
 export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
@@ -197,10 +214,12 @@ export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
     substRe('( {0,3}> ?(paragraph|[^\\n]*)(?:\\n|$))+', {
         paragraph
     }),
-    ($, src, text) => [{
-        $: BlockTag.Quote,
-        _: parseNest($, text.replace(/^ *> ?/gm, ''))
-    }, src]
+    ($, text) => {
+        pushToken($, {
+            $: BlockTag.Quote,
+            _: parseNest($, text.replace(/^ *> ?/gm, ''))
+        });
+    }
 ];
 
 export const Paragraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
@@ -219,37 +238,45 @@ export const GfmParagraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     procParagraph
 ];
 
-function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, src: string, text: string): [AsUnion<BlockParagraph<any>> | void, string] {
+function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, text: string) {
     const contents = parseNest($,
         text
             //.replace(/^ +/, '')
             .replace(/\n$/, ''),
         ContextTag.Inline);
-    return [contents.length ? {
+    if (contents.length) pushToken($, {
         $: BlockTag.Paragraph,
         _: contents
-    } : undefined, src];
+    });
 }
 
 export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Text,
     '[^\\n]+',
-    ($, src, text) => [{ $: BlockTag.Text, _: parseNest($, text, ContextTag.Inline) }, src]
+    ($, text) => {
+        pushToken($, {
+            $: BlockTag.Text,
+            _: parseNest($, text, ContextTag.Inline)
+        });
+    }
 ];
 
 export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.List,
     list,
-    ($, src, str, { }, bull) => {
+    ($, str, { }, bull) => {
         const ordered = bull.length > 1;
         const items: BlockListItem<UnknownToken>[] = [];
 
         // Get each top-level item.
         const cap = str.match(item_re);
 
-        if (!cap) return [undefined, str + src];
+        if (!cap) {
+            reject($);
+            return;
+        }
 
         let loose: true | undefined;
         let next = false;
@@ -278,11 +305,14 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
             // Backpedal if it does not belong in this list.
             if (/* smartLists && */i !== l - 1) {
                 const b_cap = bull_re.exec(cap[i + 1]);
-                if (!b_cap) return [undefined, str + src];
+                if (!b_cap) {
+                    reject($);
+                    return;
+                }
 
                 const b = b_cap[0];
                 if (bull !== b && !(bull.length > 1 && b.length > 1)) {
-                    src = cap.slice(i + 1).join('\n') + src;
+                    backpedal($, cap.slice(i + 1).join('\n'));
                     i = l - 1;
                 }
             }
@@ -328,7 +358,7 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
 
         if (loose) list.l = 1;
 
-        return [list, src];
+        pushToken($, list);
     }
 ];
 
@@ -355,43 +385,47 @@ function initDef(m: MetaLinks) {
     m.links = {};
 }
 
-function procDef($: BlockHandle<void, MetaLinks>, src: string, { }: string, label: string, href: string, title?: string): [void, string] {
+function procDef($: BlockHandle<void, MetaLinks>, _: string, label: string, href: string, title?: string) {
     if (title) title = title.substring(1, title.length - 1);
+
     $.m.links[label.toLowerCase().replace(/\s+/g, ' ')] = {
         l: href,
         t: title
     };
-    return [undefined, src];
 }
 
 export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.List,
-    '( *([^|\\n ].*\\|.*)\\n *([-:]+ *\\|[-| :]*)(?:\\n((?:.*[^>\\n ].*(?:\\n|$))*)\\n*|$))',
+    ' *([^|\\n ].*\\|.*)\\n *([-:]+ *\\|[-| :]*)(?:\\n((?:.*[^>\\n ].*(?:\\n|$))*)\\n*|$)',
     procTable,
 ];
 
 export const Table: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.List,
-    '( *\\|(.+)\\n *\\|?( *[-:]+[-| :]*)(?:\\n((?: *[^>\\n ].*(?:\\n|$))*)\\n*|$))',
+    ' *\\|(.+)\\n *\\|?( *[-:]+[-| :]*)(?:\\n((?: *[^>\\n ].*(?:\\n|$))*)\\n*|$)',
     procTable,
 ];
 
-function procTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, src: string, str: string, header: string, align: string, cells: string): [AsUnion<BlockTable<any>> | undefined, string] {
+function procTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, _: string, header: string, align: string, cells: string) {
     const h = procRow($, header.replace(/^ *| *\| *$/g, ''));
     const a = align.replace(/^ *|\| *$/g, '').split(/ *\| */)
         .map(hint => /^ *-+: *$/.test(hint) ? BlockAlign.Right :
             /^ *:-+: *$/.test(hint) ? BlockAlign.Center :
                 /^ *:-+ *$/.test(hint) ? BlockAlign.Left :
                     BlockAlign.None);
-    return h.length === a.length ? [{
-        $: BlockTag.Table,
-        h,
-        a,
-        _: cells ? cells.replace(/(?: *\| *)?\n$/, '').split('\n')
-            .map(row => procRow($, row.replace(/^ *\| *| *\| *$/g, ''), h.length)) : []
-    }, src] : [undefined, str + src];
+    if (h.length == a.length) {
+        pushToken($, {
+            $: BlockTag.Table,
+            h,
+            a,
+            _: cells ? cells.replace(/(?: *\| *)?\n$/, '').split('\n')
+                .map(row => procRow($, row.replace(/^ *\| *| *\| *$/g, ''), h.length)) : []
+        });
+    } else {
+        reject($);
+    }
 }
 
 function procRow($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, srcRow: string, count?: number): BlockTableRow<any> {
