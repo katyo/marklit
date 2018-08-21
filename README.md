@@ -9,6 +9,12 @@
 
 Originally this project is deeply re-engineered fork of __[marked]__ with conceptual differences.
 
+## Design goals
+
+* Deep customizability
+* Compile-time configuration
+* Compact code size
+
 ## Key features
 
 * Parsing result is abstract document tree what allows advanced intermediate processing and non-string rendering
