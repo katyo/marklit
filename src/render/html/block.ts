@@ -90,9 +90,9 @@ export const TextBlockHtml: BlockRenderRuleStr<BlockText<UnknownToken>, NoMeta> 
 export const TableHtml: BlockRenderRuleStr<BlockTable<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Table,
-    ($, { h, a, _ }) => '<table>\n<thead>\n' +
+    ($, { h, a, _ }) => '<table>\n<thead>\n<tr>\n' +
         renderTableCells($, h, 'th', a) +
-        '</thead>\n' +
+        '</tr>\n</thead>\n' +
         (_.length ? '<tbody>\n' +
             renderTableRows($, _, a) +
             '</tbody>\n' : '') +
@@ -114,7 +114,7 @@ function renderTableCells($: BlockRenderHandleStr<BlockTable<UnknownToken>, NoMe
     for (let i = 0; i < cells.length; i++) {
         const a = textAlign[align[i]];
         out += `<${tag}` +
-            (a ? ` style="text-align: ${a}"` : '') +
+            (a ? ` align="${a}"` : '') +
             '>' + renderNest($, cells[i]) +
             `</${tag}>\n`;
     }
