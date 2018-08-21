@@ -195,8 +195,22 @@ function initHeading(m: MetaHeadings<UnknownToken>) {
 function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string) {
     const index = $.m.headings.length;
     const content = parseNest({ ...$ }, text, ContextTag.Inline);
-    $.m.headings.push({ t: text, n: level, _: content });
+    $.m.headings.push({ t: extractText(content), n: level, _: content });
     pushToken($, { $: BlockTag.Heading, i: index, n: level, _: content });
+}
+
+interface TokenWithNested {
+    _?: string | (TokenWithNested | string)[];
+}
+
+function extractText(tokens: (TokenWithNested | string)[]): string {
+    const chunks: string[] = [];
+    for (const token of tokens) {
+        chunks.push(typeof token == 'string' ? token :
+            typeof token._ == 'string' ? token._ :
+                token._ ? extractText(token._) : '');
+    }
+    return chunks.join('');
 }
 
 export const Hr: BlockRule<BlockHr, NoMeta> = [

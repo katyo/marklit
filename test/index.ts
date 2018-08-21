@@ -65,7 +65,6 @@ const newBlacklist = blacklist([
     'gfm_code_hr_list',
     'gfm_del',
     'gfm_tables',
-    'headings_id',
     'hr_list_break',
     'html_comments',
     'links',
