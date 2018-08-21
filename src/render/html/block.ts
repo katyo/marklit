@@ -48,6 +48,12 @@ export const HrHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
     ({ }, { }) => '<hr>\n'
 ];
 
+export const HrXHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
+    ContextTag.Block,
+    BlockTag.Hr,
+    ({ }, { }) => '<hr />\n'
+];
+
 export const QuoteHtml: BlockRenderRuleStr<BlockQuote<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.Quote,
@@ -127,6 +133,10 @@ function renderTableCells($: BlockRenderHandleStr<BlockTable<UnknownToken>, NoMe
     return out;
 }
 
-export const BlockHtml = [CodeBlockHtml, HeadingHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
+export const BlockHtml = [CodeBlockHtml, HeadingWithIdHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
+
+export const BlockXHtml = [CodeBlockHtml, HeadingWithIdHtml, HrXHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
 
 export const BlockTablesHtml = [...BlockHtml, TableHtml];
+
+export const BlockTablesXHtml = [...BlockXHtml, TableHtml];

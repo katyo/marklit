@@ -37,6 +37,16 @@ export const ImageHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
         '>'
 ];
 
+export const ImageXHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
+    ContextTag.Inline,
+    InlineTag.Image,
+    ($, { l, t, _ }) => '<img' +
+        putLinkAttr(l, l, 'l', $.m, 'src') +
+        ' alt="' + escapeHtml(_) + '"' +
+        putLinkAttr(l, t, 't', $.m, 'title') +
+        ' />'
+];
+
 function putLinkAttr(l: string, v: string | void, n: keyof MetaLink, m: MetaLinks, a: string): string {
     if (m.links) {
         const $ = m.links[l];
@@ -83,6 +93,16 @@ export const BrHtml: InlineRenderRuleStr<InlineBr, NoMeta> = [
     () => '<br>'
 ];
 
+export const BrXHtml: InlineRenderRuleStr<InlineBr, NoMeta> = [
+    ContextTag.Inline,
+    InlineTag.Br,
+    () => '<br />'
+];
+
 export const InlineHtml = [LinkHtml, ImageHtml, StrongHtml, EmHtml, CodeSpanHtml, BrHtml];
 
+export const InlineXHtml = [LinkHtml, ImageXHtml, StrongHtml, EmHtml, CodeSpanHtml, BrXHtml];
+
 export const InlineGfmHtml = [...InlineHtml, DelHtml];
+
+export const InlineGfmXHtml = [...InlineXHtml, DelHtml];
