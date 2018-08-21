@@ -14,6 +14,8 @@ export type BlockRenderHandleStr<BlockTokenMap, Meta> = RenderHandle<string, Con
 
 export const initRenderHtml = makeRender(wrapHtml, joinHtml);
 
+export const initRenderHtmlSmartypants = makeRender(wrapHtmlSmartypants, joinHtml);
+
 export const textAlign: string[] = [
     '',
     'left',
@@ -23,6 +25,24 @@ export const textAlign: string[] = [
 
 export function wrapHtml($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunk: string): string {
     return escapeHtml(chunk);
+}
+
+export function wrapHtmlSmartypants($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunk: string): string {
+    return escapeHtml(chunk
+        // em-dashes
+        .replace(/---/g, '\u2014')
+        // en-dashes
+        .replace(/--/g, '\u2013')
+        // opening singles
+        .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
+        // closing singles & apostrophes
+        .replace(/'/g, '\u2019')
+        // opening doubles
+        .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
+        // closing doubles
+        .replace(/"/g, '\u201d')
+        // ellipses
+        .replace(/\.{3}/g, '\u2026'));
 }
 
 export function joinHtml($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunks: string[]): string {
@@ -53,4 +73,40 @@ export function escapeAttr(str: string): string {
         .replace(/'/g, '&#39;')
         .replace(/"/g, '&quot;')
         ;
+}
+
+export function sanitizeUrl(url: string): string | void {
+    let proto: string;
+    try {
+        proto = decodeURIComponent(unescapeHtml(escapeAttr(url)))
+            .replace(/[^\w:]/g, '')
+            .toLowerCase();
+    } catch (e) {
+        return;
+    }
+    if (proto.indexOf('javascript:') == 0 ||
+        proto.indexOf('vbscript:') == 0 ||
+        proto.indexOf('data:') == 0) {
+        return;
+    }
+    try {
+        url = encodeURI(url).replace(/%25/g, '%');
+    } catch (e) {
+        return;
+    }
+    return url;
+}
+
+export function unescapeHtml(html: string) {
+    // explicitly match decimal, hex, and named HTML entities
+    return html.replace(/&(#(?:\d+)|(?:#x[0-9A-Fa-f]+)|(?:\w+));?/ig, function(_, n) {
+        n = n.toLowerCase();
+        if (n === 'colon') return ':';
+        if (n.charAt(0) === '#') {
+            return n.charAt(1) === 'x'
+                ? String.fromCharCode(parseInt(n.substring(2), 16))
+                : String.fromCharCode(+n.substring(1));
+        }
+        return '';
+    });
 }

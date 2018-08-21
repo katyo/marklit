@@ -31,7 +31,7 @@ import {
     InlineGfmHtml,
     InlineGfmXHtml,
 
-    initRenderHtml, render
+    initRenderHtml, initRenderHtmlSmartypants, render
 } from '../src/index';
 
 interface Meta extends MetaHeadings<InlineToken>, MetaLinks { }
@@ -85,17 +85,21 @@ export function htmlEq(actual_html: string, expected_html: string, actual_adt?: 
     }
 }
 
-function doTest({ pedantic, gfm, breaks, tables, headingId, xhtml,/*, smartypants, baseUrl, mangle, sanitize*/ }: Options, source_md: string, expected_html: string) {
+function doTest({ pedantic, gfm, breaks, tables, headingId, xhtml, smartypants/*, baseUrl, mangle, sanitize*/ }: Options, source_md: string, expected_html: string) {
     const parser = init<Context>(
         ...(pedantic ? BlockPedantic : tables ? BlockGfmTables : gfm ? BlockGfm : BlockNormal),
         ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal)
     );
 
-    const renderer = initRenderHtml<Context>(
+    const render_rules = [
         ...(tables ? (xhtml ? BlockTablesXHtml : BlockTablesHtml) : (xhtml ? BlockXHtml : BlockHtml)),
         ...(headingId === false ? [HeadingHtml] : []),
-        ...(gfm ? (xhtml ? InlineGfmXHtml : InlineGfmHtml) : (xhtml ? InlineXHtml : InlineHtml))
-    );
+        ...(gfm ? (xhtml ? InlineGfmXHtml : InlineGfmHtml) : (xhtml ? InlineXHtml : InlineHtml)),
+    ];
+
+    const renderer = smartypants ?
+        initRenderHtmlSmartypants<Context>(...render_rules) :
+        initRenderHtml<Context>(...render_rules);
 
     const result = parse(parser, source_md);
 

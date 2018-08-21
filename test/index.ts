@@ -76,9 +76,7 @@ const newBlacklist = blacklist([
     'redos_nolink',
     'relative_urls',
     'same_bullet',
-    'smartypants',
     'toplevel_paragraphs',
-    'uppercase_hex',
 ], TEST_MARKED_NEW_WL);
 
 const commonmarkBlacklist = blacklist([
