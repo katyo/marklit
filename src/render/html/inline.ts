@@ -15,26 +15,34 @@ import {
     InlineRenderRuleStr,
     escapeCode,
     escapeAttr,
-    escapeHtml
+    escapeHtml,
+    sanitizeUrl,
 } from '../str';
 
 export const LinkHtml: InlineRenderRuleStr<InlineLink<UnknownToken>, MetaLinks> = [
     ContextTag.Inline,
     InlineTag.Link,
-    ($, { l, t, _ }) => '<a' +
-        putLinkAttr(l, l, 'l', $.m, 'href') +
-        putLinkAttr(l, t, 't', $.m, 'title') +
-        '>' + renderNest($, _) + '</a>'
+    ($, { l, t, _ }) => {
+        const href = putLinkAttr(l, l, 'l', $.m, 'href');
+        const nest = renderNest($, _);
+        return href ? '<a' +
+            href +
+            putLinkAttr(l, t, 't', $.m, 'title') +
+            '>' + nest + '</a>' : nest;
+    }
 ];
 
 export const ImageHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
     ContextTag.Inline,
     InlineTag.Image,
-    ($, { l, t, _ }) => '<img' +
-        putLinkAttr(l, l, 'l', $.m, 'src') +
-        (_ ? ' alt="' + escapeAttr(_) + '"' : '') +
-        putLinkAttr(l, t, 't', $.m, 'title') +
-        '>'
+    ($, { l, t, _ }) => {
+        const src = putLinkAttr(l, l, 'l', $.m, 'src');
+        return src ? '<img' +
+            src +
+            (_ ? ' alt="' + escapeAttr(_) + '"' : '') +
+            putLinkAttr(l, t, 't', $.m, 'title') +
+            '>' : escapeHtml(_);
+    }
 ];
 
 export const ImageXHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
@@ -53,6 +61,9 @@ function putLinkAttr(l: string, v: string | void, n: keyof MetaLink, m: MetaLink
         if ($ && $[n]) {
             v = $[n] as string;
         }
+    }
+    if (n == 'l' && v) {
+        v = sanitizeUrl(v);
     }
     return v ? ` ${a}="${escapeAttr(v as string)}"` : '';
 }

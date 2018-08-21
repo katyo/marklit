@@ -15,7 +15,13 @@ export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownToke
 
 export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline | ContextTag.InlineLink, Meta>;
 
-const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{}~|])';
+const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{|}~])';
+
+const escape_re = new RegExp(escape, 'g');
+
+function escapes(src: string): string {
+    return src.replace(escape_re, '$1');
+}
 
 export const Escape: InlineRule<string, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
@@ -78,18 +84,30 @@ export const Link: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
         href: '\\s*(<(?:\\\\[<>]?|[^\\s<>\\\\])*>|(?:\\\\[()]?|\\([^\\s\\x00-\\x1f\\\\]*\\)|[^\\s\\x00-\\x1f()\\\\])*?)',
         title: '"(?:\\\\"?|[^"\\\\])*"|\'(?:\\\\\'?|[^\'\\\\])*\'|\\((?:\\\\\\)?|[^)\\\\])*\\)',
     }),
-    procLink
+    ($, link: string, text: string, href: string, title?: string) => {
+        procLink($, link, text, href, title ? title.slice(1, -1) : '');
+    }
 ];
 
 export const PedanticLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     [ContextTag.Inline],
     InlineOrder.Link,
     substRe('!?\\[(label)\\]\\((.*?)\\)', { label }),
-    procLink
+    ($, link: string, text: string, href: string, title?: string) => {
+        const m = /^([^'"]*[^\s])\s+(['"])(.*)\2/.exec(href);
+
+        if (m) {
+            [, href, , title] = m;
+        } else {
+            title = '';
+        }
+
+        procLink($, link, text, href, title);
+    }
 ];
 
-function procLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: string, text: string, href: string, title?: string) {
-    parseLink($, link, text, href.trim().replace(/^<([\s\S]*)>$/, '$1'), title ? title.slice(1, -1) : '');
+function procLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: string, text: string, href: string, title: string) {
+    parseLink($, link, text, escapes(href.trim().replace(/^<([\s\S]*)>$/, '$1')), escapes(title));
 }
 
 export const RefLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
