@@ -27,10 +27,12 @@ export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> extends HasMeta
     [ContextTag.InlineLink]: InlineTokenType<InlineTokenMap>;
 }
 
-export type ContextToken<CtxMap, Ctx extends keyof CtxMap> = CtxMap[Ctx];
+//export type ContextKey<CtxMap> = Exclude<keyof CtxMap, '_'>;
+export type ContextKey<CtxMap> = keyof CtxMap;
+export type ContextToken<CtxMap, Ctx extends ContextKey<CtxMap>> = CtxMap[Ctx];
 export type ContextMeta<CtxMap extends HasMeta<any>> = CtxMap extends HasMeta<infer Meta> ? Meta : never;
 
-export type ContextResult<CtxMap extends HasMeta<any>, Ctx extends keyof CtxMap> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
+export type ContextResult<CtxMap extends HasMeta<any>, Ctx extends ContextKey<CtxMap>> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
 
 export type UnknownToken = any;
 
