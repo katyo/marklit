@@ -32,7 +32,7 @@ export const ImageHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
     InlineTag.Image,
     ($, { l, t, _ }) => '<img' +
         putLinkAttr(l, l, 'l', $.m, 'src') +
-        (_ ? ' alt="' + escapeHtml(_) + '"' : '') +
+        (_ ? ' alt="' + escapeAttr(_) + '"' : '') +
         putLinkAttr(l, t, 't', $.m, 'title') +
         '>'
 ];
