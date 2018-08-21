@@ -15,25 +15,14 @@ export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownToke
 
 export type InlineHandle<InlineTokenMap, Meta> = ParserHandle<ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline | ContextTag.InlineLink, Meta>;
 
-const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{}])';
+const escape = '\\\\([!"#$%&\'()*+,\\-.\\/:;<=>?@\\[\\]\\\\^_`{}~|])';
 
 export const Escape: InlineRule<string, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Escape,
     escape,
-    procEscape
+    ($, _, char) => { pushText($, char) }
 ];
-
-export const GfmEscape: InlineRule<string, NoMeta> = [
-    [ContextTag.Inline, ContextTag.InlineLink],
-    InlineOrder.Escape,
-    substRe(escape, { '\\]\\)': '~|])' }),
-    procEscape
-];
-
-function procEscape($: InlineHandle<string, NoMeta>, _: string, char: string) {
-    pushText($, char);
-}
 
 const email = '[a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])';
 
@@ -253,6 +242,6 @@ export const InlineNormal = [Escape, AutoLink, Link, RefLink, NoLink, Strong, Em
 
 export const InlinePedantic = [Escape, AutoLink, PedanticLink, PedanticRefLink, NoLink, PedanticStrong, PedanticEm, CodeSpan, Br, TextSpan];
 
-export const InlineGfm = [GfmEscape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, Br, GfmTextSpan];
+export const InlineGfm = [Escape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, Br, GfmTextSpan];
 
-export const InlineGfmBreaks = [GfmEscape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, GfmBreaksBr, GfmBreaksTextSpan];
+export const InlineGfmBreaks = [Escape, AutoLink, Url, Link, RefLink, NoLink, Strong, Em, Del, CodeSpan, GfmBreaksBr, GfmBreaksTextSpan];

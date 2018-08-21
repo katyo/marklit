@@ -45,8 +45,8 @@ export default function() {
             _('Bang: \\!', ['Bang: !']);
             _('Plus: \\+', ['Plus: +']);
             _('Minus: \\-', ['Minus: -']);
-            _('Tube: \\|', ['Tube: \\|']);
-            _('Tilde: \\~', ['Tilde: \\~']);
+            _('Tube: \\|', ['Tube: |']);
+            _('Tilde: \\~', ['Tilde: ~']);
         });
 
         describe('auto link', () => {
@@ -150,27 +150,6 @@ export default function() {
     describe('gfm', () => {
         const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineGfm);
         const _ = (s: string, r: InlineTokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
-
-        describe('escape', () => {
-            _('Backslash: \\\\', ['Backslash: \\']);
-            _('Backtick: \\\`', ['Backtick: `']);
-            _('Asterisk: \*', ['Asterisk: *']);
-            _('Underscore: \\_', ['Underscore: _']);
-            _('Left brace: \\{', ['Left brace: {']);
-            _('Right brace: \\}', ['Right brace: }']);
-            _('Left bracket: \\[', ['Left bracket: [']);
-            _('Right bracket: \\]', ['Right bracket: ]']);
-            _('Left paren: \\(', ['Left paren: (']);
-            _('Right paren: \\)', ['Right paren: )']);
-            _('Greater-than: \\>', ['Greater-than: >']);
-            _('Hash: \\#', ['Hash: #']);
-            _('Period: \\.', ['Period: .']);
-            _('Bang: \\!', ['Bang: !']);
-            _('Plus: \\+', ['Plus: +']);
-            _('Minus: \\-', ['Minus: -']);
-            _('Tube: \\|', ['Tube: |']);
-            _('Tilde: \\~', ['Tilde: ~']);
-        });
 
         describe('del', () => {
             _('Deleted ~phrase~', ['Deleted ', { $: InlineTag.Del, _: ['phrase'] }]);

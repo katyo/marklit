@@ -114,7 +114,7 @@ const commonmarkBlacklist = blacklist([
     164, 166, 169, 171, 174, 176, 177, 178, // Link reference definitions !
     217, 219, 221, 222, 226, 228, 230, 231, 233, 234, 240, 249, 250, 251, 253, 254, 255, 256, 262, // List items
     266, 268, 271, 272, 275, 277, 281, 285, 286, 287, // Lists
-    289, 296, 297, 298, 299, // Backslash escapes !
+    296, 297, 298, 299, // Backslash escapes !!
     308, // Entity and numeric character references
     325, 327, // Code spans !
     452, // Emphasis and strong emphasis
@@ -125,7 +125,6 @@ const commonmarkBlacklist = blacklist([
     584, 585, 586, 587, 588, 594, 596, 599, 600, 601, 602, 603, // Raw HTML
     614, 615, // Hard line breaks
 ], TEST_SPEC_CM_WL);
-
 
 const gfmBlacklist = blacklist([
     // Marked specific
