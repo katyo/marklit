@@ -1,10 +1,10 @@
 import { backpedal, reject } from '../match';
-import { ParserHandle, ParserRule, parseNest, pushToken } from '../parser';
+import { ParserHandle, ParserRule, parseNest, procNest, pushToken } from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap,
     NoMeta, MetaLinks, MetaHeadings,
-    UnknownToken, TokenType
+    UnknownToken, TokenType, MetaHeading
 } from '../model';
 import {
     BlockTag, BlockOrder,
@@ -162,10 +162,12 @@ export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unknown
         if (text.charAt(0) == '#') {
             reject($);
         } else {
-            procHeading($, sharps.length, text);
+            parseHeading($, sharps.length, text);
         }
     },
-    initHeading
+    initHeading,
+    [BlockTag.Heading],
+    procHeading
 ];
 
 export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
@@ -173,9 +175,11 @@ export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unknow
     BlockOrder.LHeading,
     lheading,
     ($, _, text, underscore) => {
-        procHeading($, underscore == '=' ? 1 : 2, text);
+        parseHeading($, underscore == '=' ? 1 : 2, text);
     },
-    initHeading
+    initHeading,
+    [BlockTag.Heading],
+    procHeading
 ];
 
 export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
@@ -183,20 +187,27 @@ export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unkn
     BlockOrder.Heading,
     ' *(#{1,6}) +([^\\n]+?) *#* *(?:\\n+|$)',
     ($, _, sharps, text) => {
-        procHeading($, sharps.length, text);
+        parseHeading($, sharps.length, text);
     },
-    initHeading
+    initHeading,
+    [BlockTag.Heading],
+    procHeading
 ];
 
 function initHeading(m: MetaHeadings<UnknownToken>) {
     m.headings = [];
 }
 
-function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string) {
+function parseHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string) {
     const index = $.m.headings.length;
-    const content = parseNest({ ...$ }, text, ContextTag.Inline);
-    $.m.headings.push({ t: extractText(content), n: level, _: content });
-    pushToken($, { $: BlockTag.Heading, i: index, n: level, _: content });
+    $.m.headings.push({ n: level } as MetaHeading<UnknownToken>);
+    pushToken($, { $: BlockTag.Heading, i: index, n: level, _: text as any });
+}
+
+function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, token: TokenType<BlockHeading<UnknownToken>>) {
+    const heading = $.m.headings[token.i];
+    heading._ = token._ = parseNest($, token._ as any, ContextTag.Inline);
+    heading.t = extractText(token._);
 }
 
 interface TokenWithNested {
@@ -233,6 +244,10 @@ export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
             $: BlockTag.Quote,
             _: parseNest($, text.replace(/^ *> ?/gm, ''))
         });
+    },
+    [BlockTag.Quote],
+    ($, token) => {
+        procNest($, token._);
     }
 ];
 
@@ -240,6 +255,8 @@ export const Paragraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.Paragraph,
     paragraph,
+    parseParagraph,
+    [BlockTag.Paragraph],
     procParagraph
 ];
 
@@ -249,19 +266,22 @@ export const GfmParagraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     substRe(paragraph, {
         '\\(\\?!': `(?!${shiftRe(fences, 1)}|${shiftRe(list, 2)}|`
     }),
+    parseParagraph,
+    [BlockTag.Paragraph],
     procParagraph
 ];
 
-function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, text: string) {
-    const contents = parseNest($,
-        text
-            //.replace(/^ +/, '')
-            .replace(/\n$/, ''),
-        ContextTag.Inline);
-    if (contents.length) pushToken($, {
+function parseParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, text: string) {
+    pushToken($, {
         $: BlockTag.Paragraph,
-        _: contents
+        _: text
+            //.replace(/^ +/, '')
+            .replace(/\n$/, '') as any
     });
+}
+
+function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, token: TokenType<BlockParagraph<UnknownToken>>) {
+    token._ = parseNest($, token._ as any, ContextTag.Inline);
 }
 
 export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
@@ -271,9 +291,11 @@ export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     ($, text) => {
         pushToken($, {
             $: BlockTag.Text,
-            _: parseNest($, text, ContextTag.Inline)
+            _: text as any
         });
-    }
+    },
+    [BlockTag.Text],
+    procParagraph as any as (($: BlockHandle<BlockText<UnknownToken>, NoMeta>, token: TokenType<BlockText<UnknownToken>>) => void)
 ];
 
 export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
@@ -373,6 +395,12 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
         if (loose) list.l = 1;
 
         pushToken($, list);
+    },
+    [BlockTag.List, BlockTag.OrdList],
+    ($, token) => {
+        for (const item of token._) {
+            procNest($, item._, ContextTag.BlockNest);
+        }
     }
 ];
 
@@ -383,7 +411,7 @@ export const Def: BlockRule<void, MetaLinks> = [
         label: '(?!\\s*\\])(?:\\\\[\\[\\]]|[^\\[\\]])+',
         title: '(?:"(?:\\\\"?|[^"\\\\])*"|\'[^\'\\n]*(?:\\n[^\'\\n]+)*\\n?\'|\\([^()]*\\))'
     }),
-    procDef,
+    parseDef,
     initDef
 ];
 
@@ -391,7 +419,7 @@ export const PedanticDef: BlockRule<void, MetaLinks> = [
     [ContextTag.Block],
     BlockOrder.Def,
     ' *\\[([^\\]]+)\\]: *<?([^\\s>]+)>?(?: +(["(][^\\n]+[")]))? *(?:\\n+|$)',
-    procDef,
+    parseDef,
     initDef
 ];
 
@@ -399,7 +427,7 @@ function initDef(m: MetaLinks) {
     m.links = {};
 }
 
-function procDef($: BlockHandle<void, MetaLinks>, _: string, label: string, href: string, title?: string) {
+function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, href: string, title?: string) {
     if (title) title = title.substring(1, title.length - 1);
 
     $.m.links[label.toLowerCase().replace(/\s+/g, ' ')] = {
@@ -412,18 +440,22 @@ export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.List,
     ' *([^|\\n ].*\\|.*)\\n *([-:]+ *\\|[-| :]*)(?:\\n((?:.*[^>\\n ].*(?:\\n|$))*)\\n*|$)',
-    procTable,
+    parseTable,
+    [BlockTag.Table],
+    procTable
 ];
 
 export const Table: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.List,
     ' *\\|(.+)\\n *\\|?( *[-:]+[-| :]*)(?:\\n((?: *[^>\\n ].*(?:\\n|$))*)\\n*|$)',
-    procTable,
+    parseTable,
+    [BlockTag.Table],
+    procTable
 ];
 
-function procTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, _: string, header: string, align: string, cells: string) {
-    const h = procRow($, header.replace(/^ *| *\| *$/g, ''));
+function parseTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, _: string, header: string, align: string, cells: string) {
+    const h = parseRow($, header.replace(/^ *| *\| *$/g, ''));
     const a = align.replace(/^ *|\| *$/g, '').split(/ *\| */)
         .map(hint => /^ *-+: *$/.test(hint) ? BlockAlign.Right :
             /^ *:-+: *$/.test(hint) ? BlockAlign.Center :
@@ -435,14 +467,14 @@ function procTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, _: string, 
             h,
             a,
             _: cells ? cells.replace(/(?: *\| *)?\n$/, '').split('\n')
-                .map(row => procRow($, row.replace(/^ *\| *| *\| *$/g, ''), h.length)) : []
+                .map(row => parseRow($, row.replace(/^ *\| *| *\| *$/g, ''), h.length)) : []
         });
     } else {
         reject($);
     }
 }
 
-function procRow($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, srcRow: string, count?: number): BlockTableRow<any> {
+function parseRow($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, srcRow: string, count?: number): BlockTableRow<any> {
     // ensure that every cell-delimiting pipe has a space
     // before it to distinguish it from an escaped pipe
     const cells = srcRow.replace(/\|/g, (match, offset, str) => {
@@ -469,6 +501,17 @@ function procRow($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, srcRow: strin
         // leading or trailing whitespace is ignored per the gfm spec
         cell.trim().replace(/\\\|/g, '|'),
         ContextTag.BlockNest));
+}
+
+function procTable($: BlockHandle<BlockTable<UnknownToken>, NoMeta>, token: TokenType<BlockTable<UnknownToken>>) {
+    for (const cell of token.h) {
+        procNest($, cell, ContextTag.BlockNest);
+    }
+    for (const row of token._) {
+        for (const cell of row) {
+            procNest($, cell, ContextTag.BlockNest);
+        }
+    }
 }
 
 export const BlockNormal = [Newline, CodeBlock, Heading, Hr, Quote, List, Def, LHeading, Paragraph, TextBlock];

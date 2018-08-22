@@ -1,4 +1,8 @@
-import { InitTag, HasMeta, HasContexts, HasInit, ContextKey, ContextToken, ContextResult, ContextMeta } from './model';
+import {
+    InitTag, HasMeta, HasContexts, HasInit,
+    TaggedToken, TokenTag, TokenByTag,
+    ContextKey, ContextToken, ContextResult, ContextMeta
+} from './model';
 
 export interface RenderFunc<Type, CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Token extends ContextToken<CtxMap, Ctx>, Meta> {
     <MetaType extends Meta>(handle: RenderHandle<Type, CtxMap, Ctx, MetaType>, token: Exclude<Token, string>): Type;
@@ -19,14 +23,6 @@ export interface RenderHandle<Type, CtxMap extends HasContexts, Ctx extends Cont
     c: Ctx; // current context
     m: Meta; // render meta
 }
-
-export interface TaggedToken<Tag extends keyof any> {
-    $: Tag;
-}
-
-export type TokenTag<Token> = Token extends TaggedToken<infer Tag> ? Tag : never;
-
-export type TokenByTag<Token, Tag extends keyof any> = Token extends TaggedToken<Tag> ? Token : never;
 
 export type ContextRenderMethods<Type, CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> = {
     [Tag in TokenTag<ContextToken<CtxMap, Ctx>>]: RenderFunc<Type, CtxMap, Ctx, TokenByTag<ContextToken<CtxMap, Ctx>, Tag>, Meta>;

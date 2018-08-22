@@ -1,6 +1,12 @@
+export type UnknownToken = any;
+
 export type TokenTypeByTag<Map, Tag extends keyof Map> = Map[Tag] extends object ? { $: Tag; } & Map[Tag] : Map[Tag];
 export type TokenType<Map> = Map extends object ? { [Tag in keyof Map]: TokenTypeByTag<Map, Tag>; }[keyof Map] : Map extends string ? Map : any;
-export type TokensType<Map> = Map extends string ? string : TokenType<Map>[];
+export type TokensType<Map> = TokenType<Map>[];
+
+export interface TaggedToken<Tag extends keyof any> { $: Tag; }
+export type TokenTag<Token> = Token extends TaggedToken<infer Tag> ? Tag : never;
+export type TokenByTag<Token, Tag extends keyof any> = Token extends TaggedToken<Tag> ? Token : never;
 
 export interface HasMeta { _: object; }
 export interface HasContexts { $: object; }
@@ -29,8 +35,6 @@ export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
         [ContextTag.InlineLink]: TokenType<InlineTokenMap>;
     };
 }
-
-export type UnknownToken = any;
 
 export interface MetaLink {
     l: string; // href
