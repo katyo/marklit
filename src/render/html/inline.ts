@@ -25,10 +25,10 @@ export const LinkHtml: InlineRenderRuleStr<InlineLink<UnknownToken>, MetaLinks> 
     ($, { l, t, _ }) => {
         const href = putLinkAttr(l, l, 'l', $.m, 'href');
         const nest = renderNest($, _);
-        return href ? '<a' +
-            href +
+        return href == null ? nest : '<a' +
+            (href || ' href=""') +
             putLinkAttr(l, t, 't', $.m, 'title') +
-            '>' + nest + '</a>' : nest;
+            '>' + nest + '</a>';
     }
 ];
 
@@ -55,7 +55,7 @@ export const ImageXHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
         ' />'
 ];
 
-function putLinkAttr(l: string, v: string | void, n: keyof MetaLink, m: MetaLinks, a: string): string {
+function putLinkAttr(l: string, v: string | void, n: keyof MetaLink, m: MetaLinks, a: string): string | void {
     if (m.links) {
         const $ = m.links[l];
         if ($ && $[n]) {
@@ -64,6 +64,7 @@ function putLinkAttr(l: string, v: string | void, n: keyof MetaLink, m: MetaLink
     }
     if (n == 'l' && v) {
         v = sanitizeUrl(v);
+        if (v == null) return;
     }
     return v ? ` ${a}="${escapeAttr(v as string)}"` : '';
 }

@@ -1,9 +1,10 @@
-import { backpedal } from '../match';
+import { backpedal, reject } from '../match';
 import { ParserHandle, ParserRule, parseNest, pushToken, pushText } from '../parser';
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
-    NoMeta, UnknownToken, TokenType
+    NoMeta, MetaLinks,
+    UnknownToken, TokenType
 } from '../model';
 import {
     InlineTag, InlineOrder,
@@ -76,7 +77,7 @@ export const Url: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
 const label = '(?:\\[[^\\[\\]]*\\]|\\\\[\\[\\]]?|`[^`]*`|[^\\[\\]\\\\])*?';
 
 export const Link: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
-    [ContextTag.Inline],
+    [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Link,
     substRe('!?\\[(label)\\]\\(href(?:\\s+(title))?\\s*\\)', {
         label,
@@ -89,7 +90,7 @@ export const Link: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
 ];
 
 export const PedanticLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
-    [ContextTag.Inline],
+    [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Link,
     substRe('!?\\[(label)\\]\\((.*?)\\)', { label }),
     ($, link: string, text: string, href: string, title?: string) => {
@@ -109,29 +110,36 @@ function procLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: strin
     parseLink($, link, text, escapes(href.trim().replace(/^<([\s\S]*)>$/, '$1')), escapes(title));
 }
 
-export const RefLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
-    [ContextTag.Inline],
+export const RefLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
+    [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.RefLink,
     substRe('!?\\[(label)\\]\\[(?!\\s*\\])((?:\\\\[\\[\\]]?|[^\\[\\]\\\\])+)\\]', { label }),
     procRefNoLink
 ];
 
-export const PedanticRefLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
-    [ContextTag.Inline],
+export const PedanticRefLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
+    [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.RefLink,
     substRe('!?\\[(label)\\]\\s*\\[([^\\]]*)\\]', { label }),
     procRefNoLink
 ];
 
-export const NoLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
-    [ContextTag.Inline],
+export const NoLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
+    [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.NoLink,
     '!?\\[(?!\\s*\\])((?:\\[[^\\[\\]]*\\]|\\\\[\\[\\]]|[^\\[\\]])*)\\](?:\\[\\])?',
     procRefNoLink
 ];
 
-function procRefNoLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: string, text: string, text2: string) {
-    parseLink($, link, text, (text2 || text).replace(/\s+/g, ' ').toLowerCase());
+function procRefNoLink($: InlineHandle<InlineLink<UnknownToken>, MetaLinks>, link: string, text: string, text2: string) {
+    const id = (text2 || text).replace(/\s+/g, ' ').toLowerCase();
+    const def = $.m.links[id];
+    if (def && def.l) {
+        parseLink($, link, text, id);
+    } else {
+        pushText($, link.charAt(0));
+        backpedal($, link.substring(1));
+    }
 }
 
 export const Strong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
@@ -247,11 +255,16 @@ function procText($: InlineHandle<string, NoMeta>, text: string) {
 }
 
 function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage, NoMeta>, link: string, text: string, href: string, title?: string) {
-    const token: TokenType<InlineLink<UnknownToken> & InlineImage> = link.charAt(0) != '!'
-        ? { $: InlineTag.Link, l: href, _: parseNest($, text, ContextTag.InlineLink) }
-        : { $: InlineTag.Image, l: href, _: text };
-    if (title) token.t = title;
-    pushToken($, token);
+    const islink = link.charAt(0) != '!';
+    if ($.c == ContextTag.InlineLink && islink) {
+        reject($);
+    } else {
+        const token: TokenType<InlineLink<UnknownToken> & InlineImage> = islink
+            ? { $: InlineTag.Link, l: href, _: parseNest($, text, ContextTag.InlineLink) }
+            : { $: InlineTag.Image, l: href, _: text };
+        if (title) token.t = title;
+        pushToken($, token);
+    }
 }
 
 // rulesets

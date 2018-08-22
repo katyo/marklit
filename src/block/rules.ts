@@ -147,10 +147,10 @@ const fences = ' *(`{3,}|~{3,})[ \\.]*(\\S+)? *\\n([\\s\\S]*?)\\n? *\\1 *(?:\\n+
 
 export const Fences: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
-    BlockOrder.Code,
+    BlockOrder.Fences,
     fences,
-    ($, _, lang, text) => {
-        pushToken($, { $: BlockTag.Code, _: text ? text.replace(/^ {4}/gm, '') : '' });
+    ($, _, fences, lang, text) => {
+        pushToken($, { $: BlockTag.Code, l: lang, _: text || '' });
     }
 ];
 
@@ -430,10 +430,14 @@ function initDef(m: MetaLinks) {
 function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, href: string, title?: string) {
     if (title) title = title.substring(1, title.length - 1);
 
-    $.m.links[label.toLowerCase().replace(/\s+/g, ' ')] = {
-        l: href,
-        t: title
-    };
+    label = label.toLowerCase().replace(/\s+/g, ' ');
+
+    if (!$.m.links[label]) {
+        $.m.links[label] = {
+            l: href,
+            t: title
+        };
+    }
 }
 
 export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [

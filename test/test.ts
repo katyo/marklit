@@ -85,7 +85,7 @@ export function htmlEq(actual_html: string, expected_html: string, actual_adt?: 
     }
 }
 
-function doTest({ pedantic, gfm, breaks, tables, headingId, xhtml, smartypants/*, baseUrl, mangle, sanitize*/ }: Options, source_md: string, expected_html: string) {
+function doTest({ pedantic, gfm, breaks, tables, headerIds, xhtml, smartypants/*, baseUrl, mangle, sanitize*/ }: Options, source_md: string, expected_html: string) {
     const parser = init<Context>(
         ...(pedantic ? BlockPedantic : tables ? BlockGfmTables : gfm ? BlockGfm : BlockNormal),
         ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal)
@@ -93,7 +93,7 @@ function doTest({ pedantic, gfm, breaks, tables, headingId, xhtml, smartypants/*
 
     const render_rules = [
         ...(tables ? (xhtml ? BlockTablesXHtml : BlockTablesHtml) : (xhtml ? BlockXHtml : BlockHtml)),
-        ...(headingId === false ? [HeadingHtml] : []),
+        ...(headerIds ? [] : [HeadingHtml]),
         ...(gfm ? (xhtml ? InlineGfmXHtml : InlineGfmHtml) : (xhtml ? InlineXHtml : InlineHtml)),
     ];
 
@@ -125,7 +125,12 @@ export function testMarked(tests: Record<string, [Options, string, string]>, bla
     for (const name in tests) {
         if (blacklist.indexOf(name) < 0) {
             it(name, () => {
-                doTest(...tests[name]);
+                const test = tests[name];
+                const [opts,] = test;
+                if (opts.headerIds !== false) opts.headerIds = true;
+                if (opts.gfm !== false) opts.gfm = true;
+                if (opts.tables !== false) opts.tables = true;
+                doTest(...test);
             });
         }
     }

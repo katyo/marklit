@@ -422,8 +422,7 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "Link below\n",
-                            { $: InlineTag.Link, l: "ql", _: ["This link"] }
+                            "Link below\n[This link][ql]",
                         ]
                     },
                     {

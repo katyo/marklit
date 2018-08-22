@@ -226,7 +226,7 @@ export function pushToken<CtxMap extends HasContexts, Ctx extends ContextKey<Ctx
     tokens.push(token);
 }
 
-export function pushText<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta, Token extends string & ContextToken<CtxMap, Ctx>>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>, token: Token) {
+export function pushText<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta, Token extends string & ContextToken<CtxMap, Ctx>>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>, token: string) {
     if (token.length) {
         if (tokens.length &&
             typeof tokens[tokens.length - 1] == 'string') {

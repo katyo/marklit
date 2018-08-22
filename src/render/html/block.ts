@@ -29,6 +29,12 @@ export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
     ({ }, { _ }) => '<pre><code>' + escapeCode(_) + '</code></pre>\n'
 ];
 
+export const CodeBlockWithClassHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
+    ContextTag.Block,
+    BlockTag.Code,
+    ({ }, { _, l }) => '<pre><code' + (l ? ' class="language-' + l + '"' : '') + '>' + escapeCode(_) + '</code></pre>\n'
+];
+
 export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
     ContextTag.Block,
     BlockTag.Heading,
@@ -71,7 +77,7 @@ export const ListHtml: BlockRenderRuleStr<BlockList<UnknownToken>, NoMeta> = [
 export const OrdListHtml: BlockRenderRuleStr<BlockOrdList<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.OrdList,
-    ($, { s, _ }) => '<ol' + (s != 1 ? 'start="' + s + '"' : '') + '>\n' +
+    ($, { s, _ }) => '<ol' + (s && s != 1 ? ' start="' + s + '"' : '') + '>\n' +
         renderListItems($, _) +
         '</ol>\n'
 ];
@@ -133,9 +139,9 @@ function renderTableCells($: BlockRenderHandleStr<BlockTable<UnknownToken>, NoMe
     return out;
 }
 
-export const BlockHtml = [CodeBlockHtml, HeadingWithIdHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
+export const BlockHtml = [CodeBlockWithClassHtml, HeadingWithIdHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
 
-export const BlockXHtml = [CodeBlockHtml, HeadingWithIdHtml, HrXHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
+export const BlockXHtml = [CodeBlockWithClassHtml, HeadingWithIdHtml, HrXHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
 
 export const BlockTablesHtml = [...BlockHtml, TableHtml];
 

@@ -41,34 +41,24 @@ const originalBlacklist = blacklist([
     'inline_html_advanced',
     'inline_html_comments',
     'inline_html_simple',
-    'links_inline_style',
     'links_reference_style',
     'literal_quotes_in_titles',
     'markdown_documentation_basics',
     'markdown_documentation_syntax',
     'ordered_and_unordered_lists',
     'tabs',
+    'hard_wrapped_paragraphs_with_list_like_lines',
 ], TEST_MARKED_ORIG_WL);
 
 const newBlacklist = blacklist([
     'blockquote_list_item',
-    'cm_autolinks',
-    'cm_blockquotes',
     'cm_html_blocks',
     'cm_link_defs',
     'cm_links',
     'cm_raw_html',
-    'def_blocks',
     'double_link',
-    'gfm_autolinks',
-    'gfm_code',
     'gfm_code_hr_list',
-    'gfm_del',
-    'gfm_tables',
-    'hr_list_break',
     'html_comments',
-    'links',
-    'link_lt',
     'list_item_text',
     'main',
     'redos_html_closing',
@@ -76,6 +66,7 @@ const newBlacklist = blacklist([
     'relative_urls',
     'same_bullet',
     'toplevel_paragraphs',
+    'nogfm_hashtag',
 ], TEST_MARKED_NEW_WL);
 
 const commonmarkBlacklist = blacklist([
@@ -106,17 +97,14 @@ const commonmarkBlacklist = blacklist([
     4, 5, // Tabs
     34, // ATX headings
     77, 78, // Indented code blocks !
-    88, 89, 91, 92, 94, 98, 99, 100, 104, 105, 109, 110, 111, 113, 115, // Fenced code blocks !
     116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, // HTML blocks
-    164, 166, 169, 171, 174, 176, 177, 178, // Link reference definitions !
     217, 219, 221, 222, 226, 228, 230, 231, 233, 234, 240, 249, 250, 251, 253, 254, 255, 256, 262, // List items
     266, 268, 271, 272, 275, 277, 281, 285, 286, 287, // Lists
-    296, 298, // Backslash escapes !!
+    296, 298, // Backslash escapes
     308, // Entity and numeric character references
     325, // Code spans !
     452, // Emphasis and strong emphasis
-    461, 462, 463, 464, 465, 466, 467, 469, 471, 473, 475, 477, 479, 482, 484, 488, 502, 513, 514, 515, 516, 517, 518, 519, 530, 538, 540, 542, // Links !
-    561, // Images !
+    466, // Links !
 
     584, 585, 586, 587, 588, 594, 596, 599, 600, 601, 602, 603, // Raw HTML
     614, 615, // Hard line breaks
@@ -131,6 +119,7 @@ const gfmBlacklist = blacklist([
 const markedBlacklist = blacklist([
     // Marked specific
     1, // Code spans
+    10, // Links
 ], TEST_SPEC_MARKED_WL);
 
 if (!disabled(TEST_BASIC)) {
@@ -175,7 +164,7 @@ if (!disabled(TEST_SPEC)) {
     describe('specs', () => {
         if (!disabled(TEST_SPEC_CM)) {
             describe('commonmark.0.28', () => {
-                testSpecs({ headingId: false, xhtml: true }, commonmark_0_28, commonmarkBlacklist);
+                testSpecs({ headingId: false, gfm: true, tables: true, xhtml: true }, commonmark_0_28, commonmarkBlacklist);
             });
         }
 
