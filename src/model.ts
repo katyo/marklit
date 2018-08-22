@@ -1,7 +1,18 @@
 import { InlineTokenType } from './inline/model';
 import { BlockTokenType } from './block/model';
 
-export type AsUnion<Map> = Map extends string ? string : { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map];
+export type AsUnion<Map> = Map extends object ? { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map] : Map extends void ? any : Map;
+
+export interface HasMeta { _: object; }
+export interface HasContexts { $: object; }
+
+export type InitTag = 0;
+export interface HasInit { $: { [0]: any; }; }
+
+export type ContextKey<CtxMap extends HasContexts> = keyof CtxMap['$'];
+export type ContextToken<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>> = CtxMap['$'][Ctx];
+export type ContextMeta<CtxMap extends HasMeta> = CtxMap['_'];
+export type ContextResult<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
 
 export const enum ContextTag {
     Block,
@@ -10,29 +21,15 @@ export const enum ContextTag {
     InlineLink,
 }
 
-export interface HasMeta<Meta> {
+export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
     _: Meta;
+    $: {
+        [ContextTag.Block]: BlockTokenType<BlockTokenMap>;
+        [ContextTag.BlockNest]: BlockTokenType<BlockTokenMap>;
+        [ContextTag.Inline]: InlineTokenType<InlineTokenMap>;
+        [ContextTag.InlineLink]: InlineTokenType<InlineTokenMap>;
+    };
 }
-
-export type InitTag = 0;
-
-export interface HasInit<Token> {
-    [0]: Token;
-}
-
-export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> extends HasMeta<Meta> {
-    [ContextTag.Block]: BlockTokenType<BlockTokenMap>;
-    [ContextTag.BlockNest]: BlockTokenType<BlockTokenMap>;
-    [ContextTag.Inline]: InlineTokenType<InlineTokenMap>;
-    [ContextTag.InlineLink]: InlineTokenType<InlineTokenMap>;
-}
-
-//export type ContextKey<CtxMap> = Exclude<keyof CtxMap, '_'>;
-export type ContextKey<CtxMap> = keyof CtxMap;
-export type ContextToken<CtxMap, Ctx extends ContextKey<CtxMap>> = CtxMap[Ctx];
-export type ContextMeta<CtxMap extends HasMeta<any>> = CtxMap extends HasMeta<infer Meta> ? Meta : never;
-
-export type ContextResult<CtxMap extends HasMeta<any>, Ctx extends ContextKey<CtxMap>> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
 
 export type UnknownToken = any;
 
