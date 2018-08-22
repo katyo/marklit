@@ -49,12 +49,14 @@ export interface MetaFootnotes<BlockTokenMap> {
     footnotes: Record<string, TokensType<BlockTokenMap>>;
 }
 
+export interface MetaHeading<InlineTokenMap> {
+    t: string; // text
+    n: number; // level
+    _: TokensType<InlineTokenMap>;
+}
+
 export interface MetaHeadings<InlineTokenMap> {
-    headings: {
-        t: string; // text
-        n: number; // level
-        _: TokenType<InlineTokenMap>[];
-    }[];
+    headings: MetaHeading<InlineTokenMap>[];
 }
 
 export interface MetaData<BlockTokenMap, InlineTokenMap> extends
