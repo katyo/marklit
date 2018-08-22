@@ -3,8 +3,7 @@ import { ParserHandle, ParserRule, parseNest, pushToken, pushText } from '../par
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
-    NoMeta, AsUnion,
-    UnknownToken
+    NoMeta, UnknownToken, TokenType
 } from '../model';
 import {
     InlineTag, InlineOrder,
@@ -248,7 +247,7 @@ function procText($: InlineHandle<string, NoMeta>, text: string) {
 }
 
 function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage, NoMeta>, link: string, text: string, href: string, title?: string) {
-    const token: AsUnion<InlineLink<UnknownToken> & InlineImage> = link.charAt(0) != '!'
+    const token: TokenType<InlineLink<UnknownToken> & InlineImage> = link.charAt(0) != '!'
         ? { $: InlineTag.Link, l: href, _: parseNest($, text, ContextTag.InlineLink) }
         : { $: InlineTag.Image, l: href, _: text };
     if (title) token.t = title;

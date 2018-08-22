@@ -1,6 +1,6 @@
 import { htmlEq } from '../test';
 import {
-    BlockTokenType,
+    TokenType,
 
     InlineTag, BlockTag,
 
@@ -24,7 +24,7 @@ interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
 
 export default function() {
     const renderer = initRenderHtml<Context>(...BlockHtml, ...InlineHtml);
-    const _ = (test: string, meta: Meta, tokens: BlockTokenType<BlockToken>[], html: string) => it(test, () => htmlEq(render(renderer, [meta, tokens]), html));
+    const _ = (test: string, meta: Meta, tokens: TokenType<BlockToken>[], html: string) => it(test, () => htmlEq(render(renderer, [meta, tokens]), html));
 
     describe('block', () => {
         _('headings', {

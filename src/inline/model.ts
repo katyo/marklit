@@ -1,6 +1,4 @@
-import { AsUnion } from '../model';
-
-export type InlineTokenType<InlineTokenMap> = AsUnion<InlineTokenMap> | string;
+import { TokenType } from '../model';
 
 export const enum InlineTag {
     Link,
@@ -73,7 +71,11 @@ export interface InlineMath {
 }
 
 export interface InlinePhrase<InlineTokenMap> {
-    _: InlineTokenType<InlineTokenMap>[];
+    _: TokenType<InlineTokenMap>[];
+}
+
+export interface InlineText {
+    '': string;
 }
 
 export interface InlineTokenMap<InlineTokenMap> extends
@@ -84,10 +86,11 @@ export interface InlineTokenMap<InlineTokenMap> extends
     InlineDel<InlineTokenMap>,
     InlineCode,
     InlineMath,
-    InlineBr { }
+    InlineBr,
+    InlineText { }
 
 // Basics
 
 export interface BasicInlineTokenMap extends InlineTokenMap<BasicInlineTokenMap> { }
 
-export type BasicInlineToken = InlineTokenType<BasicInlineTokenMap>;
+export type BasicInlineToken = TokenType<BasicInlineTokenMap>;

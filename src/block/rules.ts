@@ -4,10 +4,10 @@ import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap,
     NoMeta, MetaLinks, MetaHeadings,
-    UnknownToken
+    UnknownToken, TokenType
 } from '../model';
 import {
-    BlockTag, BlockOrder, BlockTokenType,
+    BlockTag, BlockOrder,
     BlockAlign,
     BlockCode, BlockHeading,
     BlockTable, BlockTableRow,
@@ -366,9 +366,9 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
         const list = {
             $: ordered ? BlockTag.OrdList : BlockTag.List,
             _: items
-        } as BlockTokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>;
+        } as TokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>;
 
-        if (ordered && bull != '1.') (list as BlockTokenType<BlockOrdList<UnknownToken>>).s = +bull;
+        if (ordered && bull != '1.') (list as TokenType<BlockOrdList<UnknownToken>>).s = +bull;
 
         if (loose) list.l = 1;
 

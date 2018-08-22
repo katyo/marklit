@@ -1,7 +1,5 @@
-import { InlineTokenType } from './inline/model';
-import { BlockTokenType } from './block/model';
-
-export type AsUnion<Map> = Map extends object ? { [Tag in keyof Map]: { $: Tag } & Map[Tag] }[keyof Map] : Map extends void ? any : Map;
+export type TokenTypeByTag<Map, Tag extends keyof Map> = Map[Tag] extends object ? { $: Tag; } & Map[Tag] : Map[Tag];
+export type TokenType<Map> = Map extends object ? { [Tag in keyof Map]: TokenTypeByTag<Map, Tag>; }[keyof Map] : Map extends string ? Map : any;
 
 export interface HasMeta { _: object; }
 export interface HasContexts { $: object; }
@@ -24,10 +22,10 @@ export const enum ContextTag {
 export interface ContextMap<BlockTokenMap, InlineTokenMap, Meta> {
     _: Meta;
     $: {
-        [ContextTag.Block]: BlockTokenType<BlockTokenMap>;
-        [ContextTag.BlockNest]: BlockTokenType<BlockTokenMap>;
-        [ContextTag.Inline]: InlineTokenType<InlineTokenMap>;
-        [ContextTag.InlineLink]: InlineTokenType<InlineTokenMap>;
+        [ContextTag.Block]: TokenType<BlockTokenMap>;
+        [ContextTag.BlockNest]: TokenType<BlockTokenMap>;
+        [ContextTag.Inline]: TokenType<InlineTokenMap>;
+        [ContextTag.InlineLink]: TokenType<InlineTokenMap>;
     };
 }
 
@@ -47,14 +45,14 @@ export interface MetaAbbrevs {
 }
 
 export interface MetaFootnotes<BlockTokenMap> {
-    footnotes: Record<string, BlockTokenType<BlockTokenMap>[]>;
+    footnotes: Record<string, TokenType<BlockTokenMap>[]>;
 }
 
 export interface MetaHeadings<InlineTokenMap> {
     headings: {
         t: string; // text
         n: number; // level
-        _: InlineTokenType<InlineTokenMap>[];
+        _: TokenType<InlineTokenMap>[];
     }[];
 }
 
