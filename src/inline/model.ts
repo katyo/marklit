@@ -1,4 +1,4 @@
-import { TokenType } from '../model';
+import { TokenType, TokensType } from '../model';
 
 export const enum InlineTag {
     Link,
@@ -71,7 +71,7 @@ export interface InlineMath {
 }
 
 export interface InlinePhrase<InlineTokenMap> {
-    _: TokenType<InlineTokenMap>[];
+    _: TokensType<InlineTokenMap>;
 }
 
 export interface InlineText {

@@ -1,4 +1,4 @@
-import { TokenType } from '../model';
+import { TokenType, TokensType } from '../model';
 import { BasicInlineTokenMap } from '../inline/model';
 
 export const enum BlockTag {
@@ -40,25 +40,25 @@ export interface BlockHeading<InlineTokenMap> {
     [BlockTag.Heading]: {
         i: number; // index
         n: number; // level
-        _: TokenType<InlineTokenMap>[];
+        _: TokensType<InlineTokenMap>;
     };
 }
 
 export interface BlockParagraph<InlineTokenMap> {
     [BlockTag.Paragraph]: {
-        _: TokenType<InlineTokenMap>[];
+        _: TokensType<InlineTokenMap>;
     };
 }
 
 export interface BlockText<InlineTokenMap> {
     [BlockTag.Text]: {
-        _: TokenType<InlineTokenMap>[];
+        _: TokensType<InlineTokenMap>;
     };
 }
 
 export interface BlockQuote<BlockTokenMap> {
     [BlockTag.Quote]: {
-        _: TokenType<BlockTokenMap>[];
+        _: TokensType<BlockTokenMap>;
     };
 }
 
@@ -81,7 +81,7 @@ export interface BlockListItem<BlockTokenMap> {
     t?: 1; // is task item
     c?: 1; // is checked
     l?: 1; // loose item
-    _: TokenType<BlockTokenMap>[];
+    _: TokensType<BlockTokenMap>;
 }
 
 export interface BlockTable<BlockTokenMap> {
@@ -92,7 +92,7 @@ export interface BlockTable<BlockTokenMap> {
     };
 }
 
-export type BlockTableCell<BlockTokenMap> = TokenType<BlockTokenMap>[];
+export type BlockTableCell<BlockTokenMap> = TokensType<BlockTokenMap>;
 
 export type BlockTableRow<BlockTokenMap> = BlockTableCell<BlockTokenMap>[];
 

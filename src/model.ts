@@ -1,5 +1,6 @@
 export type TokenTypeByTag<Map, Tag extends keyof Map> = Map[Tag] extends object ? { $: Tag; } & Map[Tag] : Map[Tag];
 export type TokenType<Map> = Map extends object ? { [Tag in keyof Map]: TokenTypeByTag<Map, Tag>; }[keyof Map] : Map extends string ? Map : any;
+export type TokensType<Map> = Map extends string ? string : TokenType<Map>[];
 
 export interface HasMeta { _: object; }
 export interface HasContexts { $: object; }
@@ -45,7 +46,7 @@ export interface MetaAbbrevs {
 }
 
 export interface MetaFootnotes<BlockTokenMap> {
-    footnotes: Record<string, TokenType<BlockTokenMap>[]>;
+    footnotes: Record<string, TokensType<BlockTokenMap>>;
 }
 
 export interface MetaHeadings<InlineTokenMap> {
