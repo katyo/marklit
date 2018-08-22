@@ -82,7 +82,19 @@ export type ParserMatchers<CtxMap extends HasContexts, Meta> = {
     [Ctx in ContextKey<CtxMap>]: Matcher<ParserHandle<CtxMap, Ctx, Meta>>
 };
 
-function buildRules<CtxMap extends HasContexts & HasMeta>(rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): ParserMatchers<CtxMap, ContextMeta<CtxMap>> {
+export interface Parser<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> {
+    p: ParserMatchers<CtxMap, ContextMeta<CtxMap>>; // matchers
+    m: ParserInits<CtxMap, ContextMeta<CtxMap>>; // initializers
+    a: ParserProcs<CtxMap, ContextMeta<CtxMap>>; // postprocessors
+    s: Ctx; // starting context
+}
+
+export function init<CtxMap extends HasContexts & HasMeta & HasInit>(...rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): Parser<CtxMap, InitTag>;
+export function init<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>(start: Ctx, ...rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): Parser<CtxMap, Ctx>;
+export function init<CtxMap extends HasContexts & HasMeta>(...rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): Parser<CtxMap, any> {
+    let start = typeof rules[0] == 'number' ? rules.shift() : 0;
+
+    // aggregating matchers
     const ctxs: (ContextKey<CtxMap>)[] = [];
     for (const [ctxl] of rules) {
         for (const ctx of ctxl) {
@@ -111,22 +123,8 @@ function buildRules<CtxMap extends HasContexts & HasMeta>(rules: ParserRules<Ctx
             .map(([, ...path]) =>
                 path as MatchPath<ParserHandle<CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>>));
     }
-    return matchers;
-}
 
-export interface Parser<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> {
-    p: ParserMatchers<CtxMap, ContextMeta<CtxMap>>; // matchers
-    m: ParserInits<CtxMap, ContextMeta<CtxMap>>; // initializers
-    a: ParserProcs<CtxMap, ContextMeta<CtxMap>>; // postprocessors
-    s: Ctx; // starting context
-}
-
-export function init<CtxMap extends HasContexts & HasMeta & HasInit>(...rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): Parser<CtxMap, InitTag>;
-export function init<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>(start: Ctx, ...rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): Parser<CtxMap, Ctx>;
-export function init<CtxMap extends HasContexts & HasMeta>(...rules: ParserRules<CtxMap, ContextMeta<CtxMap>>): Parser<CtxMap, any> {
-    let start = typeof rules[0] == 'number' ? rules.shift() : 0;
-
-    // populate post fns
+    // aggregating init and post fns
     const inits = [] as ParserInits<CtxMap, ContextMeta<CtxMap>>;
     const procs = {} as ParserProcs<CtxMap, ContextMeta<CtxMap>>;
 
@@ -152,7 +150,7 @@ export function init<CtxMap extends HasContexts & HasMeta>(...rules: ParserRules
     }
 
     return {
-        p: buildRules(rules),
+        p: matchers,
         m: inits,
         a: procs,
         s: start,
