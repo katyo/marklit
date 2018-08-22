@@ -46,7 +46,7 @@ export type MatchPath<Self> = [
     MatchFunc<Self> // parser to apply
 ];
 
-export function parseSeq<Type, Self>(state: Self & MatchState, matcher: Matcher<Self>) {
+export function parseSeq<Type, Self>(matcher: Matcher<Self>, state: Self & MatchState) {
     for (; state.s.length > 0;) {
         doMatch(matcher, state);
         if (state.r) break;

@@ -146,7 +146,7 @@ export function parseNest<CtxMap extends HasContexts & HasMeta, Ctx extends Cont
         s: src.replace(/^ +$/gm, ''), // remove spaces on empty lines which has spaces only
         r: true
     };
-    parseSeq($$, $.p[ctx]);
+    parseSeq($$.p[$$.c], $$);
     if ($$.r && $$.s.length) throw new Error(`Unable to parse: ${$$.s}...`);
     return $$.t;
 }
