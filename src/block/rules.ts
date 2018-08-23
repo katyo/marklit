@@ -310,107 +310,125 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.List,
     list,
-    ($, str, { }, bull) => {
-        const ordered = bull.length > 1;
-        const items: BlockListItem<UnknownToken>[] = [];
+    ($, str, { }, bull) => { parseList($, str, bull, false); },
+    [BlockTag.List, BlockTag.OrdList],
+    procList
+];
 
-        // Get each top-level item.
-        const cap = str.match(item_re);
+export const SmartList: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
+    [ContextTag.Block, ContextTag.BlockNest],
+    BlockOrder.List,
+    list,
+    ($, str, { }, bull) => { parseList($, str, bull, true); },
+    [BlockTag.List, BlockTag.OrdList],
+    procList
+];
 
-        if (!cap) {
-            reject($);
-            return;
+function procList($: BlockHandle<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta>, token: TokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>) {
+    for (const item of token._) {
+        procNest($, item._, ContextTag.BlockNest);
+    }
+}
+
+function parseList($: BlockHandle<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta>, str: string, bull: string, smart: boolean) {
+    const ordered = bull.length > 1;
+    const items: BlockListItem<UnknownToken>[] = [];
+
+    // Get each top-level item.
+    const cap = str.match(item_re);
+
+    if (!cap) {
+        reject($);
+        return;
+    }
+
+    let loose: true | undefined;
+    let next = false;
+    const l = cap.length;
+
+    for (let i = 0; i < l; i++) {
+        let item_src = cap[i];
+
+        // Remove the list item's bullet
+        // so it is seen as the next token.
+        let space = item_src.length;
+        item_src = item_src.replace(/^ *([*+-]|\d+\.) +/, '');
+
+        // Outdent whatever the
+        // list item contains. Hacky.
+        if (~item_src.indexOf('\n ')) {
+            space -= item_src.length;
+            item_src = //!this.options.pedantic
+                //?
+                item_src.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
+                //: item_src.replace(/^ {1,4}/gm, '')
+                ;
         }
 
-        let loose: true | undefined;
-        let next = false;
-        const l = cap.length;
-
-        for (let i = 0; i < l; i++) {
-            let item_src = cap[i];
-
-            // Remove the list item's bullet
-            // so it is seen as the next token.
-            let space = item_src.length;
-            item_src = item_src.replace(/^ *([*+-]|\d+\.) +/, '');
-
-            // Outdent whatever the
-            // list item contains. Hacky.
-            if (~item_src.indexOf('\n ')) {
-                space -= item_src.length;
-                item_src = //!this.options.pedantic
-                    //?
-                    item_src.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
-                    //: item_src.replace(/^ {1,4}/gm, '')
-                    ;
+        // Determine whether the next list item belongs here.
+        // Backpedal if it does not belong in this list.
+        if (smart && i !== l - 1) {
+            const b_cap = bull_re.exec(cap[i + 1]);
+            if (!b_cap) {
+                reject($);
+                return;
             }
-
-            // Determine whether the next list item belongs here.
-            // Backpedal if it does not belong in this list.
-            if (/* smartLists && */i !== l - 1) {
-                const b_cap = bull_re.exec(cap[i + 1]);
-                if (!b_cap) {
-                    reject($);
-                    return;
-                }
-
-                const b = b_cap[0];
-                if (bull !== b && !(bull.length > 1 && b.length > 1)) {
-                    backpedal($, cap.slice(i + 1).join('\n'));
-                    i = l - 1;
-                }
+            const b = b_cap[0];
+            if (bull !== b && !(bull.length > 1 && b.length > 1)) {
+                backpedal($, cap.slice(i + 1).join('\n'));
+                i = l - 1;
             }
+        }
 
-            const item = {} as BlockListItem<UnknownToken>;
+        const item = {} as BlockListItem<UnknownToken>;
 
+        if (!loose) {
             // Determine whether item is loose or not.
             // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
             // for discount behavior.
-            if (next || /\n\n(?!\s*$)/.test(item_src)) item.l = 1;
+            if (next || /\n\n(?!\s*$)/.test(item_src)) loose = true;
 
             if (i !== l - 1) {
                 next = item_src.charAt(item_src.length - 1) === '\n';
-                if (!item.l && next) item.l = 1;
-            }
-
-            if (item.l) loose = true;
-
-            // Check for task list items
-            if (/^\[[ xX]\] /.test(item_src)) {
-                item.t = 1;
-                if (item_src.charAt(1) !== ' ') item.c = 1;
-                item_src = item_src.replace(/^\[[ xX]\] +/, '');
-            }
-
-            item._ = parseNest($, item_src, ContextTag.BlockNest);
-
-            items.push(item);
-        }
-
-        if (loose) {
-            for (let i = 0; i < items.length; i++) {
-                items[i].l = 1;
+                if (next) loose = true;
             }
         }
 
-        const list = {
-            $: ordered ? BlockTag.OrdList : BlockTag.List,
-            _: items
-        } as TokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>;
+        // Check for task list items
+        if (/^\[[ xX]\] /.test(item_src)) {
+            item.t = 1;
+            if (item_src.charAt(1) !== ' ') item.c = 1;
+            item_src = item_src.replace(/^\[[ xX]\] +/, '');
+        }
 
-        if (ordered && bull != '1.') (list as TokenType<BlockOrdList<UnknownToken>>).s = +bull;
+        item._ = parseNest($, item_src, ContextTag.BlockNest);
 
-        if (loose) list.l = 1;
+        items.push(item);
+    }
 
-        pushToken($, list);
-    },
-    [BlockTag.List, BlockTag.OrdList],
-    ($, token) => {
-        for (const item of token._) {
-            procNest($, item._, ContextTag.BlockNest);
+    if (loose) {
+        for (const item of items) {
+            textBlocksToParagraphs(item._);
         }
     }
-];
+
+    const list = {
+        $: ordered ? BlockTag.OrdList : BlockTag.List,
+        _: items
+    } as TokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>;
+
+    if (ordered && bull != '1.') (list as TokenType<BlockOrdList<UnknownToken>>).s = +bull;
+
+    pushToken($, list);
+}
+
+export function textBlocksToParagraphs(tokens: TokenType<BlockParagraph<UnknownToken> | BlockText<UnknownToken>>[]) {
+    for (const token of tokens) {
+        if (token.$ == BlockTag.Text) {
+            (token as any).$ = BlockTag.Paragraph;
+        }
+    }
+}
 
 export const Def: BlockRule<void, MetaLinks> = [
     [ContextTag.Block],

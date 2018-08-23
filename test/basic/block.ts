@@ -450,37 +450,37 @@ paragraph`, {
 * Item 2
 * Item 3`, { headings: [], links: {} }, [
                     {
-                        $: BlockTag.List, l: 1, _: [
-                            { l: 1, _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
-                            { l: 1, _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
-                            { l: 1, _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                        $: BlockTag.List, _: [
+                            { _: [{ $: BlockTag.Paragraph, _: ['Item 1'] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: ['Item 2'] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: ['Item 3'] }] },
                         ]
                     }
                 ]);
 
-            _('unordered mutiline', `* Item 1
+            _('unordered multiline', `* Item 1
   Item 1 Line 2
 * Item 2
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }, { $: BlockTag.Text, _: ['Item 1 Line 2'] }] },
+                            { _: [{ $: BlockTag.Text, _: ['Item 1\nItem 1 Line 2'] }] },
                             { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
                             { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
                         ]
                     }
                 ]);
 
-            _('unordered mutiline loose', `* Item 1
+            _('unordered multiline loose', `* Item 1
   Item 1 Line 2
 
 * Item 2
 * Item 3`, { headings: [], links: {} }, [
                     {
-                        $: BlockTag.List, l: 1, _: [
-                            { l: 1, _: [{ $: BlockTag.Text, _: ['Item 1'] }, { $: BlockTag.Text, _: ['Item 1 Line 2'] }] },
-                            { l: 1, _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
-                            { l: 1, _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                        $: BlockTag.List, _: [
+                            { _: [{ $: BlockTag.Paragraph, _: ['Item 1\nItem 1 Line 2'] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: ['Item 2'] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: ['Item 3'] }] },
                         ]
                     }
                 ]);
@@ -531,7 +531,7 @@ paragraph`, {
                     {
                         $: BlockTag.OrdList, _: [
                             { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 2'] }, { $: BlockTag.Text, _: ['Item 2 Line 2'] }, { $: BlockTag.Text, _: ['Item 2 Line 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: ['Item 2\nItem 2 Line 2\nItem 2 Line 3'] }] },
                             { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
                         ]
                     }

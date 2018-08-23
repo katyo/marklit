@@ -65,7 +65,6 @@ export interface BlockQuote<BlockTokenMap> {
 
 export interface BlockList<BlockTokenMap> {
     [BlockTag.List]: {
-        l?: 1; // loose list
         _: BlockListItem<BlockTokenMap>[];
     };
 }
@@ -73,7 +72,6 @@ export interface BlockList<BlockTokenMap> {
 export interface BlockOrdList<BlockTokenMap> {
     [BlockTag.OrdList]: {
         s?: number; // start number
-        l?: 1; // loose list
         _: BlockListItem<BlockTokenMap>[];
     };
 }
@@ -81,7 +79,6 @@ export interface BlockOrdList<BlockTokenMap> {
 export interface BlockListItem<BlockTokenMap> {
     t?: 1; // is task item
     c?: 1; // is checked
-    l?: 1; // loose item
     _: TokensType<BlockTokenMap>;
 }
 

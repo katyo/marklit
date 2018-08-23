@@ -45,7 +45,6 @@ const originalBlacklist = blacklist([
     'literal_quotes_in_titles',
     'markdown_documentation_basics',
     'markdown_documentation_syntax',
-    'ordered_and_unordered_lists',
     'tabs',
     'hard_wrapped_paragraphs_with_list_like_lines',
 ], TEST_MARKED_ORIG_WL);
@@ -59,7 +58,6 @@ const newBlacklist = blacklist([
     'double_link',
     'gfm_code_hr_list',
     'html_comments',
-    'list_item_text',
     'main',
     'redos_html_closing',
     'redos_nolink',

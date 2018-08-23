@@ -19,6 +19,7 @@ import {
 import {
     BlockRenderRuleStr,
     BlockRenderHandleStr,
+    escapeAttr,
     escapeCode,
     textAlign,
 } from '../str';
@@ -77,7 +78,7 @@ export const ListHtml: BlockRenderRuleStr<BlockList<UnknownToken>, NoMeta> = [
 export const OrdListHtml: BlockRenderRuleStr<BlockOrdList<UnknownToken>, NoMeta> = [
     ContextTag.Block,
     BlockTag.OrdList,
-    ($, { s, _ }) => '<ol' + (s && s != 1 ? ' start="' + s + '"' : '') + '>\n' +
+    ($, { s, _ }) => '<ol' + (s != null && s != 1 ? ' start="' + s + '"' : '') + '>\n' +
         renderListItems($, _) +
         '</ol>\n'
 ];
