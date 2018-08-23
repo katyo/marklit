@@ -1,6 +1,7 @@
 test/
 node_modules/
 .travis.yml
+testem.html
 testem.json
 *.log*
 test-out.js
