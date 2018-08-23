@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/marklit.svg)](https://www.npmjs.com/package/marklit)
 [![Build Status](https://travis-ci.org/katyo/marklit.svg?branch=master)](https://travis-ci.org/katyo/marklit)
 
-**WARNING**: WIP (This work in progress and not ready for production now.)
+**WARNING**: Ready for use with exceptions (missing HTML parsing rules)
 
 Originally this project is deeply re-engineered fork of __[marked]__ with conceptual differences.
 
