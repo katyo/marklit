@@ -34,7 +34,7 @@ interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
 export default function() {
     describe('normal', () => {
         const parser = init<Context>(...BlockNormal, ...InlineNormal);
-        const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), { $: 1, _: [m, r] }));
+        const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), [m, r]));
 
         describe('paragraph', () => {
             _('simple', `Simple and short paragraph`,
@@ -661,7 +661,7 @@ regular text`,
 
     describe('gfm', () => {
         const parser = init<Context>(...BlockGfmTables, ...InlineGfmBreaks);
-        const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), { $: 1, _: [m, r] }));
+        const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), [m, r]));
 
         describe('tables', () => {
             _('simple piped', `| Col 1 | Col 2 | Col 3 |

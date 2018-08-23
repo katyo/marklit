@@ -26,7 +26,7 @@ interface InlineContext extends ContextMap<any, InlineToken, NoMeta> { }
 export default function() {
     describe('normal', () => {
         const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal);
-        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
+        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 
         describe('escape', () => {
             _('Backslash: \\\\', ['Backslash: \\']);
@@ -132,7 +132,7 @@ export default function() {
 
     describe('pedantic', () => {
         const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlinePedantic);
-        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
+        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 
         describe('link', () => {
             _('Just a [URL](/url/).', [
@@ -149,7 +149,7 @@ export default function() {
 
     describe('gfm', () => {
         const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineGfm);
-        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
+        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 
         describe('del', () => {
             _('Deleted ~phrase~', ['Deleted ', { $: InlineTag.Del, _: ['phrase'] }]);
@@ -159,7 +159,7 @@ export default function() {
 
     describe('math', () => {
         const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, MathSpan);
-        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), { $: 1, _: [{}, r] }));
+        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 
         _('Inline $math$', ['Inline ', { $: InlineTag.Math, _: 'math' }]);
         _('Inline $ math with spaces $', ['Inline ', { $: InlineTag.Math, _: 'math with spaces' }]);

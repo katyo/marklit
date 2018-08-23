@@ -101,11 +101,7 @@ function doTest({ pedantic, gfm, breaks, tables, headerIds, xhtml, smartypants/*
         initRenderHtmlSmartypants<Context>(...render_rules) :
         initRenderHtml<Context>(...render_rules);
 
-    const result = parse(parser, source_md);
-
-    if (!result.$) throw new Error(`Parser error: ${result._}`);
-
-    const actual_adt = result._;
+    const actual_adt = parse(parser, source_md);
 
     const actual_html = render(renderer, actual_adt);
 

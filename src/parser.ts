@@ -2,7 +2,8 @@ import { MatchPath, MatchState, Matcher, matchAny, parseSeq } from './match';
 import {
     InitTag, HasContexts, HasMeta, HasInit,
     TaggedToken, TokenTag,
-    ContextKey, ContextToken, ContextMeta, ContextResult
+    ContextKey, ContextToken, ContextMeta,
+    ParserResult
 } from './model';
 
 export interface ParseFunc<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> {
@@ -167,15 +168,6 @@ export function init<CtxMap extends HasContexts & HasMeta>(...rules: ParserRules
     };
 }
 
-export type ParserSuccess<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> = {
-    $: 1, _: ContextResult<CtxMap, Ctx>;
-};
-
-export type ParserError = { $: 0, _: string; };
-
-export type ParserResult<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> =
-    ParserSuccess<CtxMap, Ctx> | ParserError;
-
 export function parse<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>({ p, a, s, m }: Parser<CtxMap, Ctx>, source: string): ParserResult<CtxMap, Ctx> {
     const meta = {} as ContextMeta<CtxMap>;
     for (const init of m) {
@@ -187,7 +179,7 @@ export function parse<CtxMap extends HasContexts & HasMeta, Ctx extends ContextK
         m: meta,
         c: s,
     } as ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>;
-    //try {
+
     const tokens = parseNest(
         $,
         source
@@ -197,10 +189,8 @@ export function parse<CtxMap extends HasContexts & HasMeta, Ctx extends ContextK
             .replace(/\u2424/g, '\n') // replace unicode NL by newline
     );
     procNest($, tokens);
-    return { $: 1, _: [$.m, tokens] };
-    //} catch (e) {
-    //    return { $: 0, _: e.message };
-    //}
+
+    return [$.m, tokens];
 }
 
 export function parseNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>, NestedCtx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, src: string, ctx: NestedCtx): ContextToken<CtxMap, NestedCtx>[];

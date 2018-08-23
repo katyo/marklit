@@ -1,7 +1,8 @@
 import {
     InitTag, HasMeta, HasContexts, HasInit,
     TaggedToken, TokenTag, TokenByTag,
-    ContextKey, ContextToken, ContextResult, ContextMeta
+    ContextKey, ContextToken, ContextMeta,
+    ParserResult
 } from './model';
 
 export interface RenderFunc<Type, CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Token extends ContextToken<CtxMap, Ctx>, Meta> {
@@ -87,7 +88,7 @@ function initRender<Type, CtxMap extends HasContexts & HasMeta>(wrap: WrapFunc<T
     return { r: renderers, w: wrap, j: join, s: start };
 }
 
-export function render<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>({ r, w, j, s }: Renderer<Type, CtxMap, Ctx>, [meta, tokens]: ContextResult<CtxMap, Ctx>): Type {
+export function render<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>({ r, w, j, s }: Renderer<Type, CtxMap, Ctx>, [meta, tokens]: ParserResult<CtxMap, Ctx>): Type {
     const $: RenderHandle<Type, CtxMap, Ctx, ContextMeta<CtxMap>> = {
         r, w, j, m: meta, c: s
     };

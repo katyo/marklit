@@ -17,7 +17,8 @@ export interface HasInit { $: { [0]: any; }; }
 export type ContextKey<CtxMap extends HasContexts> = keyof CtxMap['$'];
 export type ContextToken<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>> = CtxMap['$'][Ctx];
 export type ContextMeta<CtxMap extends HasMeta> = CtxMap['_'];
-export type ContextResult<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
+
+export type ParserResult<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> = [ContextMeta<CtxMap>, ContextToken<CtxMap, Ctx>[]];
 
 export const enum ContextTag {
     Block,
