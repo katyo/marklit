@@ -235,6 +235,13 @@ export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends Conte
     }
 }
 
+export function lastToken<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>): ContextToken<CtxMap, Ctx> | void {
+    if (tokens.length &&
+        typeof tokens[tokens.length - 1] != 'string') {
+        return tokens[tokens.length - 1];
+    }
+}
+
 export function pushToken<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>, token: ContextToken<CtxMap, Ctx>) {
     tokens.push(token);
 }

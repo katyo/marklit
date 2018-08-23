@@ -1,5 +1,5 @@
 import { backpedal, reject } from '../match';
-import { ParserHandle, ParserRule, parseNest, procNest, pushToken } from '../parser';
+import { ParserHandle, ParserRule, parseNest, procNest, pushToken, lastToken } from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap,
@@ -289,12 +289,18 @@ function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, tok
 export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Text,
-    '[^\\n]+',
-    ($, text) => {
-        pushToken($, {
-            $: BlockTag.Text,
-            _: text as any
-        });
+    '([^\\n]+)\\n?',
+    ($, _, text) => {
+        const token = lastToken($);
+        // join with previous text token when it possible
+        if (token && token.$ == BlockTag.Text) {
+            (token._ as any) += (token._ ? '\n' : '') + text;
+        } else {
+            pushToken($, {
+                $: BlockTag.Text,
+                _: text as any
+            });
+        }
     },
     [BlockTag.Text],
     procParagraph as any as (($: BlockHandle<BlockText<UnknownToken>, NoMeta>, token: TokenType<BlockText<UnknownToken>>) => void)
