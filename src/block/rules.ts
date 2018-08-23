@@ -8,7 +8,7 @@ import {
 } from '../model';
 import {
     BlockTag, BlockOrder,
-    BlockAlign,
+    BlockAlign, BlockSpace,
     BlockCode, BlockHeading,
     BlockTable, BlockTableRow,
     BlockHr, BlockQuote,
@@ -127,11 +127,13 @@ const list = substRe('( *)(bull) [\\s\\S]+?(?:hr|def|\\n{2,}(?! )(?!\\1bull )\\n
     def: '\\n+(?=' + def + ')'
 });
 
-export const Newline: BlockRule<void, NoMeta> = [
+export const Newline: BlockRule<BlockSpace, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Newline,
     '\\n+',
-    () => { }
+    $ => { pushToken($, { $: BlockTag.Space }); },
+    [BlockTag.Space],
+    () => false,
 ];
 
 export const CodeBlock: BlockRule<BlockCode, NoMeta> = [

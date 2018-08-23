@@ -2,6 +2,7 @@ import { TokenType, TokensType } from '../model';
 import { BasicInlineTokenMap } from '../inline/model';
 
 export const enum BlockTag {
+    Space,
     Heading,
     Paragraph,
     Quote,
@@ -109,7 +110,12 @@ export interface BlockCode {
     };
 }
 
+export interface BlockSpace {
+    [BlockTag.Space]: BlockEmpty;
+}
+
 export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
+    BlockSpace,
     BlockCode,
     BlockHeading<InlineTokenMap>,
     BlockHr,

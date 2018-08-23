@@ -24,7 +24,7 @@ export interface InitFunc<CtxMap extends HasContexts, Ctx extends ContextKey<Ctx
 export type ParserInits<CtxMap extends HasContexts, Meta> = InitFunc<CtxMap, ContextKey<CtxMap>, Meta>[];
 
 export interface ProcFunc<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> {
-    <MetaType extends Meta>($: ParserHandle<CtxMap, Ctx, MetaType>, token: ContextToken<CtxMap, Ctx>): void;
+    <MetaType extends Meta>($: ParserHandle<CtxMap, Ctx, MetaType>, token: ContextToken<CtxMap, Ctx>): false | void;
 }
 
 export type ParserContextProcs<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> = {
@@ -223,10 +223,13 @@ export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends Conte
 export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>, NestedCtx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, tokens: ContextToken<CtxMap, Ctx>[], ctx: Ctx | NestedCtx = $.c) {
     const posts = $.a[$.c];
     if (posts) {
-        for (const token of tokens) {
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
             if (typeof token == 'object') {
                 const proc = (posts as any)[(token as any as TaggedToken<keyof any>).$];
-                if (proc) proc($, token);
+                if (proc && proc($, token) === false) {
+                    tokens.splice(i--, 1);
+                }
             }
         }
     }
