@@ -3,7 +3,6 @@
   "test_page": "testem.html",
   "src_files": [
     "src/**/*.ts",
-    "src/**/*.coffee",
     "test/**/*.ts"
   ],
   "serve_files": [
@@ -13,7 +12,7 @@
   "on_exit": "npm run clean-test",
   "launchers": {
     "nodejs": {
-      "command": "TS_NODE_TYPE_CHECK=y mocha -r ts-node/register test/index.ts -R tap",
+      "command": "npm run test-node -- -R tap",
       "protocol": "tap"
     }
   },
@@ -23,7 +22,7 @@
       "--disable-setuid-sandbox"
     ]
   },
-  "launch_in_ci": [ "firefox", "chromium", "nodejs" ],
-  "ignore_missing_launchers": true,
-  "launch_in_dev": [ "firefox", "chromium", "safari", "nodejs" ]
+  "launch_in_ci": [ "firefox", "chromium", "nodejs", "phantomjs" ],
+  "launch_in_dev": [ "firefox", "chromium", "safari", "nodejs", "phantomjs" ],
+  "ignore_missing_launchers": true
 }

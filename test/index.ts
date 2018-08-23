@@ -4,8 +4,8 @@ import basicInline from './basic/inline';
 import basicBlock from './basic/block';
 import renderHtml from './basic/render';
 
-import originalTests from './original-out';
-import newTests from './new-out';
+import originalTests from './original-out.json';
+import newTests from './new-out.json';
 
 import commonmark_0_28 from './specs/commonmark.0.28.json';
 import gfm_0_28 from './specs/gfm.0.28.json';
@@ -134,13 +134,13 @@ if (!disabled(TEST_MARKED)) {
     describe('marked', () => {
         if (!disabled(TEST_MARKED_ORIG)) {
             describe('original', () => {
-                testMarked({ gfm: true, tables: true, headerIds: false, xhtml: true }, originalTests, originalBlacklist);
+                testMarked({ gfm: true, tables: true, headerIds: false, xhtml: true }, originalTests as any, originalBlacklist);
             });
         }
 
         if (!disabled(TEST_MARKED_NEW)) {
             describe('new', () => {
-                testMarked({ gfm: true, tables: true, headerIds: true }, newTests, newBlacklist);
+                testMarked({ gfm: true, tables: true, headerIds: true }, newTests as any, newBlacklist);
             });
         }
     });

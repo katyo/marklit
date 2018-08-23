@@ -15,11 +15,11 @@
     "prepack": "npm run compile",
     "postpack": "npm run clean",
     "compile-test": "npm run conv-test && browserify -d test/index.ts -p [ tsify --resolveJsonModule ] -o test-out.js",
-    "clean-test": "rm -f test-out.js test/*-out.ts",
+    "clean-test": "rm -f test-out.js test/*-out.json",
     "test": "testem ci",
-    "test-node": "npm run conv-test && TS_NODE_TYPE_CHECK=y TS_NODE_COMPILER_OPTIONS='{\"resolveJsonModule\":true}' mocha -r ts-node/register test/index.ts -R spec",
+    "test-node": "npm run conv-test && TS_NODE_TYPE_CHECK=y TS_NODE_COMPILER_OPTIONS='{\"resolveJsonModule\":true}' mocha -r ts-node/register test/index.ts",
     "test-dev": "testem",
-    "conv-test": "ts-node test/to test/original test/original-out.ts; ts-node test/to test/new test/new-out.ts"
+    "conv-test": "ts-node test/to test/original test/original-out.json; ts-node test/to test/new test/new-out.json"
   },
   "repository": {
     "type": "git",
