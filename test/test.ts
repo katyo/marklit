@@ -121,15 +121,17 @@ function prettyPrint(str: string): string {
         : '∅'; // highlight empty contents
 }
 
-export function testMarked(tests: Record<string, [Options, string, string]>, blacklist: string[] = []) {
+export function testMarked(options: Options, tests: Record<string, [Options, string, string]>, blacklist: string[] = []) {
     for (const name in tests) {
         if (blacklist.indexOf(name) < 0) {
             it(name, () => {
                 const test = tests[name];
                 const [opts,] = test;
-                if (opts.headerIds !== false) opts.headerIds = true;
-                if (opts.gfm !== false) opts.gfm = true;
-                if (opts.tables !== false) opts.tables = true;
+                for (const key in options) {
+                    if (!(key in opts)) {
+                        opts[key] = options[key];
+                    }
+                }
                 doTest(...test);
             });
         }

@@ -148,13 +148,13 @@ if (!disabled(TEST_MARKED)) {
     describe('marked', () => {
         if (!disabled(TEST_MARKED_ORIG)) {
             describe('original', () => {
-                testMarked(originalTests, originalBlacklist);
+                testMarked({ gfm: true, tables: true, headerIds: false, xhtml: true }, originalTests, originalBlacklist);
             });
         }
 
         if (!disabled(TEST_MARKED_NEW)) {
             describe('new', () => {
-                testMarked(newTests, newBlacklist);
+                testMarked({ gfm: true, tables: true, headerIds: true }, newTests, newBlacklist);
             });
         }
     });
