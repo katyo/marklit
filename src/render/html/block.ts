@@ -32,7 +32,7 @@ export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
 export const CodeBlockWithClassHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
     ContextTag.Block,
     BlockTag.Code,
-    ({ }, { _, l }) => '<pre><code' + (l ? ' class="language-' + l + '"' : '') + '>' + escapeCode(_) + '</code></pre>\n'
+    ({ }, { _, l }) => '<pre><code' + (l ? ' class="language-' + escapeAttr(l) + '"' : '') + '>' + escapeCode(_) + '</code></pre>\n'
 ];
 
 export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
