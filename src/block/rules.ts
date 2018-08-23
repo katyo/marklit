@@ -442,7 +442,7 @@ function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, hre
 
 export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
-    BlockOrder.List,
+    BlockOrder.NpTable,
     ' *([^|\\n ].*\\|.*)\\n *([-:]+ *\\|[-| :]*)(?:\\n((?:.*[^>\\n ].*(?:\\n|$))*)\\n*|$)',
     parseTable,
     [BlockTag.Table],
@@ -451,7 +451,7 @@ export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
 
 export const Table: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
-    BlockOrder.List,
+    BlockOrder.Table,
     ' *\\|(.+)\\n *\\|?( *[-:]+[-| :]*)(?:\\n((?: *[^>\\n ].*(?:\\n|$))*)\\n*|$)',
     parseTable,
     [BlockTag.Table],

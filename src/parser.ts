@@ -106,7 +106,7 @@ export function init<CtxMap extends HasContexts & HasMeta>(...rules: ParserRules
     const matchers = {} as ParserMatchers<CtxMap, ContextMeta<CtxMap>>;
     for (const context of ctxs) {
         type MatchPathWithWeight = [
-            number, // weight
+            number, // weight (order)
             string, // regexp to match
             ParseFunc<CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>> // parser function
         ];
@@ -116,11 +116,21 @@ export function init<CtxMap extends HasContexts & HasMeta>(...rules: ParserRules
                 paths.push(path as MatchPathWithWeight);
             }
         }
-        matchers[context] = matchAny(paths
-            .sort(([weight_a,], [weight_b,]) =>
-                weight_a < weight_b ? -1 :
-                    weight_b < weight_a ? 1 : 0)
-            .map(([, ...path]) =>
+        // sorting rules by weight
+        paths.sort(([weight_a,], [weight_b,]) =>
+            weight_a < weight_b ? -1 :
+                weight_b < weight_a ? 1 : 0);
+        // overriding duplicated rules (with same weight)
+        for (let i = 1; i < paths.length;) {
+            if (paths[i][0] == paths[i - 1][0]) {
+                paths.splice(i - 1, 1);
+            } else {
+                i++;
+            }
+        }
+        // set matcher paths
+        matchers[context] = matchAny(
+            paths.map(([, ...path]) =>
                 path as MatchPath<ParserHandle<CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>>));
     }
 
