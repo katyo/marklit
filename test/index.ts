@@ -37,32 +37,24 @@ const { env: {
 const originalBlacklist = blacklist([
     'backslash_escapes',
     'code_spans',
-    'horizontal_rules',
     'inline_html_advanced',
     'inline_html_comments',
     'inline_html_simple',
-    'links_reference_style',
-    'literal_quotes_in_titles',
     'markdown_documentation_basics',
     'markdown_documentation_syntax',
-    'tabs',
     'hard_wrapped_paragraphs_with_list_like_lines',
 ], TEST_MARKED_ORIG_WL);
 
 const newBlacklist = blacklist([
-    'blockquote_list_item',
     'cm_html_blocks',
-    'cm_link_defs',
     'cm_links',
     'cm_raw_html',
     'double_link',
-    'gfm_code_hr_list',
     'html_comments',
     'main',
     'redos_html_closing',
     'redos_nolink',
     'relative_urls',
-    'same_bullet',
     'toplevel_paragraphs',
     'nogfm_hashtag',
 ], TEST_MARKED_NEW_WL);
@@ -92,20 +84,16 @@ const commonmarkBlacklist = blacklist([
     621, // Soft line breaks
 
     // Marklit specific
-    4, 5, // Tabs
-    34, // ATX headings
-    77, 78, // Indented code blocks !
     116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, // HTML blocks
-    217, 219, 221, 222, 226, 228, 230, 231, 233, 234, 240, 249, 250, 251, 253, 254, 255, 256, 262, // List items
-    266, 268, 271, 272, 275, 277, 281, 285, 286, 287, // Lists
-    296, 298, // Backslash escapes
-    308, // Entity and numeric character references
-    325, // Code spans !
-    452, // Emphasis and strong emphasis
-    466, // Links !
+    271, 272, // Lists (html comment)
+    298, // Backslash escapes (html)
+    308, // Entity and numeric character references (html)
+    325, // Code spans (html)
+    452, // Emphasis and strong emphasis (html)
+    466, // Links (html)
 
     584, 585, 586, 587, 588, 594, 596, 599, 600, 601, 602, 603, // Raw HTML
-    614, 615, // Hard line breaks
+    614, 615, // Hard line breaks (html)
 ], TEST_SPEC_CM_WL);
 
 const gfmBlacklist = blacklist([

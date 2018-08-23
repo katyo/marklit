@@ -244,7 +244,7 @@ export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
     ($, text) => {
         pushToken($, {
             $: BlockTag.Quote,
-            _: parseNest($, text.replace(/^ *> ?/gm, ''))
+            _: parseNest($, text.replace(/^ *> ?/gm, ''), ContextTag.Block)
         });
     },
     [BlockTag.Quote],

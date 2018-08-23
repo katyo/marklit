@@ -251,7 +251,7 @@ export const GfmBreaksTextSpan: InlineRule<string, NoMeta> = [
 ];
 
 function procText($: InlineHandle<string, NoMeta>, text: string) {
-    pushText($, text);
+    pushText($, text.replace(/ +/g, ' '));
 }
 
 function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage, NoMeta>, link: string, text: string, href: string, title?: string) {

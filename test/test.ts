@@ -116,7 +116,7 @@ function prettyPrint(str: string): string {
     return str ? str
         .replace(/ /g, '␣') // highlight spaces
         .replace(/\t/g, '→') // highlight tabs
-        .replace(/\n/g, '⤶') // highlight line-feeds
+        .replace(/\n/g, '⤶\n') // highlight line-feeds
         .replace(/\r/g, '⇠') // highlight carriage returns
         : '∅'; // highlight empty contents
 }
