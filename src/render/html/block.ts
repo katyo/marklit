@@ -1,7 +1,7 @@
 import { renderNest } from '../../render';
 import {
     ContextTag,
-    NoMeta, MetaHeadings,
+    NoMeta,
     UnknownToken
 } from '../../model';
 import {
@@ -14,7 +14,8 @@ import {
     BlockListItem,
     BlockTableCell,
     BlockAlign,
-    BlockTableRow
+    BlockTableRow,
+    MetaHeadings
 } from '../../block/model';
 import {
     BlockRenderRuleStr,

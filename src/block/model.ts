@@ -123,6 +123,41 @@ export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
     BlockText<InlineTokenMap>,
     BlockTable<BlockTokenMap> { }
 
+// Metas
+
+export interface MetaLink {
+    l: string; // href
+    t?: string; // title
+}
+
+export interface MetaLinks {
+    links: Record<string, MetaLink>;
+}
+
+export interface MetaAbbrevs {
+    abbrevs: Record<string, string>;
+}
+
+export interface MetaFootnotes<BlockTokenMap> {
+    footnotes: Record<string, TokensType<BlockTokenMap>>;
+}
+
+export interface MetaHeading<InlineTokenMap> {
+    t: string; // text
+    n: number; // level
+    _: TokensType<InlineTokenMap>;
+}
+
+export interface MetaHeadings<InlineTokenMap> {
+    headings: MetaHeading<InlineTokenMap>[];
+}
+
+export interface MetaData<BlockTokenMap, InlineTokenMap> extends
+    MetaLinks,
+    MetaAbbrevs,
+    MetaFootnotes<BlockTokenMap>,
+    MetaHeadings<InlineTokenMap> { }
+
 // Basics
 
 export interface BasicBlockTokenMap extends BlockTokenMap<BasicBlockTokenMap, BasicInlineTokenMap> { }

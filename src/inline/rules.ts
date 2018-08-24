@@ -3,9 +3,12 @@ import { ParserHandle, ParserRule, parseNest, pushToken, pushText } from '../par
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
-    NoMeta, MetaLinks,
+    NoMeta,
     UnknownToken, TokenType
 } from '../model';
+import {
+    MetaLinks
+} from '../block/model';
 import {
     InlineTag, InlineOrder,
     InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr, InlineText

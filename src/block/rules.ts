@@ -3,8 +3,7 @@ import { ParserHandle, ParserRule, parseNest, procNest, pushToken, lastToken, Pr
 import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap,
-    NoMeta, MetaLinks, MetaHeadings,
-    UnknownToken, TokenType, MetaHeading
+    NoMeta, UnknownToken, TokenType
 } from '../model';
 import {
     BlockTag, BlockOrder,
@@ -13,7 +12,8 @@ import {
     BlockTable, BlockTableRow,
     BlockHr, BlockQuote,
     BlockList, BlockListItem,
-    BlockParagraph, BlockText, BlockOrdList
+    BlockParagraph, BlockText, BlockOrdList,
+    MetaLinks, MetaHeading, MetaHeadings
 } from './model';
 
 export type BlockRule<BlockTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block | ContextTag.BlockNest, Meta>;

@@ -1,9 +1,12 @@
 import { renderNest } from '../../render';
 import {
     ContextTag,
-    NoMeta, MetaLinks, MetaLink,
+    NoMeta,
     UnknownToken
 } from '../../model';
+import {
+    MetaLinks, MetaLink
+} from '../../block/model';
 import {
     InlineTag,
     InlineLink, InlineImage,
