@@ -134,6 +134,7 @@ const list = substRe('( *)(bull) [\\s\\S]+?(?:hr|def|\\n{2,}(?! )(?!\\1bull )\\n
 export const Newline: BlockRule<BlockSpace, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Newline,
+    // ⤶
     '\\n+',
     $ => { pushToken($, { $: BlockTag.Space }); },
     [BlockTag.Space],
@@ -143,6 +144,7 @@ export const Newline: BlockRule<BlockSpace, NoMeta> = [
 export const CodeBlock: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Code,
+    // ␣␣␣␣some code
     '( {4}[^\\n]+\\n*)+',
     ($, text) => {
         pushToken($, { $: BlockTag.Code, _: text.replace(/^ {4}/gm, '') });
@@ -154,6 +156,9 @@ const fences = ' *(`{3,}|~{3,})[ \\.]*(\\S+)? *\\n([\\s\\S]*?)\\n? *\\1 *(?:\\n+
 export const Fences: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Fences,
+    // ```language (c, c++, rust, js, typescript, ...)
+    // some code
+    // ```
     fences,
     ($, _, fences, lang, text) => {
         pushToken($, { $: BlockTag.Code, l: lang, _: text || '' });
@@ -165,6 +170,9 @@ const dollars = ' *(\\${3,})[ \\.]*(\\S+)? *\\n([\\s\\S]*?)\\n? *\\1 *(?:\\n+|$)
 export const MathBlock: BlockRule<BlockMath, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Math,
+    // $$$specificator (tex, latex, dot, ...)
+    // some math
+    // $$$
     dollars,
     ($, _, dollars, spec, text) => {
         pushToken($, { $: BlockTag.Math, s: spec, _: text || '' });
@@ -174,6 +182,9 @@ export const MathBlock: BlockRule<BlockMath, NoMeta> = [
 export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
+    // # Heading 1 #
+    // ## Heading 2 ##
+    // ### Heading 3 ###
     heading,
     ($, _, sharps, text) => {
         if (text.charAt(0) == '#') {
@@ -190,6 +201,10 @@ export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
 export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.LHeading,
+    // Heading 1
+    // =========
+    // Heading 2
+    // ---------
     lheading,
     ($, _, text, underscore) => {
         parseHeading($, underscore == '=' ? 1 : 2, text);
@@ -202,6 +217,9 @@ export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
 export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
+    // # Heading 1
+    // ## Heading 2
+    // ### Heading 3
     ' *(#{1,6}) +([^\\n]+?) *#* *(?:\\n+|$)',
     ($, _, sharps, text) => {
         parseHeading($, sharps.length, text);
@@ -243,6 +261,9 @@ export function extractText(tokens: TokenWithNested[]): string {
 export const Hr: BlockRule<BlockHr, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Hr,
+    // - - -
+    // _ _ _
+    // * * *
     hr,
     $ => { pushToken($, { $: BlockTag.Hr }); }
 ];
@@ -250,6 +271,9 @@ export const Hr: BlockRule<BlockHr, NoMeta> = [
 export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Quote,
+    // > some
+    // > block
+    // > quote
     substRe('( {0,3}> ?(paragraph|[^\\n]*)(?:\\n|$))+', {
         paragraph
     }),
@@ -323,6 +347,14 @@ export function procInlines<BlockTokenMap, Meta>($: BlockHandle<BlockTokenMap, M
 export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.List,
+    // * Item 1
+    // * Item 2
+    // * Item 3
+    // 1. Item
+    // 2. Item
+    // 3. Item
+    // * [ ] Incomplete task
+    // * [x] Complete task
     list,
     ($, str, { }, bull) => { parseList($, str, bull, false); },
     [BlockTag.List, BlockTag.OrdList],
@@ -332,6 +364,14 @@ export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken
 export const SmartList: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.List,
+    // * Item 1
+    // * Item 2
+    // * Item 3
+    // 1. Item
+    // 2. Item
+    // 3. Item
+    // * [ ] Incomplete task
+    // * [x] Complete task
     list,
     ($, str, { }, bull) => { parseList($, str, bull, true); },
     [BlockTag.List, BlockTag.OrdList],
@@ -447,6 +487,7 @@ export function textBlocksToParagraphs(tokens: TokenType<BlockParagraph<UnknownT
 export const Def: BlockRule<void, MetaLinks> = [
     [ContextTag.Block],
     BlockOrder.Def,
+    // [blog](http://blog.example.com/ "My blog")
     substRe(' {0,3}\\[(label)\\]: *\\n? *<?([^\\s>]+)>?(?:(?: +\\n? *| *\\n *)(title))? *(?:\\n+|$)', {
         label: '(?!\\s*\\])(?:\\\\[\\[\\]]|[^\\[\\]])+',
         title: '(?:"(?:\\\\"?|[^"\\\\])*"|\'[^\'\\n]*(?:\\n[^\'\\n]+)*\\n?\'|\\([^()]*\\))'
@@ -458,6 +499,7 @@ export const Def: BlockRule<void, MetaLinks> = [
 export const PedanticDef: BlockRule<void, MetaLinks> = [
     [ContextTag.Block],
     BlockOrder.Def,
+    // [blog](http://blog.example.com/ "My blog")
     ' *\\[([^\\]]+)\\]: *<?([^\\s>]+)>?(?: +(["(][^\\n]+[")]))? *(?:\\n+|$)',
     parseDef,
     initDef
@@ -483,6 +525,10 @@ function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, hre
 export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.NpTable,
+    // Header 1 | Header 2
+    // :------- | -------:
+    // Cell 1:1 | Cell 1:2
+    // Cell 2:1 | Cell 2:2
     ' *([^|\\n ].*\\|.*)\\n *([-:]+ *\\|[-| :]*)(?:\\n((?:.*[^>\\n ].*(?:\\n|$))*)\\n*|$)',
     parseTable,
     [BlockTag.Table],
@@ -492,6 +538,10 @@ export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
 export const Table: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.Table,
+    // | Header 1 | Header 2 |
+    // | :------- | -------: |
+    // | Cell 1:1 | Cell 1:2 |
+    // | Cell 2:1 | Cell 2:2 |
     ' *\\|(.+)\\n *\\|?( *[-:]+[-| :]*)(?:\\n((?: *[^>\\n ].*(?:\\n|$))*)\\n*|$)',
     parseTable,
     [BlockTag.Table],

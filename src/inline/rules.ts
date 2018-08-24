@@ -38,6 +38,8 @@ const email = '[a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{
 export const AutoLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     [ContextTag.Inline],
     InlineOrder.AutoLink,
+    // <http://example.com/>
+    // <mailbox@example.com>
     substRe('<(scheme:[^\\s\\x00-\\x1f<>]*|email)>', {
         scheme: '[a-zA-Z][a-zA-Z0-9+.-]{1,31}',
         email
@@ -54,6 +56,9 @@ export const AutoLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
 export const Url: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     [ContextTag.Inline],
     InlineOrder.Url,
+    // http://example.com/
+    // www.example.com
+    // mailbox@example.com
     substRe('((?:ftp|https?):\\/\\/|www\\.)(?:[a-zA-Z0-9\\-]+\\.?)+[^\\s<]*|email', { email }),
     ($, text, url, at) => {
         const _text = text;
@@ -82,6 +87,8 @@ const label = '(?:\\[[^\\[\\]]*\\]|\\\\[\\[\\]]?|`[^`]*`|[^\\[\\]\\\\])*?';
 export const Link: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Link,
+    // [my blog](http://blog.example.com/ "this is link to my blog")
+    // ![nyan cat](/nyan-cat.gif)
     substRe('!?\\[(label)\\]\\(href(?:\\s+(title))?\\s*\\)', {
         label,
         href: '\\s*(<(?:\\\\[<>]?|[^\\s<>\\\\])*>|(?:\\\\[()]?|\\([^\\s\\x00-\\x1f\\\\]*\\)|[^\\s\\x00-\\x1f()\\\\])*?)',
@@ -95,6 +102,8 @@ export const Link: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
 export const PedanticLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Link,
+    // [my blog](http://blog.example.com/ "this is link to my blog")
+    // ![nyan cat](/nyan-cat.gif)
     substRe('!?\\[(label)\\]\\((.*?)\\)', { label }),
     ($, link: string, text: string, href: string, title?: string) => {
         const m = /^([^'"]*[^\s])\s+(['"])(.*)\2/.exec(href);
@@ -116,6 +125,8 @@ function procLink($: InlineHandle<InlineLink<UnknownToken>, NoMeta>, link: strin
 export const RefLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.RefLink,
+    // [my blog][blog]
+    // ![nyan cat][nyan-cat]
     substRe('!?\\[(label)\\]\\[(?!\\s*\\])((?:\\\\[\\[\\]]?|[^\\[\\]\\\\])+)\\]', { label }),
     procRefNoLink
 ];
@@ -123,6 +134,8 @@ export const RefLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
 export const PedanticRefLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.RefLink,
+    // [my blog][blog]
+    // ![nyan cat][nyan-cat]
     substRe('!?\\[(label)\\]\\s*\\[([^\\]]*)\\]', { label }),
     procRefNoLink
 ];
@@ -130,6 +143,8 @@ export const PedanticRefLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = 
 export const NoLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.NoLink,
+    // [my blog]
+    // ![nyan cat]
     '!?\\[(?!\\s*\\])((?:\\[[^\\[\\]]*\\]|\\\\[\\[\\]]|[^\\[\\]])*)\\](?:\\[\\])?',
     procRefNoLink
 ];
@@ -148,6 +163,8 @@ function procRefNoLink($: InlineHandle<InlineLink<UnknownToken> | InlineText, Me
 export const Strong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Strong,
+    // **some important text**
+    // __some important text__
     '__([^\\s])__(?!_)|^\\*\\*([^\\s])\\*\\*(?!\\*)|^__([^\\s][\\s\\S]*?[^\\s])__(?!_)|^\\*\\*([^\\s][\\s\\S]*?[^\\s])\\*\\*(?!\\*)',
     procStrong
 ];
@@ -155,6 +172,8 @@ export const Strong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
 export const PedanticStrong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Strong,
+    // **some important text**
+    // __some important text__
     '__(?=\\S)([\\s\\S]*?\\S)__(?!_)|\\*\\*(?=\\S)([\\s\\S]*?\\S)\\*\\*(?!\\*)',
     procStrong
 ];
@@ -166,6 +185,8 @@ function procStrong($: InlineHandle<InlineStrong<UnknownToken>, NoMeta>, { }: st
 export const Em: InlineRule<InlineEm<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Em,
+    // *some important text*
+    // _some important text_
     '_([^\\s_])_(?!_)|^\\*([^\\s*"<\\[])\\*(?!\\*)|^_([^\\s][\\s\\S]*?[^\\s_])_(?!_)|^_([^\\s_][\\s\\S]*?[^\\s])_(?!_)|^\\*([^\\s"<\\[][\\s\\S]*?[^\\s*])\\*(?!\\*)|^\\*([^\\s*"<\\[][\\s\\S]*?[^\\s])\\*(?!\\*)',
     procEm
 ];
@@ -173,6 +194,8 @@ export const Em: InlineRule<InlineEm<UnknownToken>, NoMeta> = [
 export const PedanticEm: InlineRule<InlineEm<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Em,
+    // *some important text*
+    // _some important text_
     '_(?=\\S)([\\s\\S]*?\\S)_(?!_)|\\*(?=\\S)([\\s\\S]*?\\S)\\*(?!\\*)',
     procEm
 ];
@@ -184,6 +207,7 @@ function procEm($: InlineHandle<InlineEm<UnknownToken>, NoMeta>, { }: string, _1
 export const Del: InlineRule<InlineDel<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Del,
+    // ~~some striked text~~
     '~+(?=\\S)([\\s\\S]*?\\S)~+',
     ($, { }, text) => {
         pushToken($, { $: InlineTag.Del, _: parseNest($, text) });
@@ -193,6 +217,7 @@ export const Del: InlineRule<InlineDel<UnknownToken>, NoMeta> = [
 export const CodeSpan: InlineRule<InlineCode, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Code,
+    // `some code`
     '(`+)\\s*([\\s\\S]*?[^`]?)\\s*\\1(?!`)',
     ($, { }, fences, text) => {
         pushToken($, { $: InlineTag.Code, _: text.replace(/\s+$/, '') });
@@ -202,6 +227,7 @@ export const CodeSpan: InlineRule<InlineCode, NoMeta> = [
 export const MathSpan: InlineRule<InlineMath, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Math,
+    // $some math$
     '(\\$+)\\s*([\\s\\S]*?[^\\$]?)\\s*\\1(?!\\$)',
     ($, { }, delims, text) => {
         pushToken($, { $: InlineTag.Math, _: text.replace(/\s+$/, '') });
