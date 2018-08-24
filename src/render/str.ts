@@ -55,6 +55,10 @@ export function escapeAttr(str: string): string {
         ;
 }
 
+export function simpleId(src: string): string {
+    return src.toLowerCase().replace(/[^\w]+/g, '-');
+}
+
 export function sanitizeUrl(url: string): string | void {
     let proto: string;
     try {

@@ -14,11 +14,11 @@ import {
     BlockAlign, BlockSpace,
     BlockCode, BlockMath, BlockHeading,
     BlockTable, BlockTableRow,
-    BlockHr, BlockQuote,
+    BlockHr, BlockQuote, BlockFootnotes,
     BlockList, BlockListItem,
     BlockParagraph, BlockText, BlockOrdList,
     MetaLinks, MetaHeading, MetaHeadings,
-    MetaAbbrevs
+    MetaAbbrevs, MetaFootnotes
 } from './model';
 
 export type BlockRule<BlockTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block | ContextTag.BlockNest, Meta>;
@@ -146,9 +146,9 @@ export const CodeBlock: BlockRule<BlockCode, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Code,
     // ␣␣␣␣some code
-    '( {4}[^\\n]+\\n*)+',
+    '(?: {4}[^\\n]+\\n*)+',
     ($, text) => {
-        pushToken($, { $: BlockTag.Code, _: text.replace(/^ {4}/gm, '') });
+        pushToken($, { $: BlockTag.Code, _: text.replace(/^ {4}/gm, '').replace(/\n+$/, '\n') });
     }
 ];
 
@@ -285,10 +285,12 @@ export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
         });
     },
     [BlockTag.Quote],
-    ($, token) => {
-        procNest($, token._);
-    }
+    procBlocks
 ];
+
+export function procBlocks<BlockTokenMap extends { [tag: number]: BlockPhrase<BlockTokenMap> }, Meta>($: BlockHandle<BlockTokenMap, Meta>, token: TokenType<BlockTokenMap>) {
+    procNest($, token._);
+}
 
 export const Paragraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
@@ -341,7 +343,7 @@ export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     procInlines
 ];
 
-export function procInlines<BlockTokenMap extends { [0]: BlockPhrase<BlockTokenMap> }, Meta>($: BlockHandle<BlockTokenMap, Meta>, token: TokenType<BlockTokenMap>) {
+export function procInlines<BlockTokenMap extends { [tag: number]: BlockPhrase<InlineTokenMap> }, InlineTokenMap, Meta>($: BlockHandle<BlockTokenMap, Meta>, token: TokenType<BlockTokenMap>) {
     token._ = parseNest($, token._ as any, ContextTag.Inline);
 }
 
@@ -379,7 +381,7 @@ export const SmartList: BlockRule<BlockList<UnknownToken> | BlockOrdList<Unknown
     procList
 ];
 
-function procList($: BlockHandle<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta>, token: TokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken>>) {
+function procList($: BlockHandle<BlockList<UnknownToken> | BlockOrdList<UnknownToken> | BlockFootnotes<UnknownToken>, NoMeta>, token: TokenType<BlockList<UnknownToken> | BlockOrdList<UnknownToken> | BlockFootnotes<UnknownToken>>) {
     for (const item of token._) {
         procNest($, item._, ContextTag.BlockNest);
     }
@@ -531,9 +533,40 @@ export const AbbrevBlock: BlockRule<void, MetaAbbrevs> = [
     // *[HTML]: Hyper Text Markup Language
     substRe(' {0,3}\\*\\[(label)\\]: *\\n? *([^\\n]+) *(?:\\n+|$)', { label }),
     ({ m: { a } }, { }, word, desc) => {
-        if (a && !a[word]) a[word] = desc;
+        if (!a[word]) a[word] = desc;
     },
     m => { m.a = {}; }
+];
+
+export const FootnotesBlock: BlockRule<BlockFootnotes<UnknownToken>, MetaFootnotes> = [
+    [ContextTag.Block],
+    BlockOrder.Footnotes,
+    // [^1]: Long definition
+    //     With optional
+    //     indented contents
+    ' {0,3}\\[\\^([^\\]]+)\\]: *([^\\n]+)? *(?:\\n+|$)((?: {4}[^\\n]+\\n*)+)?',
+    ($, { }, anchor, text, block) => {
+        const { m: { f } } = $;
+        if (f.indexOf(anchor) < 0) {
+            const nested: UnknownToken[] = parseNest($, (text || '') + (block ? block.replace(/^ {4}/gm, '') : ''), ContextTag.BlockNest);
+            if (block) textBlocksToParagraphs(nested);
+            let token = lastToken($);
+            if (!token || token.$ != BlockTag.Footnotes) {
+                // push new
+                pushToken($, token = {
+                    $: BlockTag.Footnotes,
+                    i: f.length,
+                    _: []
+                });
+            }
+            // add note
+            token._.push({ i: f.length, l: anchor, _: nested });
+            f.push(anchor);
+        }
+    },
+    m => { m.f = []; },
+    [BlockTag.Footnotes],
+    procList
 ];
 
 export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [

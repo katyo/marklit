@@ -8,10 +8,14 @@ import {
 
     InlineNormal,
     InlineAbbrev,
+    InlineFootnote,
+    BlockFootnotes,
     BlockNormal,
     AbbrevBlock,
     Abbrev,
     AbbrevTextSpan,
+    FootnotesBlock,
+    Footnote,
     MathBlock,
 
     InlineGfmBreaks,
@@ -24,6 +28,7 @@ import {
     MetaHeadings,
     MetaLinks,
     MetaAbbrevs,
+    MetaFootnotes,
 
     BlockTag,
     InlineTag,
@@ -612,7 +617,7 @@ paragraph`, {
     
 regular text`,
                 { l: {}, h: [] }, [
-                    { $: BlockTag.Code, _: 'code block\n\n' },
+                    { $: BlockTag.Code, _: 'code block\n' },
                     { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'regular text' }] }
                 ]);
         });
@@ -750,7 +755,9 @@ regular text`,
                     }
                 ]);
         });
+    });
 
+    describe('extension', () => {
         describe('math', () => {
             // block token with math
             interface BlockToken extends BlockTokenMap<BlockToken, InlineToken>, BlockMath { }
@@ -853,10 +860,10 @@ $$$
             });
         });
 
-        describe('abbrevs', () => {
+        describe('abbrev', () => {
             // metadata with abbrevs
             interface Meta extends MetaLinks, MetaHeadings, MetaAbbrevs { }
-            // block token with abbrevs
+            // inline token with abbrevs
             interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
             // context with abbrevs
             interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
@@ -884,6 +891,97 @@ is maintained by the W3C.
                         { $: InlineTag.Text, _: "." }
                     ]
                 }]);
+        });
+
+        describe('footnote', () => {
+            // metadata with footnotes
+            interface Meta extends MetaLinks, MetaHeadings, MetaFootnotes { }
+            // inline token with footnotes
+            interface InlineToken extends InlineTokenMap<InlineToken>, InlineFootnote { }
+            // block token with footnotes
+            interface BlockToken extends BlockTokenMap<BlockToken, InlineToken>, BlockFootnotes<BlockToken> { }
+            // context with footnotes
+            interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
+
+            const parser = init<Context>(...BlockNormal, FootnotesBlock, ...InlineNormal, Footnote);
+            const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), [m, r]));
+
+            _('simple', `Footnotes[^1] have a label[^@#$%] and the footnote's content.
+
+[^1]: This is a footnote content.
+[^@#$%]: A footnote on the label: "@#$%".`, {
+                    l: {}, h: [], f: ['1', '@#$%']
+                }, [
+                    {
+                        $: BlockTag.Paragraph,
+                        _: [
+                            { $: InlineTag.Text, _: "Footnotes" },
+                            { $: InlineTag.Footnote, l: "1" },
+                            { $: InlineTag.Text, _: " have a label" },
+                            { $: InlineTag.Footnote, l: "@#$%" },
+                            { $: InlineTag.Text, _: " and the footnote's content." }
+                        ]
+                    },
+                    {
+                        $: BlockTag.Footnotes,
+                        i: 0,
+                        _: [
+                            {
+                                i: 0,
+                                l: '1',
+                                _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: "This is a footnote content." }] }]
+                            },
+                            {
+                                i: 1,
+                                l: '@#$%',
+                                _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: `A footnote on the label: "@#$%".` }] }]
+                            }
+                        ]
+                    }
+                ]);
+
+            _('nested contents', `[^1]:
+    The first paragraph of the definition.
+
+    Paragraph two of the definition.
+
+    > A blockquote with
+    > multiple lines.
+
+        a code block
+
+A final paragraph.
+`, { l: {}, h: [], f: ['1'] }, [
+                    {
+                        $: BlockTag.Footnotes, i: 0, _: [
+                            {
+                                i: 0, l: '1', _: [
+                                    {
+                                        $: BlockTag.Paragraph,
+                                        _: [{ $: InlineTag.Text, _: "The first paragraph of the definition." }]
+                                    },
+                                    {
+                                        $: BlockTag.Paragraph,
+                                        _: [{ $: InlineTag.Text, _: "Paragraph two of the definition." }]
+                                    },
+                                    {
+                                        $: BlockTag.Quote, _: [
+                                            {
+                                                $: BlockTag.Paragraph,
+                                                _: [{ $: InlineTag.Text, _: "A blockquote with\nmultiple lines." }]
+                                            },
+                                        ]
+                                    },
+                                    { $: BlockTag.Code, _: "a code block\n" }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        $: BlockTag.Paragraph,
+                        _: [{ $: InlineTag.Text, _: "A final paragraph." }]
+                    }
+                ]);
         });
     });
 }

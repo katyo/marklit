@@ -16,7 +16,9 @@ import {
     BlockTableCell,
     BlockAlign,
     BlockTableRow,
-    MetaHeadings
+    BlockFootnotes,
+    MetaHeadings,
+    MetaFootnotes
 } from '../../block/model';
 import {
     BlockRenderRuleStr,
@@ -24,6 +26,7 @@ import {
     escapeAttr,
     escapeCode,
     textAlign,
+    simpleId
 } from '../str';
 
 export const CodeBlockHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
@@ -50,6 +53,17 @@ export const MathBlockWithClassHtml: BlockRenderRuleStr<BlockMath, NoMeta> = [
     ({ }, { _, s }) => '<math' + (s ? ' class="spec-' + escapeAttr(s) + '"' : '') + '>' + escapeCode(_) + '</math>\n'
 ];
 
+export const FootnotesBlockHtml: BlockRenderRuleStr<BlockFootnotes<UnknownToken>, MetaFootnotes> = [
+    ContextTag.Block,
+    BlockTag.Footnotes,
+    ($, { _ }) => '<ol class="fn-list">\n' +
+        _.map(({ l, _ }) => {
+            const id = simpleId(l);
+            return '<li id="fn-' + id + '">\n' + renderNest($, _) +
+                '<a href="#fnref-' + id + '">↩</a>\n</li>\n';
+        }).join('') + '</ol>\n'
+];
+
 export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings> = [
     ContextTag.Block,
     BlockTag.Heading,
@@ -59,13 +73,9 @@ export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHea
 export const HeadingWithIdHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings> = [
     ContextTag.Block,
     BlockTag.Heading,
-    ($, { n, i, _ }) => `<h${n} id="${headingId($.m.h[i].t)}">` +
+    ($, { n, i, _ }) => `<h${n} id="${simpleId($.m.h[i].t)}">` +
         renderNest($, _, ContextTag.Inline) + `</h${n}>\n`
 ];
-
-export function headingId(t: string): string {
-    return t.toLowerCase().replace(/[^\w]+/g, '-');
-}
 
 export const HrHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
     ContextTag.Block,

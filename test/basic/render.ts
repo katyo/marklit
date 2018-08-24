@@ -4,7 +4,7 @@ import {
 
     InlineTag, BlockTag,
 
-    MetaLinks, MetaHeadings, MetaAbbrevs,
+    MetaLinks, MetaHeadings, MetaAbbrevs, MetaFootnotes,
 
     ContextMap, InlineTokenMap, BlockTokenMap,
 
@@ -13,7 +13,9 @@ import {
     InlineAbbrev, AbbrevHtml,
 
     initRenderHtml,
-    render
+    render,
+
+    InlineFootnote, BlockFootnotes, FootnoteHtml, FootnotesBlockHtml
 } from '../../src/index';
 
 interface Meta extends MetaHeadings, MetaLinks { }
@@ -66,8 +68,6 @@ export default function() {
 
         interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
 
-        interface BlockToken extends BlockTokenMap<BlockToken, InlineToken> { }
-
         interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
 
         const renderer = initRenderHtml<Context>(...BlockHtml, ...InlineHtml, AbbrevHtml);
@@ -102,5 +102,56 @@ export default function() {
                     ]
                 }
             ], `<p><abbr>HTTP</abbr></p>`);
+    });
+
+    describe('abbrev', () => {
+        interface Meta extends MetaHeadings, MetaLinks, MetaFootnotes { }
+
+        interface InlineToken extends InlineTokenMap<InlineToken>, InlineFootnote { }
+
+        interface BlockToken extends BlockTokenMap<BlockToken, InlineToken>, BlockFootnotes<BlockToken> { }
+
+        interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
+
+        const renderer = initRenderHtml<Context>(...BlockHtml, FootnotesBlockHtml, ...InlineHtml, FootnoteHtml);
+        const _ = (test: string, meta: Meta, tokens: TokenType<BlockToken>[], html: string) => it(test, () => htmlEq(render(renderer, [meta, tokens]), html));
+
+        _("simple", { l: {}, h: [], f: ['1', '@#$%'] }, [
+            {
+                $: BlockTag.Paragraph,
+                _: [
+                    { $: InlineTag.Text, _: "Footnotes" },
+                    { $: InlineTag.Footnote, l: "1" },
+                    { $: InlineTag.Text, _: " have a label" },
+                    { $: InlineTag.Footnote, l: "@#$%" },
+                    { $: InlineTag.Text, _: " and the footnote's content." }
+                ]
+            },
+            {
+                $: BlockTag.Footnotes,
+                i: 0,
+                _: [
+                    {
+                        i: 0,
+                        l: '1',
+                        _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: "This is a footnote content." }] }]
+                    },
+                    {
+                        i: 1,
+                        l: '@#$%',
+                        _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: `A footnote on the label: "@#$%".` }] }]
+                    }
+                ]
+            }
+        ], `<p>Footnotes<sup class="fn-ref"><a id="fnref-1" href="#fn-1">1</a></sup> have a label<sup class="fn-ref"><a id="fnref--" href="#fn--">@#$%</a></sup> and the footnote&#39;s content.</p>
+
+<ol class="fn-list">
+<li id="fn-1">
+This is a footnote content.<a href="#fnref-1">↩</a>
+</li>
+<li id="fn--">
+A footnote on the label: &quot;@#$%&quot;.<a href="#fnref--">↩</a>
+</li>
+</ol>`);
     });
 }

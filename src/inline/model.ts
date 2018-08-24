@@ -11,12 +11,14 @@ export const enum InlineTag {
     Del,
     Br,
     Abbrev,
+    Footnote,
 }
 
 export const enum InlineOrder {
     Escape,
     AutoLink,
     Url,
+    Footnote,
     Link,
     RefLink,
     NoLink,
@@ -80,6 +82,12 @@ export interface InlineAbbrev {
     };
 }
 
+export interface InlineFootnote {
+    [InlineTag.Footnote]: {
+        l: string; // link
+    };
+}
+
 export interface InlinePhrase<InlineTokenMap> {
     _: TokensType<InlineTokenMap>;
 }
@@ -97,7 +105,6 @@ export interface InlineTokenMap<InlineTokenMap> extends
     InlineEm<InlineTokenMap>,
     InlineDel<InlineTokenMap>,
     InlineCode,
-    //InlineMath,
     InlineAbbrev,
     InlineBr,
     InlineText { }

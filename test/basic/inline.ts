@@ -19,7 +19,8 @@ import {
 
     InlineMath, MathSpan,
 
-    MetaAbbrevs, InlineAbbrev, Abbrev
+    MetaAbbrevs, InlineAbbrev, Abbrev,
+    MetaFootnotes, InlineFootnote, Footnote
 } from '../../src/index';
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
@@ -160,45 +161,72 @@ export default function() {
         });
     });
 
-    describe('math', () => {
-        // inline token with math
-        interface InlineToken extends InlineTokenMap<InlineToken>, InlineMath { }
-        // inline context with math
-        interface InlineContext extends ContextMap<any, InlineToken, NoMeta> { }
+    describe('extension', () => {
+        describe('math', () => {
+            // inline token with math
+            interface InlineToken extends InlineTokenMap<InlineToken>, InlineMath { }
+            // inline context with math
+            interface InlineContext extends ContextMap<any, InlineToken, NoMeta> { }
 
-        const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, MathSpan);
-        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, MathSpan);
+            const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 
-        _('Inline $math$', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math' }]);
-        _('Inline $ math with spaces $', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math with spaces' }]);
-        _('Inline $$math with $ char$$.', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math with $ char' }, { $: InlineTag.Text, _: '.' }]);
-    });
+            _('Inline $math$', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math' }]);
+            _('Inline $ math with spaces $', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math with spaces' }]);
+            _('Inline $$math with $ char$$.', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math with $ char' }, { $: InlineTag.Text, _: '.' }]);
+        });
 
-    describe('abbrevs', () => {
-        // metadata with abbrevs
-        interface Meta extends MetaAbbrevs { }
-        // block token with abbrevs
-        interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
-        // context with abbrevs
-        interface InlineContext extends ContextMap<UnknownToken, InlineToken, Meta> { }
+        describe('abbrev', () => {
+            // metadata with abbrevs
+            interface Meta extends MetaAbbrevs { }
+            // block token with abbrevs
+            interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
+            // context with abbrevs
+            interface InlineContext extends ContextMap<UnknownToken, InlineToken, Meta> { }
 
-        const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, Abbrev);
-        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, Abbrev);
+            const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 
-        _(`*[HTTP Hyper Text Transfer Protocol]`, [
-            { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
-        ]);
+            _(`*[HTTP Hyper Text Transfer Protocol]`, [
+                { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
+            ]);
 
-        _(`*[HTTP: Hyper Text Transfer Protocol]`, [
-            { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
-        ]);
+            _(`*[HTTP: Hyper Text Transfer Protocol]`, [
+                { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
+            ]);
 
-        _(`*[HTTP|Hyper Text Transfer Protocol]`, [
-            { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
-        ]);
+            _(`*[HTTP|Hyper Text Transfer Protocol]`, [
+                { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
+            ]);
 
-        _(`*[HTTP]`, [
-            { $: InlineTag.Abbrev, t: undefined, _: "HTTP" },
-        ]);
+            _(`*[HTTP]`, [
+                { $: InlineTag.Abbrev, t: undefined, _: "HTTP" },
+            ]);
+        });
+
+        describe('footnote', () => {
+            // metadata with abbrevs
+            interface Meta extends MetaFootnotes { }
+            // block token with abbrevs
+            interface InlineToken extends InlineTokenMap<InlineToken>, InlineFootnote { }
+            // context with abbrevs
+            interface InlineContext extends ContextMap<UnknownToken, InlineToken, Meta> { }
+
+            const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, Footnote);
+            const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
+
+            _(`Short term[^1]`, [
+                { $: InlineTag.Text, _: "Short term" },
+                { $: InlineTag.Footnote, l: "1" },
+            ]);
+
+            _(`Footnotes[^1] have a label[^@#$%] and the footnote's content.`, [
+                { $: InlineTag.Text, _: "Footnotes" },
+                { $: InlineTag.Footnote, l: "1" },
+                { $: InlineTag.Text, _: " have a label" },
+                { $: InlineTag.Footnote, l: "@#$%" },
+                { $: InlineTag.Text, _: " and the footnote's content." },
+            ]);
+        });
     });
 }

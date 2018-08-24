@@ -6,7 +6,7 @@ export const enum BlockTag {
     Heading,
     Paragraph,
     Quote,
-    Footnote,
+    Footnotes,
     List,
     OrdList,
     Table,
@@ -27,7 +27,7 @@ export const enum BlockOrder {
     Quote,
     List,
     Abbrev,
-    Footnote,
+    Footnotes,
     Def,
     Table,
     LHeading,
@@ -70,10 +70,15 @@ export interface BlockQuote<BlockTokenMap> {
     [BlockTag.Quote]: BlockNested<BlockTokenMap>;
 }
 
-export interface BlockFootnote<BlockTokenMap> {
-    [BlockTag.Footnote]: {
-        l: string;
-        _: TokensType<BlockTokenMap>;
+export interface BlockFootnote<BlockTokenMap> extends BlockNested<BlockTokenMap> {
+    i: number; // offset
+    l: string;
+}
+
+export interface BlockFootnotes<BlockTokenMap> {
+    [BlockTag.Footnotes]: {
+        i: number; // offset
+        _: BlockFootnote<BlockTokenMap>[];
     };
 }
 
@@ -135,7 +140,6 @@ export interface BlockSpace {
 export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
     BlockSpace,
     BlockCode,
-    //BlockMath,
     BlockHeading<InlineTokenMap>,
     BlockHr,
     BlockQuote<BlockTokenMap>,
@@ -175,8 +179,6 @@ export interface MetaFootnotes {
 
 export interface MetaData extends
     MetaHeadings,
-    //MetaAbbrevs,
-    //MetaFootnotes,
     MetaLinks { }
 
 // Basics

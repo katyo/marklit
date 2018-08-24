@@ -5,13 +5,15 @@ import {
     UnknownToken
 } from '../../model';
 import {
-    MetaLinks, MetaLink, MetaAbbrevs
+    MetaLinks, MetaLink,
+    MetaAbbrevs, MetaFootnotes
 } from '../../block/model';
 import {
     InlineTag,
     InlineLink, InlineImage,
     InlineStrong, InlineEm, InlineDel,
-    InlineCode, InlineMath, InlineAbbrev,
+    InlineCode, InlineMath,
+    InlineAbbrev, InlineFootnote,
     InlineBr, InlineText
 } from '../../inline/model';
 import {
@@ -20,6 +22,7 @@ import {
     escapeAttr,
     escapeHtml,
     sanitizeUrl,
+    simpleId
 } from '../str';
 
 export const LinkHtml: InlineRenderRuleStr<InlineLink<UnknownToken>, MetaLinks> = [
@@ -106,6 +109,15 @@ export const AbbrevHtml: InlineRenderRuleStr<InlineAbbrev, MetaAbbrevs> = [
     ContextTag.Inline,
     InlineTag.Abbrev,
     ({ m: { a } }, { t, _ }) => '<abbr' + (t || a[_] ? ' title="' + escapeAttr(t || a[_]) + '"' : '') + '>' + escapeHtml(_) + '</abbr>'
+];
+
+export const FootnoteHtml: InlineRenderRuleStr<InlineFootnote, MetaFootnotes> = [
+    ContextTag.Inline,
+    InlineTag.Footnote,
+    ({ m: { f } }, { l }) => {
+        const id = simpleId(l);
+        return '<sup class="fn-ref"><a id="fnref-' + id + '" href="#fn-' + id + '">' + escapeHtml(l) + '</a></sup>';
+    }
 ];
 
 export const TextHtml: InlineRenderRuleStr<InlineText, NoMeta> = [

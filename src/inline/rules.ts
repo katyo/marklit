@@ -7,13 +7,15 @@ import {
     UnknownToken, TokenType
 } from '../model';
 import {
-    MetaLinks, MetaAbbrevs
+    MetaLinks, MetaAbbrevs, MetaFootnotes
 } from '../block/model';
 import {
     InlineTag, InlineOrder,
-    InlineLink, InlineImage, InlineAbbrev,
+    InlineLink, InlineImage,
+    InlineAbbrev, InlineFootnote,
     InlineStrong, InlineEm, InlineDel,
-    InlineCode, InlineMath, InlineBr, InlineText
+    InlineCode, InlineMath,
+    InlineBr, InlineText
 } from './model';
 
 export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline | ContextTag.InlineLink, Meta>;
@@ -174,6 +176,16 @@ export const Abbrev: InlineRule<InlineAbbrev, MetaAbbrevs> = [
         const { m: { a } } = $;
         if (a && !a[word] && desc) a[word] = desc;
         pushToken($, { $: InlineTag.Abbrev, t: desc, _: word });
+    }
+];
+
+export const Footnote: InlineRule<InlineFootnote, MetaFootnotes> = [
+    [ContextTag.Inline, ContextTag.InlineLink],
+    InlineOrder.Footnote,
+    // Short term[^1]
+    '\\[\\^([^\\]]+)\\]',
+    ($, { }, anchor) => {
+        pushToken($, { $: InlineTag.Footnote, l: anchor });
     }
 ];
 
