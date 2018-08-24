@@ -16,7 +16,7 @@ import {
 
     init, parse,
 
-    MathSpan
+    InlineMath, MathSpan
 } from '../../src/index';
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
@@ -158,6 +158,11 @@ export default function() {
     });
 
     describe('math', () => {
+        // inline token with math
+        interface InlineToken extends InlineTokenMap<InlineToken>, InlineMath { }
+        // inline context with math
+        interface InlineContext extends ContextMap<any, InlineToken, NoMeta> { }
+
         const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, MathSpan);
         const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
 

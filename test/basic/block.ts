@@ -3,10 +3,12 @@ import { deepStrictEqual as dse } from 'assert';
 import {
     InlineTokenMap,
     BlockTokenMap,
+    BlockMath,
     TokenType,
 
     InlineNormal,
     BlockNormal,
+    MathBlock,
 
     InlineGfmBreaks,
     BlockGfmTables,
@@ -742,6 +744,108 @@ regular text`,
                         ]
                     }
                 ]);
+        });
+
+        describe('math', () => {
+            // block token with math
+            interface BlockToken extends BlockTokenMap<BlockToken, InlineToken>, BlockMath { }
+            // context with math
+            interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
+
+            const parser = init<Context>(...BlockNormal, MathBlock, ...InlineNormal);
+            const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), [m, r]));
+
+            describe('tex', () => {
+                _('simple', `
+$$$
+E=c^2*m
+$$$
+`, { l: {}, h: [] }, [{
+                        $: BlockTag.Math,
+                        _: "E=c^2*m",
+                        s: undefined
+                    }]);
+
+                _('advanced', `
+$$$ latex
+\begin{pmatrix}
+ a_{11} & \cdots & a_{1n}\\
+ \vdots & \ddots & \vdots\\
+ a_{m1} & \cdots & a_{mn}
+\end{pmatrix}
+$$$
+`, { l: {}, h: [] }, [{
+                        $: BlockTag.Math,
+                        _: `\begin{pmatrix}
+ a_{11} & \cdots & a_{1n}\\
+ \vdots & \ddots & \vdots\\
+ a_{m1} & \cdots & a_{mn}
+\end{pmatrix}`,
+                        s: 'latex'
+                    }]);
+            });
+
+            describe('dot', () => {
+                _('graph', `
+$$$.dot
+graph {
+    a -- b;
+    b -- c;
+    a -- c;
+    d -- c;
+    e -- c;
+    e -- a;
+}
+$$$
+`, { l: {}, h: [] }, [{
+                        $: BlockTag.Math,
+                        _: `graph {
+    a -- b;
+    b -- c;
+    a -- c;
+    d -- c;
+    e -- c;
+    e -- a;
+}`,
+                        s: 'dot'
+                    }]);
+
+                _('digraph with subgraph', `
+$$$dot
+digraph {
+    subgraph cluster_0 {
+        label="Subgraph A";
+        a -> b;
+        b -> c;
+        c -> d;
+    }
+
+    subgraph cluster_1 {
+        label="Subgraph B";
+        a -> f;
+        f -> c;
+    }
+}
+$$$
+`, { l: {}, h: [] }, [{
+                        $: BlockTag.Math,
+                        _: `digraph {
+    subgraph cluster_0 {
+        label="Subgraph A";
+        a -> b;
+        b -> c;
+        c -> d;
+    }
+
+    subgraph cluster_1 {
+        label="Subgraph B";
+        a -> f;
+        f -> c;
+    }
+}`,
+                        s: 'dot'
+                    }]);
+            });
         });
     });
 }

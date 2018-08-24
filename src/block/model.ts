@@ -10,6 +10,7 @@ export const enum BlockTag {
     OrdList,
     Table,
     Code,
+    Math,
     Hr,
     Text
 }
@@ -18,6 +19,7 @@ export const enum BlockOrder {
     Newline,
     Code,
     Fences,
+    Math,
     Heading,
     NpTable,
     Hr,
@@ -102,8 +104,15 @@ export interface BlockEmpty { }
 
 export interface BlockCode {
     [BlockTag.Code]: {
-        l?: string;
-        _: string;
+        l?: string; /* language */
+        _: string; /* code source */
+    };
+}
+
+export interface BlockMath {
+    [BlockTag.Math]: {
+        s?: string; /* specification */
+        _: string; /* math equations */
     };
 }
 
@@ -114,6 +123,7 @@ export interface BlockSpace {
 export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
     BlockSpace,
     BlockCode,
+    //BlockMath,
     BlockHeading<InlineTokenMap>,
     BlockHr,
     BlockQuote<BlockTokenMap>,

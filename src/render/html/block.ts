@@ -6,7 +6,8 @@ import {
 } from '../../model';
 import {
     BlockTag,
-    BlockCode, BlockHeading,
+    BlockCode, BlockMath,
+    BlockHeading,
     BlockHr, BlockQuote,
     BlockList, BlockOrdList,
     BlockParagraph, BlockText,
@@ -35,6 +36,18 @@ export const CodeBlockWithClassHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
     ContextTag.Block,
     BlockTag.Code,
     ({ }, { _, l }) => '<pre><code' + (l ? ' class="language-' + escapeAttr(l) + '"' : '') + '>' + escapeCode(_) + '</code></pre>\n'
+];
+
+export const MathBlockHtml: BlockRenderRuleStr<BlockMath, NoMeta> = [
+    ContextTag.Block,
+    BlockTag.Math,
+    ({ }, { _ }) => '<math>' + escapeCode(_) + '</math>\n'
+];
+
+export const MathBlockWithClassHtml: BlockRenderRuleStr<BlockMath, NoMeta> = [
+    ContextTag.Block,
+    BlockTag.Math,
+    ({ }, { _, s }) => '<math' + (s ? ' class="spec-' + escapeAttr(s) + '"' : '') + '>' + escapeCode(_) + '</math>\n'
 ];
 
 export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings> = [

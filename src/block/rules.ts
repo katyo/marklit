@@ -12,7 +12,7 @@ import {
 import {
     BlockTag, BlockOrder,
     BlockAlign, BlockSpace,
-    BlockCode, BlockHeading,
+    BlockCode, BlockMath, BlockHeading,
     BlockTable, BlockTableRow,
     BlockHr, BlockQuote,
     BlockList, BlockListItem,
@@ -157,6 +157,17 @@ export const Fences: BlockRule<BlockCode, NoMeta> = [
     fences,
     ($, _, fences, lang, text) => {
         pushToken($, { $: BlockTag.Code, l: lang, _: text || '' });
+    }
+];
+
+const dollars = ' *(\\${3,})[ \\.]*(\\S+)? *\\n([\\s\\S]*?)\\n? *\\1 *(?:\\n+|$)';
+
+export const MathBlock: BlockRule<BlockMath, NoMeta> = [
+    [ContextTag.Block, ContextTag.BlockNest],
+    BlockOrder.Math,
+    dollars,
+    ($, _, dollars, spec, text) => {
+        pushToken($, { $: BlockTag.Math, s: spec, _: text || '' });
     }
 ];
 

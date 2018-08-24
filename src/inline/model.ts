@@ -88,7 +88,7 @@ export interface InlineTokenMap<InlineTokenMap> extends
     InlineEm<InlineTokenMap>,
     InlineDel<InlineTokenMap>,
     InlineCode,
-    InlineMath,
+    //InlineMath,
     InlineBr,
     InlineText { }
 
