@@ -10,14 +10,15 @@ import {
     NoMeta, UnknownToken, TokenType
 } from '../model';
 import {
-    BlockTag, BlockOrder,
+    BlockTag, BlockOrder, BlockPhrase,
     BlockAlign, BlockSpace,
     BlockCode, BlockMath, BlockHeading,
     BlockTable, BlockTableRow,
     BlockHr, BlockQuote,
     BlockList, BlockListItem,
     BlockParagraph, BlockText, BlockOrdList,
-    MetaLinks, MetaHeading, MetaHeadings
+    MetaLinks, MetaHeading, MetaHeadings,
+    MetaAbbrevs
 } from './model';
 
 export type BlockRule<BlockTokenMap, Meta> = ParserRule<ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block | ContextTag.BlockNest, Meta>;
@@ -340,7 +341,7 @@ export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     procInlines
 ];
 
-export function procInlines<BlockTokenMap, Meta>($: BlockHandle<BlockTokenMap, Meta>, token: TokenType<BlockTokenMap>) {
+export function procInlines<BlockTokenMap extends { [0]: BlockPhrase<BlockTokenMap> }, Meta>($: BlockHandle<BlockTokenMap, Meta>, token: TokenType<BlockTokenMap>) {
     token._ = parseNest($, token._ as any, ContextTag.Inline);
 }
 
@@ -484,12 +485,14 @@ export function textBlocksToParagraphs(tokens: TokenType<BlockParagraph<UnknownT
     }
 }
 
+const label = '(?!\\s*\\])(?:\\\\[\\[\\]]|[^\\[\\]])+';
+
 export const Def: BlockRule<void, MetaLinks> = [
     [ContextTag.Block],
     BlockOrder.Def,
     // [blog](http://blog.example.com/ "My blog")
     substRe(' {0,3}\\[(label)\\]: *\\n? *<?([^\\s>]+)>?(?:(?: +\\n? *| *\\n *)(title))? *(?:\\n+|$)', {
-        label: '(?!\\s*\\])(?:\\\\[\\[\\]]|[^\\[\\]])+',
+        label,
         title: '(?:"(?:\\\\"?|[^"\\\\])*"|\'[^\'\\n]*(?:\\n[^\'\\n]+)*\\n?\'|\\([^()]*\\))'
     }),
     parseDef,
@@ -521,6 +524,17 @@ function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, hre
         };
     }
 }
+
+export const AbbrevBlock: BlockRule<void, MetaAbbrevs> = [
+    [ContextTag.Block],
+    BlockOrder.Abbrev,
+    // *[HTML]: Hyper Text Markup Language
+    substRe(' {0,3}\\*\\[(label)\\]: *\\n? *([^\\n]+) *(?:\\n+|$)', { label }),
+    ({ m: { a } }, { }, word, desc) => {
+        if (a && !a[word]) a[word] = desc;
+    },
+    m => { m.a = {}; }
+];
 
 export const NpTable: BlockRule<BlockTable<UnknownToken>, NoMeta> = [
     [ContextTag.Block],

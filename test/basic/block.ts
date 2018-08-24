@@ -7,7 +7,11 @@ import {
     TokenType,
 
     InlineNormal,
+    InlineAbbrev,
     BlockNormal,
+    AbbrevBlock,
+    Abbrev,
+    AbbrevTextSpan,
     MathBlock,
 
     InlineGfmBreaks,
@@ -19,6 +23,7 @@ import {
 
     MetaHeadings,
     MetaLinks,
+    MetaAbbrevs,
 
     BlockTag,
     InlineTag,
@@ -846,6 +851,39 @@ $$$
                         s: 'dot'
                     }]);
             });
+        });
+
+        describe('abbrevs', () => {
+            // metadata with abbrevs
+            interface Meta extends MetaLinks, MetaHeadings, MetaAbbrevs { }
+            // block token with abbrevs
+            interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
+            // context with abbrevs
+            interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
+
+            const parser = init<Context>(...BlockNormal, AbbrevBlock, ...InlineNormal, Abbrev, AbbrevTextSpan);
+            const _ = (d: string, s: string, m: Meta, r: TokenType<BlockToken>[]) => it(d, () => dse(parse(parser, s), [m, r]));
+
+            _('simple', `The HTML specification
+is maintained by the W3C.
+
+*[HTML]: Hyper Text Markup Language
+*[W3C]:  World Wide Web Consortium
+`, {
+                    l: {}, h: [], a: {
+                        HTML: "Hyper Text Markup Language",
+                        W3C: "World Wide Web Consortium"
+                    }
+                }, [{
+                    $: BlockTag.Paragraph,
+                    _: [
+                        { $: InlineTag.Text, _: "The " },
+                        { $: InlineTag.Abbrev, _: "HTML" },
+                        { $: InlineTag.Text, _: " specification\nis maintained by the " },
+                        { $: InlineTag.Abbrev, _: "W3C" },
+                        { $: InlineTag.Text, _: "." }
+                    ]
+                }]);
         });
     });
 }

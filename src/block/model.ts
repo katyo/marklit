@@ -6,6 +6,7 @@ export const enum BlockTag {
     Heading,
     Paragraph,
     Quote,
+    Footnote,
     List,
     OrdList,
     Table,
@@ -25,6 +26,8 @@ export const enum BlockOrder {
     Hr,
     Quote,
     List,
+    Abbrev,
+    Footnote,
     Def,
     Table,
     LHeading,
@@ -47,20 +50,29 @@ export interface BlockHeading<InlineTokenMap> {
     };
 }
 
+export interface BlockPhrase<InlineTokenMap> {
+    _: TokensType<InlineTokenMap>;
+}
+
 export interface BlockParagraph<InlineTokenMap> {
-    [BlockTag.Paragraph]: {
-        _: TokensType<InlineTokenMap>;
-    };
+    [BlockTag.Paragraph]: BlockPhrase<InlineTokenMap>;
 }
 
 export interface BlockText<InlineTokenMap> {
-    [BlockTag.Text]: {
-        _: TokensType<InlineTokenMap>;
-    };
+    [BlockTag.Text]: BlockPhrase<InlineTokenMap>;
+}
+
+export interface BlockNested<BlockTokenMap> {
+    _: TokensType<BlockTokenMap>;
 }
 
 export interface BlockQuote<BlockTokenMap> {
-    [BlockTag.Quote]: {
+    [BlockTag.Quote]: BlockNested<BlockTokenMap>;
+}
+
+export interface BlockFootnote<BlockTokenMap> {
+    [BlockTag.Footnote]: {
+        l: string;
         _: TokensType<BlockTokenMap>;
     };
 }
@@ -135,6 +147,15 @@ export interface BlockTokenMap<BlockTokenMap, InlineTokenMap> extends
 
 // Metas
 
+export interface MetaHeading {
+    t: string; // text
+    n: number; // level
+}
+
+export interface MetaHeadings {
+    h: MetaHeading[];
+}
+
 export interface MetaLink {
     l: string; // href
     t?: string; // title
@@ -149,23 +170,14 @@ export interface MetaAbbrevs {
 }
 
 export interface MetaFootnotes {
-    f: Record<string/* note anchor id */, number/* note index in document*/>;
-}
-
-export interface MetaHeading {
-    t: string; // text
-    n: number; // level
-}
-
-export interface MetaHeadings {
-    h: MetaHeading[];
+    f: string[]; /* note anchors */
 }
 
 export interface MetaData extends
-    MetaLinks,
-    MetaAbbrevs,
-    MetaFootnotes,
-    MetaHeadings { }
+    MetaHeadings,
+    //MetaAbbrevs,
+    //MetaFootnotes,
+    MetaLinks { }
 
 // Basics
 

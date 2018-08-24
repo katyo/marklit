@@ -10,6 +10,7 @@ export const enum InlineTag {
     Math,
     Del,
     Br,
+    Abbrev,
 }
 
 export const enum InlineOrder {
@@ -19,6 +20,7 @@ export const enum InlineOrder {
     Link,
     RefLink,
     NoLink,
+    Abbrev,
     Strong,
     Em,
     Code,
@@ -71,6 +73,13 @@ export interface InlineMath {
     };
 }
 
+export interface InlineAbbrev {
+    [InlineTag.Abbrev]: {
+        t?: string;
+        _: string;
+    };
+}
+
 export interface InlinePhrase<InlineTokenMap> {
     _: TokensType<InlineTokenMap>;
 }
@@ -89,6 +98,7 @@ export interface InlineTokenMap<InlineTokenMap> extends
     InlineDel<InlineTokenMap>,
     InlineCode,
     //InlineMath,
+    InlineAbbrev,
     InlineBr,
     InlineText { }
 

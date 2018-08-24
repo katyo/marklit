@@ -13,15 +13,18 @@ import {
     ContextTag,
     ContextMap,
     NoMeta,
+    UnknownToken,
 
     init, parse,
 
-    InlineMath, MathSpan
+    InlineMath, MathSpan,
+
+    MetaAbbrevs, InlineAbbrev, Abbrev
 } from '../../src/index';
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
 
-interface InlineContext extends ContextMap<any, InlineToken, NoMeta> { }
+interface InlineContext extends ContextMap<UnknownToken, InlineToken, NoMeta> { }
 
 export default function() {
     describe('normal', () => {
@@ -169,5 +172,33 @@ export default function() {
         _('Inline $math$', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math' }]);
         _('Inline $ math with spaces $', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math with spaces' }]);
         _('Inline $$math with $ char$$.', [{ $: InlineTag.Text, _: 'Inline ' }, { $: InlineTag.Math, _: 'math with $ char' }, { $: InlineTag.Text, _: '.' }]);
+    });
+
+    describe('abbrevs', () => {
+        // metadata with abbrevs
+        interface Meta extends MetaAbbrevs { }
+        // block token with abbrevs
+        interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
+        // context with abbrevs
+        interface InlineContext extends ContextMap<UnknownToken, InlineToken, Meta> { }
+
+        const parser = init<InlineContext, ContextTag.Inline>(ContextTag.Inline, ...InlineNormal, Abbrev);
+        const _ = (s: string, r: TokenType<InlineToken>[]) => it(s, () => dse(parse(parser, s), [{}, r]));
+
+        _(`*[HTTP Hyper Text Transfer Protocol]`, [
+            { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
+        ]);
+
+        _(`*[HTTP: Hyper Text Transfer Protocol]`, [
+            { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
+        ]);
+
+        _(`*[HTTP|Hyper Text Transfer Protocol]`, [
+            { $: InlineTag.Abbrev, t: 'Hyper Text Transfer Protocol', _: "HTTP" },
+        ]);
+
+        _(`*[HTTP]`, [
+            { $: InlineTag.Abbrev, t: undefined, _: "HTTP" },
+        ]);
     });
 }

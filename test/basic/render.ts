@@ -4,11 +4,13 @@ import {
 
     InlineTag, BlockTag,
 
-    MetaLinks, MetaHeadings,
+    MetaLinks, MetaHeadings, MetaAbbrevs,
 
     ContextMap, InlineTokenMap, BlockTokenMap,
 
     InlineHtml, BlockHtml,
+
+    InlineAbbrev, AbbrevHtml,
 
     initRenderHtml,
     render
@@ -39,6 +41,7 @@ export default function() {
 
 <h2 id="heading-2">Heading 2</h2>
 `);
+
     });
 
     describe('inline', () => {
@@ -56,5 +59,48 @@ export default function() {
             }
         ], `<p>This is example of <strong>strong</strong>, <em>em</em> and <code>inline code</code>.</p>
 `);
+    });
+
+    describe('abbrev', () => {
+        interface Meta extends MetaHeadings, MetaLinks, MetaAbbrevs { }
+
+        interface InlineToken extends InlineTokenMap<InlineToken>, InlineAbbrev { }
+
+        interface BlockToken extends BlockTokenMap<BlockToken, InlineToken> { }
+
+        interface Context extends ContextMap<BlockToken, InlineToken, Meta> { }
+
+        const renderer = initRenderHtml<Context>(...BlockHtml, ...InlineHtml, AbbrevHtml);
+        const _ = (test: string, meta: Meta, tokens: TokenType<BlockToken>[], html: string) => it(test, () => htmlEq(render(renderer, [meta, tokens]), html));
+
+        _("inline", { l: {}, h: [], a: {} }, [
+            {
+                $: BlockTag.Text, _: [
+                    { $: InlineTag.Abbrev, t: "Hyper Text Transfer Protocol", _: "HTTP" }
+                ]
+            }
+        ], `<abbr title="Hyper Text Transfer Protocol">HTTP</abbr>`);
+
+        _("block", {
+            l: {}, h: [], a: {
+                HTTP: "Hyper Text Transfer Protocol"
+            }
+        }, [
+                {
+                    $: BlockTag.Paragraph, _: [
+                        { $: InlineTag.Abbrev, _: "HTTP" }
+                    ]
+                }
+            ], `<p><abbr title="Hyper Text Transfer Protocol">HTTP</abbr></p>`);
+
+        _("without title", {
+            l: {}, h: [], a: {}
+        }, [
+                {
+                    $: BlockTag.Paragraph, _: [
+                        { $: InlineTag.Abbrev, _: "HTTP" }
+                    ]
+                }
+            ], `<p><abbr>HTTP</abbr></p>`);
     });
 }

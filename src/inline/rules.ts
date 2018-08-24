@@ -1,5 +1,5 @@
 import { backpedal, reject } from '../match';
-import { ParserHandle, ParserRule, parseNest, pushToken, pushText } from '../parser';
+import { ParserHandle, ParserRule, parseNest, lastToken, pushToken, pushText } from '../parser';
 import { substRe } from '../regex';
 import {
     ContextTag, ContextMap,
@@ -7,11 +7,13 @@ import {
     UnknownToken, TokenType
 } from '../model';
 import {
-    MetaLinks
+    MetaLinks, MetaAbbrevs
 } from '../block/model';
 import {
     InlineTag, InlineOrder,
-    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr, InlineText
+    InlineLink, InlineImage, InlineAbbrev,
+    InlineStrong, InlineEm, InlineDel,
+    InlineCode, InlineMath, InlineBr, InlineText
 } from './model';
 
 export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline | ContextTag.InlineLink, Meta>;
@@ -159,6 +161,21 @@ function procRefNoLink($: InlineHandle<InlineLink<UnknownToken> | InlineText, Me
         backpedal($, link.substring(1));
     }
 }
+
+export const Abbrev: InlineRule<InlineAbbrev, MetaAbbrevs> = [
+    [ContextTag.Inline, ContextTag.InlineLink],
+    InlineOrder.Abbrev,
+    // *[HTML]
+    // *[HTML Hyper Text Markup Language]
+    // *[HTML: Hyper Text Markup Language]
+    // *[HTML|Hyper Text Markup Language]
+    '\\*\\[([^ :\\|\\]]+)[ :\\|]?(?: *([^\\]]+))?\\]',
+    ($, { }, word, desc) => {
+        const { m: { a } } = $;
+        if (a && !a[word] && desc) a[word] = desc;
+        pushToken($, { $: InlineTag.Abbrev, t: desc, _: word });
+    }
+];
 
 export const Strong: InlineRule<InlineStrong<UnknownToken>, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
@@ -309,6 +326,34 @@ export function smartyPantsText<Meta>([ctxs, order, regex, parse]: InlineRule<In
 }
 
 export const SmartyPantsTextSpan = smartyPantsText(TextSpan);
+
+export function abbrevText<Meta extends MetaAbbrevs>([ctxs, order, regex, parse]: InlineRule<InlineText, Meta>): InlineRule<InlineText & InlineAbbrev, Meta> {
+    return [
+        ctxs,
+        order,
+        regex,
+        ($, text) => {
+            parse($, text);
+            const token = lastToken($) as TokenType<InlineText>;
+            const { m: { a } } = $;
+            if (a && !($ as any).a_) {
+                // compile regexp using abbrevs
+                ($ as any).a_ = new RegExp('(' + Object.keys(a).join('|') + ')');
+            }
+            const chunks = token._.split(($ as any).a_);
+            if (chunks.length) {
+                token._ = chunks[0];
+                for (let i = 1; i < chunks.length; i++) {
+                    pushToken($, i % 2 ?
+                        { $: InlineTag.Abbrev, _: chunks[i] } :
+                        { $: InlineTag.Text, _: chunks[i] });
+                }
+            }
+        }
+    ];
+}
+
+export const AbbrevTextSpan = abbrevText(TextSpan);
 
 function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage | InlineText, NoMeta>, link: string, text: string, href: string, title?: string) {
     const islink = link.charAt(0) != '!';

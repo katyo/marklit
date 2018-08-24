@@ -5,13 +5,13 @@ import {
     UnknownToken
 } from '../../model';
 import {
-    MetaLinks, MetaLink
+    MetaLinks, MetaLink, MetaAbbrevs
 } from '../../block/model';
 import {
     InlineTag,
     InlineLink, InlineImage,
     InlineStrong, InlineEm, InlineDel,
-    InlineCode, InlineMath,
+    InlineCode, InlineMath, InlineAbbrev,
     InlineBr, InlineText
 } from '../../inline/model';
 import {
@@ -100,6 +100,12 @@ export const MathSpanHtml: InlineRenderRuleStr<InlineMath, NoMeta> = [
     ContextTag.Inline,
     InlineTag.Math,
     ({ }, { _ }) => '<math>' + escapeCode(_) + '</math>'
+];
+
+export const AbbrevHtml: InlineRenderRuleStr<InlineAbbrev, MetaAbbrevs> = [
+    ContextTag.Inline,
+    InlineTag.Abbrev,
+    ({ m: { a } }, { t, _ }) => '<abbr' + (t || a[_] ? ' title="' + escapeAttr(t || a[_]) + '"' : '') + '>' + escapeHtml(_) + '</abbr>'
 ];
 
 export const TextHtml: InlineRenderRuleStr<InlineText, NoMeta> = [
