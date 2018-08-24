@@ -131,32 +131,31 @@ export interface MetaLink {
 }
 
 export interface MetaLinks {
-    links: Record<string, MetaLink>;
+    l: Record<string/* link id */, MetaLink>;
 }
 
 export interface MetaAbbrevs {
-    abbrevs: Record<string, string>;
+    a: Record<string/* short */, string/* description */>;
 }
 
-export interface MetaFootnotes<BlockTokenMap> {
-    footnotes: Record<string, TokensType<BlockTokenMap>>;
+export interface MetaFootnotes {
+    f: Record<string/* note anchor id */, number/* note index in document*/>;
 }
 
-export interface MetaHeading<InlineTokenMap> {
+export interface MetaHeading {
     t: string; // text
     n: number; // level
-    _: TokensType<InlineTokenMap>;
 }
 
-export interface MetaHeadings<InlineTokenMap> {
-    headings: MetaHeading<InlineTokenMap>[];
+export interface MetaHeadings {
+    h: MetaHeading[];
 }
 
-export interface MetaData<BlockTokenMap, InlineTokenMap> extends
+export interface MetaData extends
     MetaLinks,
     MetaAbbrevs,
-    MetaFootnotes<BlockTokenMap>,
-    MetaHeadings<InlineTokenMap> { }
+    MetaFootnotes,
+    MetaHeadings { }
 
 // Basics
 

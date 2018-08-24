@@ -14,7 +14,7 @@ import {
     render
 } from '../../src/index';
 
-interface Meta extends MetaHeadings<InlineToken>, MetaLinks { }
+interface Meta extends MetaHeadings, MetaLinks { }
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
 
@@ -28,9 +28,9 @@ export default function() {
 
     describe('block', () => {
         _('headings', {
-            links: {}, headings: [
-                { t: "Heading 1", n: 1, _: [{ $: InlineTag.Text, _: "Heading 1" }] },
-                { t: "Heading 2", n: 2, _: [{ $: InlineTag.Text, _: "Heading 2" }] }
+            l: {}, h: [
+                { t: "Heading 1", n: 1 },
+                { t: "Heading 2", n: 2 }
             ]
         }, [
                 { $: BlockTag.Heading, i: 0, n: 1, _: [{ $: InlineTag.Text, _: "Heading 1" }] },
@@ -42,7 +42,7 @@ export default function() {
     });
 
     describe('inline', () => {
-        _('phrases', { links: {}, headings: [] }, [
+        _('phrases', { l: {}, h: [] }, [
             {
                 $: BlockTag.Paragraph, _: [
                     { $: InlineTag.Text, _: "This is example of " },

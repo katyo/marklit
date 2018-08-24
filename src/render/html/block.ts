@@ -37,18 +37,22 @@ export const CodeBlockWithClassHtml: BlockRenderRuleStr<BlockCode, NoMeta> = [
     ({ }, { _, l }) => '<pre><code' + (l ? ' class="language-' + escapeAttr(l) + '"' : '') + '>' + escapeCode(_) + '</code></pre>\n'
 ];
 
-export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
+export const HeadingHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings> = [
     ContextTag.Block,
     BlockTag.Heading,
     ($, { n, i, _ }) => `<h${n}>` + renderNest($, _, ContextTag.Inline) + `</h${n}>\n`
 ];
 
-export const HeadingWithIdHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
+export const HeadingWithIdHtml: BlockRenderRuleStr<BlockHeading<UnknownToken>, MetaHeadings> = [
     ContextTag.Block,
     BlockTag.Heading,
-    ($, { n, i, _ }) => `<h${n} id="${$.m.headings[i].t.toLowerCase().replace(/[^\w]+/g, '-')}">` +
+    ($, { n, i, _ }) => `<h${n} id="${headingId($.m.h[i].t)}">` +
         renderNest($, _, ContextTag.Inline) + `</h${n}>\n`
 ];
+
+export function headingId(t: string): string {
+    return t.toLowerCase().replace(/[^\w]+/g, '-');
+}
 
 export const HrHtml: BlockRenderRuleStr<BlockHr, NoMeta> = [
     ContextTag.Block,

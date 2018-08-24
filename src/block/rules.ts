@@ -160,7 +160,7 @@ export const Fences: BlockRule<BlockCode, NoMeta> = [
     }
 ];
 
-export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
+export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
     heading,
@@ -176,7 +176,7 @@ export const Heading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unknown
     procHeading
 ];
 
-export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
+export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.LHeading,
     lheading,
@@ -188,7 +188,7 @@ export const LHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unknow
     procHeading
 ];
 
-export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>> = [
+export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Heading,
     ' *(#{1,6}) +([^\\n]+?) *#* *(?:\\n+|$)',
@@ -200,19 +200,19 @@ export const GfmHeading: BlockRule<BlockHeading<UnknownToken>, MetaHeadings<Unkn
     procHeading
 ];
 
-function initHeading(m: MetaHeadings<UnknownToken>) {
-    m.headings = [];
+function initHeading(m: MetaHeadings) {
+    m.h = [];
 }
 
-function parseHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, level: number, text: string) {
-    const index = $.m.headings.length;
-    $.m.headings.push({ n: level } as MetaHeading<UnknownToken>);
+function parseHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings>, level: number, text: string) {
+    const index = $.m.h.length;
+    $.m.h.push({ n: level } as MetaHeading);
     pushToken($, { $: BlockTag.Heading, i: index, n: level, _: text as any });
 }
 
-function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<UnknownToken>>, token: TokenType<BlockHeading<UnknownToken>>) {
-    const heading = $.m.headings[token.i];
-    heading._ = token._ = parseNest($, token._ as any, ContextTag.Inline);
+function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings>, token: TokenType<BlockHeading<UnknownToken>>) {
+    const heading = $.m.h[token.i];
+    token._ = parseNest($, token._ as any, ContextTag.Inline);
     heading.t = extractText(token._);
 }
 
@@ -453,7 +453,7 @@ export const PedanticDef: BlockRule<void, MetaLinks> = [
 ];
 
 function initDef(m: MetaLinks) {
-    m.links = {};
+    m.l = {};
 }
 
 function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, href: string, title?: string) {
@@ -461,8 +461,8 @@ function parseDef($: BlockHandle<void, MetaLinks>, _: string, label: string, hre
 
     label = label.toLowerCase().replace(/\s+/g, ' ');
 
-    if (!$.m.links[label]) {
-        $.m.links[label] = {
+    if (!$.m.l[label]) {
+        $.m.l[label] = {
             l: href,
             t: title
         };

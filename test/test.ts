@@ -35,7 +35,7 @@ import {
     initRenderHtml, render
 } from '../src/index';
 
-interface Meta extends MetaHeadings<InlineToken>, MetaLinks { }
+interface Meta extends MetaHeadings, MetaLinks { }
 
 interface InlineToken extends InlineTokenMap<InlineToken> { }
 

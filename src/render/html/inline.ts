@@ -59,8 +59,8 @@ export const ImageXHtml: InlineRenderRuleStr<InlineImage, MetaLinks> = [
 ];
 
 function putLinkAttr(l: string, v: string | void, n: keyof MetaLink, m: MetaLinks, a: string): string | void {
-    if (m.links) {
-        const $ = m.links[l];
+    if (m.l) {
+        const $ = m.l[l];
         if ($ && $[n]) {
             v = $[n] as string;
         }

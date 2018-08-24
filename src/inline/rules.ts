@@ -136,7 +136,7 @@ export const NoLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
 
 function procRefNoLink($: InlineHandle<InlineLink<UnknownToken> | InlineText, MetaLinks>, link: string, text: string, text2: string) {
     const id = (text2 || text).replace(/\s+/g, ' ').toLowerCase();
-    const def = $.m.links[id];
+    const def = $.m.l[id];
     if (def && def.l) {
         parseLink($, link, text, id);
     } else {
