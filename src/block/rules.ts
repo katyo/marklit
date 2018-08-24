@@ -1,5 +1,9 @@
 import { backpedal, reject } from '../match';
-import { ParserHandle, ParserRule, parseNest, procNest, pushToken, lastToken, ProcFunc } from '../parser';
+import {
+    ParserHandle, ParserRule, parseNest,
+    procNest, pushToken, lastToken, ProcFunc,
+    dropToken,
+} from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap,
@@ -133,7 +137,7 @@ export const Newline: BlockRule<BlockSpace, NoMeta> = [
     '\\n+',
     $ => { pushToken($, { $: BlockTag.Space }); },
     [BlockTag.Space],
-    () => false,
+    () => dropToken,
 ];
 
 export const CodeBlock: BlockRule<BlockCode, NoMeta> = [

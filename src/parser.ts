@@ -24,8 +24,10 @@ export interface InitFunc<CtxMap extends HasContexts, Ctx extends ContextKey<Ctx
 
 export type ParserInits<CtxMap extends HasContexts, Meta> = InitFunc<CtxMap, ContextKey<CtxMap>, Meta>[];
 
+export const dropToken: any[] = [];
+
 export interface ProcFunc<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> {
-    <MetaType extends Meta>($: ParserHandle<CtxMap, Ctx, MetaType>, token: ContextToken<CtxMap, Ctx>): false | void;
+    <MetaType extends Meta>($: ParserHandle<CtxMap, Ctx, MetaType>, token: ContextToken<CtxMap, Ctx>): ContextToken<CtxMap, Ctx>[] | void;
 }
 
 export type ParserContextProcs<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> = {
@@ -211,15 +213,14 @@ export function parseNest<CtxMap extends HasContexts & HasMeta, Ctx extends Cont
 export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, tokens: ContextToken<CtxMap, Ctx>[]): void;
 export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>, NestedCtx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, tokens: ContextToken<CtxMap, Ctx>[], ctx: NestedCtx): void;
 export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>, NestedCtx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, tokens: ContextToken<CtxMap, Ctx>[], ctx: Ctx | NestedCtx = $.c) {
-    const posts = $.a[$.c];
-    if (posts) {
+    const procs = $.a[$.c];
+    if (procs) {
         for (let i = 0; i < tokens.length; i++) {
             const token = tokens[i];
-            if (typeof token == 'object') {
-                const proc = (posts as any)[(token as any as TaggedToken<keyof any>).$];
-                if (proc && proc($, token) === false) {
-                    tokens.splice(i--, 1);
-                }
+            const proc = (procs as any)[(token as any as TaggedToken<keyof any>).$];
+            if (proc) {
+                const tokens_ = proc($, token);
+                if (tokens_) tokens.splice(i--, 1, ...tokens_);
             }
         }
     }
