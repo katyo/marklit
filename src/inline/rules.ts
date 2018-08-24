@@ -205,50 +205,52 @@ export const MathSpan: InlineRule<InlineMath, NoMeta> = [
     }
 ];
 
-const br = '(?: {2,}|\\\\)\\n(?!\\s*$)';
-
 export const Br: InlineRule<InlineBr, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Br,
-    br,
-    procBr
+    '(?: {2,}|\\\\)\\n(?!\\s*$)',
+    $ => { pushToken($, { $: InlineTag.Br }) }
 ];
 
-export const GfmBreaksBr: InlineRule<InlineBr, NoMeta> = [
-    [ContextTag.Inline, ContextTag.InlineLink],
-    InlineOrder.Br,
-    substRe(br, { '\\{2,\\}': '*' }),
-    procBr
-];
-
-function procBr($: InlineHandle<InlineBr, NoMeta>) {
-    pushToken($, { $: InlineTag.Br });
+export function gfmBreaksBr([ctxs, order, regex, parse]: InlineRule<InlineBr, NoMeta>): InlineRule<InlineBr, NoMeta> {
+    return [
+        ctxs,
+        order,
+        substRe(regex, { '\\{2,\\}': '*' }),
+        parse
+    ];
 }
 
-const text = '[\\s\\S]+?(?=[\\\\<!\\[`*$]|\\b_| {2,}\\n|$)';
+export const GfmBreaksBr = gfmBreaksBr(Br);
 
 export const TextSpan: InlineRule<InlineText, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Text,
-    text,
-    parseText
+    '[\\s\\S]+?(?=[\\\\<!\\[`*$]|\\b_| {2,}\\n|$)',
+    ($, text) => { pushText($, InlineTag.Text, text.replace(/ +/g, ' ')); }
 ];
 
-const gfm_text = substRe(text, { '\\]\\|': '~]|https?://|ftp:\\/\\/|www\\.|[a-zA-Z0-9.!#$%&\'*+/=?^_`{\\|}~-]+@|' });
+export function gfmText<Meta>([ctxs, order, regex, parse]: InlineRule<InlineText, Meta>): InlineRule<InlineText, Meta> {
+    return [
+        ctxs,
+        order,
+        substRe(regex, { '\\]\\|': '~]|https?://|ftp:\\/\\/|www\\.|[a-zA-Z0-9.!#$%&\'*+/=?^_`{\\|}~-]+@|' }),
+        parse
+    ];
+}
 
-export const GfmTextSpan: InlineRule<InlineText, NoMeta> = [
-    [ContextTag.Inline, ContextTag.InlineLink],
-    InlineOrder.Text,
-    gfm_text,
-    parseText
-];
+export const GfmTextSpan = gfmText(TextSpan);
 
-export const GfmBreaksTextSpan: InlineRule<InlineText, NoMeta> = [
-    [ContextTag.Inline, ContextTag.InlineLink],
-    InlineOrder.Text,
-    substRe(gfm_text, { '\\{2,\\}': '*' }),
-    parseText
-];
+export function gfmBreaksText<Meta>([ctxs, order, regex, parse]: InlineRule<InlineText, Meta>): InlineRule<InlineText, Meta> {
+    return [
+        ctxs,
+        order,
+        substRe(regex, { '\\{2,\\}': '*' }),
+        parse
+    ];
+}
+
+export const GfmBreaksTextSpan = gfmBreaksText(gfmText(TextSpan));
 
 export function smartypants(chunk: string): string {
     return chunk
@@ -268,16 +270,16 @@ export function smartypants(chunk: string): string {
         .replace(/\.{3}/g, '\u2026');
 }
 
-export const TextSpanSmartyPants: InlineRule<InlineText, NoMeta> = [
-    [ContextTag.Inline, ContextTag.InlineLink],
-    InlineOrder.Text,
-    text,
-    ($, text) => parseText($, smartypants(text))
-];
-
-function parseText($: InlineHandle<InlineText, NoMeta>, text: string) {
-    pushText($, InlineTag.Text, text.replace(/ +/g, ' '));
+export function smartyPantsText<Meta>([ctxs, order, regex, parse]: InlineRule<InlineText, Meta>): InlineRule<InlineText, Meta> {
+    return [
+        ctxs,
+        order,
+        regex,
+        ($, text) => { parse($, smartypants(text)); }
+    ];
 }
+
+export const SmartyPantsTextSpan = smartyPantsText(TextSpan);
 
 function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage | InlineText, NoMeta>, link: string, text: string, href: string, title?: string) {
     const islink = link.charAt(0) != '!';

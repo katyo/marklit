@@ -1,5 +1,5 @@
 import { backpedal, reject } from '../match';
-import { ParserHandle, ParserRule, parseNest, procNest, pushToken, lastToken } from '../parser';
+import { ParserHandle, ParserRule, parseNest, procNest, pushToken, lastToken, ProcFunc } from '../parser';
 import { substRe, shiftRe } from '../regex';
 import {
     ContextTag, ContextMap,
@@ -229,9 +229,7 @@ export const Hr: BlockRule<BlockHr, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
     BlockOrder.Hr,
     hr,
-    $ => {
-        pushToken($, { $: BlockTag.Hr });
-    }
+    $ => { pushToken($, { $: BlockTag.Hr }); }
 ];
 
 export const Quote: BlockRule<BlockQuote<UnknownToken>, NoMeta> = [
@@ -256,34 +254,32 @@ export const Paragraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
     [ContextTag.Block],
     BlockOrder.Paragraph,
     paragraph,
-    parseParagraph,
+    ($, text) => {
+        pushToken($, {
+            $: BlockTag.Paragraph,
+            _: text
+                //.replace(/^ +/, '')
+                .replace(/\n$/, '') as any
+        });
+    },
     [BlockTag.Paragraph],
-    procParagraph
+    procInlines
 ];
 
-export const GfmParagraph: BlockRule<BlockParagraph<UnknownToken>, NoMeta> = [
-    [ContextTag.Block],
-    BlockOrder.Paragraph,
-    substRe(paragraph, {
-        '\\(\\?!': `(?!${shiftRe(fences, 1)}|${shiftRe(list, 2)}|`
-    }),
-    parseParagraph,
-    [BlockTag.Paragraph],
-    procParagraph
-];
-
-function parseParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, text: string) {
-    pushToken($, {
-        $: BlockTag.Paragraph,
-        _: text
-            //.replace(/^ +/, '')
-            .replace(/\n$/, '') as any
-    });
+export function gfmParagraph([ctxs, order, regex, parse, tags, proc]: BlockRule<BlockParagraph<UnknownToken>, NoMeta>): BlockRule<BlockParagraph<UnknownToken>, NoMeta> {
+    return [
+        ctxs,
+        order,
+        substRe(regex, {
+            '\\(\\?!': `(?!${shiftRe(fences, 1)}|${shiftRe(list, 2)}|`
+        }),
+        parse,
+        tags as BlockTag.Paragraph[],
+        proc as ProcFunc<ContextMap<BlockParagraph<UnknownToken>, UnknownToken, NoMeta>, ContextTag.Block, NoMeta>
+    ];
 }
 
-function procParagraph($: BlockHandle<BlockParagraph<UnknownToken>, NoMeta>, token: TokenType<BlockParagraph<UnknownToken>>) {
-    token._ = parseNest($, token._ as any, ContextTag.Inline);
-}
+export const GfmParagraph = gfmParagraph(Paragraph);
 
 export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],
@@ -302,8 +298,12 @@ export const TextBlock: BlockRule<BlockText<UnknownToken>, NoMeta> = [
         }
     },
     [BlockTag.Text],
-    procParagraph as any as (($: BlockHandle<BlockText<UnknownToken>, NoMeta>, token: TokenType<BlockText<UnknownToken>>) => void)
+    procInlines
 ];
+
+export function procInlines<BlockTokenMap, Meta>($: BlockHandle<BlockTokenMap, Meta>, token: TokenType<BlockTokenMap>) {
+    token._ = parseNest($, token._ as any, ContextTag.Inline);
+}
 
 export const List: BlockRule<BlockList<UnknownToken> | BlockOrdList<UnknownToken>, NoMeta> = [
     [ContextTag.Block, ContextTag.BlockNest],

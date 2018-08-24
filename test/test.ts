@@ -30,8 +30,9 @@ import {
     InlineXHtml,
     InlineGfmHtml,
     InlineGfmXHtml,
+    SmartyPantsTextSpan,
 
-    initRenderHtml, render, TextSpanSmartyPants
+    initRenderHtml, render
 } from '../src/index';
 
 interface Meta extends MetaHeadings<InlineToken>, MetaLinks { }
@@ -89,7 +90,7 @@ function doTest({ pedantic, gfm, breaks, tables, headerIds, xhtml, smartypants/*
     const parser = init<Context>(
         ...(pedantic ? BlockPedantic : tables ? BlockGfmTables : gfm ? BlockGfm : BlockNormal),
         ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal),
-        ...(smartypants ? [TextSpanSmartyPants] : [])
+        ...(smartypants ? [SmartyPantsTextSpan] : [])
     );
 
     const render_rules = [
