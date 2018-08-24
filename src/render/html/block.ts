@@ -144,6 +144,6 @@ export const BlockHtml = [CodeBlockWithClassHtml, HeadingWithIdHtml, HrHtml, Quo
 
 export const BlockXHtml = [CodeBlockWithClassHtml, HeadingWithIdHtml, HrXHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml];
 
-export const BlockTablesHtml = [...BlockHtml, TableHtml];
+export const BlockTablesHtml = [CodeBlockWithClassHtml, HeadingWithIdHtml, HrHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml, TableHtml];
 
-export const BlockTablesXHtml = [...BlockXHtml, TableHtml];
+export const BlockTablesXHtml = [CodeBlockWithClassHtml, HeadingWithIdHtml, HrXHtml, QuoteHtml, ListHtml, OrdListHtml, ParagraphHtml, TextBlockHtml, TableHtml];

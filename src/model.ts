@@ -1,6 +1,6 @@
 export type UnknownToken = any;
 
-export type TokenTypeByTag<Map, Tag extends keyof Map> = Map[Tag] extends object ? { $: Tag; } & Map[Tag] : Map[Tag];
+export type TokenTypeByTag<Map, Tag extends keyof Map> = Map[Tag] extends object ? { $: Tag; } & Map[Tag] : never;
 export type TokenType<Map> = Map extends object ? { [Tag in keyof Map]: TokenTypeByTag<Map, Tag>; }[keyof Map] : Map extends string ? Map : any;
 export type TokensType<Map> = TokenType<Map>[];
 

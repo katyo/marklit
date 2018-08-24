@@ -8,7 +8,7 @@ import {
 } from '../model';
 import {
     InlineTag, InlineOrder,
-    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr
+    InlineLink, InlineImage, InlineStrong, InlineEm, InlineDel, InlineCode, InlineMath, InlineBr, InlineText
 } from './model';
 
 export type InlineRule<InlineTokenMap, Meta> = ParserRule<ContextMap<UnknownToken, InlineTokenMap, any>, ContextTag.Inline | ContextTag.InlineLink, Meta>;
@@ -23,11 +23,11 @@ function escapes(src: string): string {
     return src.replace(escape_re, '$1');
 }
 
-export const Escape: InlineRule<string, NoMeta> = [
+export const Escape: InlineRule<InlineText, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Escape,
     escape,
-    ($, _, char) => { pushText($, char) }
+    ($, _, char) => { pushText($, InlineTag.Text, char) }
 ];
 
 const email = '[a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])';
@@ -43,7 +43,7 @@ export const AutoLink: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
         pushToken($, {
             $: InlineTag.Link,
             l: (at ? 'mailto:' : '') + url,
-            _: [url]
+            _: [{ $: InlineTag.Text, _: url }]
         });
     }
 ];
@@ -69,7 +69,7 @@ export const Url: InlineRule<InlineLink<UnknownToken>, NoMeta> = [
         pushToken($, {
             $: InlineTag.Link,
             l: at ? `mailto:${text}` : url == 'www.' ? `http://${text}` : text,
-            _: [text]
+            _: [{ $: InlineTag.Text, _: text }]
         });
     }
 ];
@@ -131,13 +131,13 @@ export const NoLink: InlineRule<InlineLink<UnknownToken>, MetaLinks> = [
     procRefNoLink
 ];
 
-function procRefNoLink($: InlineHandle<InlineLink<UnknownToken>, MetaLinks>, link: string, text: string, text2: string) {
+function procRefNoLink($: InlineHandle<InlineLink<UnknownToken> | InlineText, MetaLinks>, link: string, text: string, text2: string) {
     const id = (text2 || text).replace(/\s+/g, ' ').toLowerCase();
     const def = $.m.links[id];
     if (def && def.l) {
         parseLink($, link, text, id);
     } else {
-        pushText($, link.charAt(0));
+        pushText($, InlineTag.Text, link.charAt(0));
         backpedal($, link.substring(1));
     }
 }
@@ -227,34 +227,59 @@ function procBr($: InlineHandle<InlineBr, NoMeta>) {
 
 const text = '[\\s\\S]+?(?=[\\\\<!\\[`*$]|\\b_| {2,}\\n|$)';
 
-export const TextSpan: InlineRule<string, NoMeta> = [
+export const TextSpan: InlineRule<InlineText, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Text,
     text,
-    procText
+    parseText
 ];
 
 const gfm_text = substRe(text, { '\\]\\|': '~]|https?://|ftp:\\/\\/|www\\.|[a-zA-Z0-9.!#$%&\'*+/=?^_`{\\|}~-]+@|' });
 
-export const GfmTextSpan: InlineRule<string, NoMeta> = [
+export const GfmTextSpan: InlineRule<InlineText, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Text,
     gfm_text,
-    procText
+    parseText
 ];
 
-export const GfmBreaksTextSpan: InlineRule<string, NoMeta> = [
+export const GfmBreaksTextSpan: InlineRule<InlineText, NoMeta> = [
     [ContextTag.Inline, ContextTag.InlineLink],
     InlineOrder.Text,
     substRe(gfm_text, { '\\{2,\\}': '*' }),
-    procText
+    parseText
 ];
 
-function procText($: InlineHandle<string, NoMeta>, text: string) {
-    pushText($, text.replace(/ +/g, ' '));
+export function smartypants(chunk: string): string {
+    return chunk
+        // em-dashes
+        .replace(/---/g, '\u2014')
+        // en-dashes
+        .replace(/--/g, '\u2013')
+        // opening singles
+        .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
+        // closing singles & apostrophes
+        .replace(/'/g, '\u2019')
+        // opening doubles
+        .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
+        // closing doubles
+        .replace(/"/g, '\u201d')
+        // ellipses
+        .replace(/\.{3}/g, '\u2026');
 }
 
-function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage, NoMeta>, link: string, text: string, href: string, title?: string) {
+export const TextSpanSmartyPants: InlineRule<InlineText, NoMeta> = [
+    [ContextTag.Inline, ContextTag.InlineLink],
+    InlineOrder.Text,
+    text,
+    ($, text) => parseText($, smartypants(text))
+];
+
+function parseText($: InlineHandle<InlineText, NoMeta>, text: string) {
+    pushText($, InlineTag.Text, text.replace(/ +/g, ' '));
+}
+
+function parseLink($: InlineHandle<InlineLink<UnknownToken> | InlineImage | InlineText, NoMeta>, link: string, text: string, href: string, title?: string) {
     const islink = link.charAt(0) != '!';
     if ($.c == ContextTag.InlineLink && islink) {
         reject($);

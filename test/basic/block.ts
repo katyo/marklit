@@ -41,7 +41,7 @@ export default function() {
                 { headings: [], links: {} }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "Simple and short paragraph"
+                            { $: InlineTag.Text, _: "Simple and short paragraph" }
                         ]
                     }
                 ]);
@@ -50,7 +50,7 @@ export default function() {
                 { headings: [], links: {} }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "Simple and short paragraph with space"
+                            { $: InlineTag.Text, _: "Simple and short paragraph with space" }
                         ]
                     }
                 ]);
@@ -59,7 +59,7 @@ and the second`,
                 { headings: [], links: {} }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "The first line\nand the second"
+                            { $: InlineTag.Text, _: "The first line\nand the second" }
                         ]
                     }
                 ]);
@@ -69,7 +69,7 @@ and the second with space
                 { headings: [], links: {} }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "The first line\nand the second with space"
+                            { $: InlineTag.Text, _: "The first line\nand the second with space" }
                         ]
                     }
                 ]);
@@ -80,12 +80,12 @@ one`,
                 { headings: [], links: {} }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "The first paragraph"
+                            { $: InlineTag.Text, _: "The first paragraph" }
                         ]
                     },
                     {
                         $: BlockTag.Paragraph, _: [
-                            "And the second\none"
+                            { $: InlineTag.Text, _: "And the second\none" }
                         ]
                     }
                 ]);
@@ -96,20 +96,20 @@ one`,
                 headings: [{
                     t: "Simple heading",
                     n: 1,
-                    _: ["Simple heading"]
+                    _: [{ $: InlineTag.Text, _: "Simple heading" }]
                 }], links: {}
             }, [
-                    { $: BlockTag.Heading, i: 0, n: 1, _: ["Simple heading"] }
+                    { $: BlockTag.Heading, i: 0, n: 1, _: [{ $: InlineTag.Text, _: "Simple heading" }] }
                 ]);
 
             _('simple h2', `## Simple heading`, {
                 headings: [{
                     t: "Simple heading",
                     n: 2,
-                    _: ["Simple heading"]
+                    _: [{ $: InlineTag.Text, _: "Simple heading" }]
                 }], links: {}
             }, [
-                    { $: BlockTag.Heading, i: 0, n: 2, _: ["Simple heading"] }
+                    { $: BlockTag.Heading, i: 0, n: 2, _: [{ $: InlineTag.Text, _: "Simple heading" }] }
                 ]);
 
             _('simple line h1', `Simple heading
@@ -117,10 +117,10 @@ one`,
                     headings: [{
                         t: "Simple heading",
                         n: 1,
-                        _: ["Simple heading"]
+                        _: [{ $: InlineTag.Text, _: "Simple heading" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 1, _: ["Simple heading"] }
+                    { $: BlockTag.Heading, i: 0, n: 1, _: [{ $: InlineTag.Text, _: "Simple heading" }] }
                 ]);
 
             _('simple line h2', `Simple heading
@@ -128,10 +128,10 @@ one`,
                     headings: [{
                         t: "Simple heading",
                         n: 2,
-                        _: ["Simple heading"]
+                        _: [{ $: InlineTag.Text, _: "Simple heading" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 2, _: ["Simple heading"] }
+                    { $: BlockTag.Heading, i: 0, n: 2, _: [{ $: InlineTag.Text, _: "Simple heading" }] }
                 ]);
 
             _('multiline', `### Multiline
@@ -139,11 +139,11 @@ heading`, {
                     headings: [{
                         t: "Multiline",
                         n: 3,
-                        _: ["Multiline"]
+                        _: [{ $: InlineTag.Text, _: "Multiline" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 3, _: ["Multiline"] },
-                    { $: BlockTag.Paragraph, _: ["heading"] }
+                    { $: BlockTag.Heading, i: 0, n: 3, _: [{ $: InlineTag.Text, _: "Multiline" }] },
+                    { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: "heading" }] }
                 ]);
 
             _('spaced', `#### Simple heading
@@ -151,10 +151,10 @@ heading`, {
                     headings: [{
                         t: "Simple heading",
                         n: 4,
-                        _: ["Simple heading"]
+                        _: [{ $: InlineTag.Text, _: "Simple heading" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 4, _: ["Simple heading"] }
+                    { $: BlockTag.Heading, i: 0, n: 4, _: [{ $: InlineTag.Text, _: "Simple heading" }] }
                 ]);
 
             _('multiple identical', `## First heading
@@ -162,15 +162,15 @@ heading`, {
                     headings: [{
                         t: "First heading",
                         n: 2,
-                        _: ["First heading"]
+                        _: [{ $: InlineTag.Text, _: "First heading" }]
                     }, {
                         t: "Second one",
                         n: 2,
-                        _: ["Second one"]
+                        _: [{ $: InlineTag.Text, _: "Second one" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 2, _: ["First heading"] },
-                    { $: BlockTag.Heading, i: 1, n: 2, _: ["Second one"] },
+                    { $: BlockTag.Heading, i: 0, n: 2, _: [{ $: InlineTag.Text, _: "First heading" }] },
+                    { $: BlockTag.Heading, i: 1, n: 2, _: [{ $: InlineTag.Text, _: "Second one" }] },
                 ]);
 
             _('multiple different', `# First heading
@@ -178,15 +178,15 @@ heading`, {
                     headings: [{
                         t: "First heading",
                         n: 1,
-                        _: ["First heading"]
+                        _: [{ $: InlineTag.Text, _: "First heading" }]
                     }, {
                         t: "Second one",
                         n: 2,
-                        _: ["Second one"]
+                        _: [{ $: InlineTag.Text, _: "Second one" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 1, _: ["First heading"] },
-                    { $: BlockTag.Heading, i: 1, n: 2, _: ["Second one"] },
+                    { $: BlockTag.Heading, i: 0, n: 1, _: [{ $: InlineTag.Text, _: "First heading" }] },
+                    { $: BlockTag.Heading, i: 1, n: 2, _: [{ $: InlineTag.Text, _: "Second one" }] },
                 ]);
 
             _('multiple with paragraphs', `### First heading
@@ -200,17 +200,17 @@ paragraph`, {
                     headings: [{
                         t: "First heading",
                         n: 3,
-                        _: ["First heading"]
+                        _: [{ $: InlineTag.Text, _: "First heading" }]
                     }, {
                         t: "Second one",
                         n: 2,
-                        _: ["Second one"]
+                        _: [{ $: InlineTag.Text, _: "Second one" }]
                     }], links: {}
                 }, [
-                    { $: BlockTag.Heading, i: 0, n: 3, _: ["First heading"] },
-                    { $: BlockTag.Paragraph, _: ["First paragraph"] },
-                    { $: BlockTag.Heading, i: 1, n: 2, _: ["Second one"] },
-                    { $: BlockTag.Paragraph, _: ["Next\nparagraph"] }
+                    { $: BlockTag.Heading, i: 0, n: 3, _: [{ $: InlineTag.Text, _: "First heading" }] },
+                    { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: "First paragraph" }] },
+                    { $: BlockTag.Heading, i: 1, n: 2, _: [{ $: InlineTag.Text, _: "Second one" }] },
+                    { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: "Next\nparagraph" }] }
                 ]);
         });
 
@@ -218,7 +218,7 @@ paragraph`, {
             _('simple', `>Block quote`, { headings: [], links: {} }, [
                 {
                     $: BlockTag.Quote, _: [
-                        { $: BlockTag.Paragraph, _: ['Block quote'] }
+                        { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Block quote' }] }
                     ]
                 }
             ]);
@@ -226,7 +226,7 @@ paragraph`, {
             _('spaced', `> Block quote`, { headings: [], links: {} }, [
                 {
                     $: BlockTag.Quote, _: [
-                        { $: BlockTag.Paragraph, _: ['Block quote'] }
+                        { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Block quote' }] }
                     ]
                 }
             ]);
@@ -236,7 +236,7 @@ paragraph`, {
 >and more...`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.Quote, _: [
-                            { $: BlockTag.Paragraph, _: ['Block quote\nnext line\nand more...'] }
+                            { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Block quote\nnext line\nand more...' }] }
                         ]
                     }
                 ]);
@@ -246,7 +246,7 @@ paragraph`, {
 >  and more...`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.Quote, _: [
-                            { $: BlockTag.Paragraph, _: ['Block quote\nnext line\n and more...'] }
+                            { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Block quote\nnext line\n and more...' }] }
                         ]
                     }
                 ]);
@@ -256,13 +256,13 @@ paragraph`, {
 >>>and next nested`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.Quote, _: [
-                            { $: BlockTag.Paragraph, _: ['Block quote'] },
+                            { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Block quote' }] },
                             {
                                 $: BlockTag.Quote, _: [
-                                    { $: BlockTag.Paragraph, _: ['nested block quote'] },
+                                    { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'nested block quote' }] },
                                     {
                                         $: BlockTag.Quote, _: [
-                                            { $: BlockTag.Paragraph, _: ['and next nested'] }
+                                            { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'and next nested' }] }
                                         ]
                                     }
                                 ]
@@ -285,7 +285,7 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
+                            { $: InlineTag.Link, l: "def link", _: [{ $: InlineTag.Text, _: "Def Link" }] }
                         ]
                     }
                 ]);
@@ -302,7 +302,7 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
+                            { $: InlineTag.Link, l: "def link", _: [{ $: InlineTag.Text, _: "Def Link" }] }
                         ]
                     }
                 ]);
@@ -319,7 +319,7 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            { $: InlineTag.Link, l: "def link", _: ["Def Link"] }
+                            { $: InlineTag.Link, l: "def link", _: [{ $: InlineTag.Text, _: "Def Link" }] }
                         ]
                     }
                 ]);
@@ -336,7 +336,7 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            { $: InlineTag.Link, l: "1", _: ["This link"] }
+                            { $: InlineTag.Link, l: "1", _: [{ $: InlineTag.Text, _: "This link" }] }
                         ]
                     }
                 ]);
@@ -359,9 +359,9 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            { $: InlineTag.Link, l: "some", _: ["Some link"] },
-                            " ",
-                            { $: InlineTag.Link, l: "-other-", _: ["Other link"] }
+                            { $: InlineTag.Link, l: "some", _: [{ $: InlineTag.Text, _: "Some link" }] },
+                            { $: InlineTag.Text, _: " " },
+                            { $: InlineTag.Link, l: "-other-", _: [{ $: InlineTag.Text, _: "Other link" }] }
                         ]
                     }
                 ]);
@@ -383,9 +383,9 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            { $: InlineTag.Link, l: "some", _: ["Some link"] },
-                            " ",
-                            { $: InlineTag.Link, l: "some", _: ["Other link"] }
+                            { $: InlineTag.Link, l: "some", _: [{ $: InlineTag.Text, _: "Some link" }] },
+                            { $: InlineTag.Text, _: " " },
+                            { $: InlineTag.Link, l: "some", _: [{ $: InlineTag.Text, _: "Other link" }] }
                         ]
                     }
                 ]);
@@ -405,8 +405,8 @@ paragraph`, {
                         $: BlockTag.Quote, _: [
                             {
                                 $: BlockTag.Paragraph, _: [
-                                    "Link below\n",
-                                    { $: InlineTag.Link, l: "ql", _: ["This link"] }
+                                    { $: InlineTag.Text, _: "Link below\n" },
+                                    { $: InlineTag.Link, l: "ql", _: [{ $: InlineTag.Text, _: "This link" }] }
                                 ]
                             }
                         ]
@@ -422,7 +422,7 @@ paragraph`, {
                 }, [
                     {
                         $: BlockTag.Paragraph, _: [
-                            "Link below\n[This link][ql]",
+                            { $: InlineTag.Text, _: "Link below\n[This link][ql]" },
                         ]
                     },
                     {
@@ -438,9 +438,9 @@ paragraph`, {
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -451,9 +451,9 @@ paragraph`, {
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Paragraph, _: ['Item 1'] }] },
-                            { _: [{ $: BlockTag.Paragraph, _: ['Item 2'] }] },
-                            { _: [{ $: BlockTag.Paragraph, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Item 2' }] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -464,9 +464,9 @@ paragraph`, {
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1\nItem 1 Line 2'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1\nItem 1 Line 2' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -478,9 +478,9 @@ paragraph`, {
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Paragraph, _: ['Item 1\nItem 1 Line 2'] }] },
-                            { _: [{ $: BlockTag.Paragraph, _: ['Item 2'] }] },
-                            { _: [{ $: BlockTag.Paragraph, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Item 1\nItem 1 Line 2' }] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Item 2' }] }] },
+                            { _: [{ $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -491,10 +491,10 @@ paragraph`, {
 * Item 4`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { t: 1, _: [{ $: BlockTag.Text, _: ['Task 1'] }] },
-                            { t: 1, c: 1, _: [{ $: BlockTag.Text, _: ['Task 2'] }] },
-                            { t: 1, _: [{ $: BlockTag.Text, _: ['Task 3'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 4'] }] }
+                            { t: 1, _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Task 1' }] }] },
+                            { t: 1, c: 1, _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Task 2' }] }] },
+                            { t: 1, _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Task 3' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 4' }] }] }
                         ]
                     }
                 ]);
@@ -504,9 +504,9 @@ paragraph`, {
 1. Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.OrdList, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -516,9 +516,9 @@ paragraph`, {
 1. Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.OrdList, s: 2, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 2'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -530,9 +530,9 @@ paragraph`, {
 1. Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.OrdList, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 2\nItem 2 Line 2\nItem 2 Line 3'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2\nItem 2 Line 2\nItem 2 Line 3' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -543,10 +543,10 @@ paragraph`, {
 4. Item 4`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.OrdList, _: [
-                            { t: 1, _: [{ $: BlockTag.Text, _: ['Task 1'] }] },
-                            { t: 1, c: 1, _: [{ $: BlockTag.Text, _: ['Task 2'] }] },
-                            { t: 1, _: [{ $: BlockTag.Text, _: ['Task 3'] }] },
-                            { _: [{ $: BlockTag.Text, _: ['Item 4'] }] }
+                            { t: 1, _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Task 1' }] }] },
+                            { t: 1, c: 1, _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Task 2' }] }] },
+                            { t: 1, _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Task 3' }] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 4' }] }] }
                         ]
                     }
                 ]);
@@ -558,19 +558,19 @@ paragraph`, {
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
                             {
                                 _: [
-                                    { $: BlockTag.Text, _: ['Item 2'] },
+                                    { $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] },
                                     {
                                         $: BlockTag.List, _: [
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 1' }] }] },
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 2' }] }] }
                                         ]
                                     }
                                 ]
                             },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -582,19 +582,19 @@ paragraph`, {
 * Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.List, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
                             {
                                 _: [
-                                    { $: BlockTag.Text, _: ['Item 2'] },
+                                    { $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] },
                                     {
                                         $: BlockTag.OrdList, _: [
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 1' }] }] },
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 2' }] }] }
                                         ]
                                     }
                                 ]
                             },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -606,19 +606,19 @@ paragraph`, {
 3. Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.OrdList, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
                             {
                                 _: [
-                                    { $: BlockTag.Text, _: ['Item 2'] },
+                                    { $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] },
                                     {
                                         $: BlockTag.OrdList, _: [
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 1' }] }] },
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 2' }] }] }
                                         ]
                                     }
                                 ]
                             },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -630,19 +630,19 @@ paragraph`, {
 1. Item 3`, { headings: [], links: {} }, [
                     {
                         $: BlockTag.OrdList, _: [
-                            { _: [{ $: BlockTag.Text, _: ['Item 1'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 1' }] }] },
                             {
                                 _: [
-                                    { $: BlockTag.Text, _: ['Item 2'] },
+                                    { $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 2' }] },
                                     {
                                         $: BlockTag.List, _: [
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 1'] }] },
-                                            { _: [{ $: BlockTag.Text, _: ['Subitem 2'] }] }
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 1' }] }] },
+                                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Subitem 2' }] }] }
                                         ]
                                     }
                                 ]
                             },
-                            { _: [{ $: BlockTag.Text, _: ['Item 3'] }] },
+                            { _: [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Item 3' }] }] },
                         ]
                     }
                 ]);
@@ -654,7 +654,7 @@ paragraph`, {
 regular text`,
                 { links: {}, headings: [] }, [
                     { $: BlockTag.Code, _: 'code block\n\n' },
-                    { $: BlockTag.Paragraph, _: ['regular text'] }
+                    { $: BlockTag.Paragraph, _: [{ $: InlineTag.Text, _: 'regular text' }] }
                 ]);
         });
     });
@@ -672,20 +672,20 @@ regular text`,
                         $: BlockTag.Table,
                         a: [BlockAlign.None, BlockAlign.None, BlockAlign.None],
                         h: [
-                            [{ $: BlockTag.Text, _: ['Col 1'] }],
-                            [{ $: BlockTag.Text, _: ['Col 2'] }],
-                            [{ $: BlockTag.Text, _: ['Col 3'] }]
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 1' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 2' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 3' }] }]
                         ],
                         _: [
                             [
-                                [{ $: BlockTag.Text, _: ['1,1'] }],
-                                [{ $: BlockTag.Text, _: ['1 2'] }],
-                                [{ $: BlockTag.Text, _: ['1:3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1,1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1 2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1:3' }] }]
                             ],
                             [
-                                [{ $: BlockTag.Text, _: ['2 1'] }],
-                                [{ $: BlockTag.Text, _: ['2:2'] }],
-                                [{ $: BlockTag.Text, _: ['2;3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2 1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2:2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2;3' }] }]
                             ]
                         ]
                     }
@@ -699,20 +699,20 @@ regular text`,
                         $: BlockTag.Table,
                         a: [BlockAlign.None, BlockAlign.None, BlockAlign.None],
                         h: [
-                            [{ $: BlockTag.Text, _: ['Col 1'] }],
-                            [{ $: BlockTag.Text, _: ['Col 2'] }],
-                            [{ $: BlockTag.Text, _: ['Col 3'] }]
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 1' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 2' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 3' }] }]
                         ],
                         _: [
                             [
-                                [{ $: BlockTag.Text, _: ['1,1'] }],
-                                [{ $: BlockTag.Text, _: ['1 2'] }],
-                                [{ $: BlockTag.Text, _: ['1:3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1,1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1 2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1:3' }] }]
                             ],
                             [
-                                [{ $: BlockTag.Text, _: ['2 1'] }],
-                                [{ $: BlockTag.Text, _: ['2:2'] }],
-                                [{ $: BlockTag.Text, _: ['2;3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2 1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2:2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2;3' }] }]
                             ]
                         ]
                     }
@@ -725,13 +725,13 @@ regular text`,
                         $: BlockTag.Table,
                         a: [BlockAlign.None, BlockAlign.None],
                         h: [
-                            [{ $: BlockTag.Text, _: ['1'] }],
-                            [{ $: BlockTag.Text, _: ['2'] }]
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2' }] }]
                         ],
                         _: [
                             [
                                 [],
-                                [{ $: BlockTag.Text, _: ['2'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2' }] }]
                             ]
                         ]
                     }
@@ -745,20 +745,20 @@ regular text`,
                         $: BlockTag.Table,
                         a: [BlockAlign.Left, BlockAlign.Center, BlockAlign.Right],
                         h: [
-                            [{ $: BlockTag.Text, _: ['Col 1'] }],
-                            [{ $: BlockTag.Text, _: ['Col 2'] }],
-                            [{ $: BlockTag.Text, _: ['Col 3'] }]
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 1' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 2' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 3' }] }]
                         ],
                         _: [
                             [
-                                [{ $: BlockTag.Text, _: ['1,1'] }],
-                                [{ $: BlockTag.Text, _: ['1 2'] }],
-                                [{ $: BlockTag.Text, _: ['1:3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1,1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1 2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1:3' }] }]
                             ],
                             [
-                                [{ $: BlockTag.Text, _: ['2 1'] }],
-                                [{ $: BlockTag.Text, _: ['2:2'] }],
-                                [{ $: BlockTag.Text, _: ['2;3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2 1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2:2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2;3' }] }]
                             ]
                         ]
                     }
@@ -772,20 +772,20 @@ regular text`,
                         $: BlockTag.Table,
                         a: [BlockAlign.Left, BlockAlign.Center, BlockAlign.Right],
                         h: [
-                            [{ $: BlockTag.Text, _: ['Col 1'] }],
-                            [{ $: BlockTag.Text, _: ['Col 2'] }],
-                            [{ $: BlockTag.Text, _: ['Col 3'] }]
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 1' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 2' }] }],
+                            [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: 'Col 3' }] }]
                         ],
                         _: [
                             [
-                                [{ $: BlockTag.Text, _: ['1,1'] }],
-                                [{ $: BlockTag.Text, _: ['1 2'] }],
-                                [{ $: BlockTag.Text, _: ['1:3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1,1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1 2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '1:3' }] }]
                             ],
                             [
-                                [{ $: BlockTag.Text, _: ['2 1'] }],
-                                [{ $: BlockTag.Text, _: ['2:2'] }],
-                                [{ $: BlockTag.Text, _: ['2;3'] }]
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2 1' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2:2' }] }],
+                                [{ $: BlockTag.Text, _: [{ $: InlineTag.Text, _: '2;3' }] }]
                             ]
                         ]
                     }

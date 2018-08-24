@@ -12,9 +12,7 @@ export type BlockRenderRuleStr<BlockTokenMap, Meta> = RenderRule<string, Context
 
 export type BlockRenderHandleStr<BlockTokenMap, Meta> = RenderHandle<string, ContextMap<BlockTokenMap, UnknownToken, any>, ContextTag.Block, Meta>;
 
-export const initRenderHtml = makeRender(wrapHtml, joinHtml);
-
-export const initRenderHtmlSmartypants = makeRender(wrapHtmlSmartypants, joinHtml);
+export const initRenderHtml = makeRender(joinHtml);
 
 export const textAlign: string[] = [
     '',
@@ -25,24 +23,6 @@ export const textAlign: string[] = [
 
 export function wrapHtml($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunk: string): string {
     return escapeHtml(chunk);
-}
-
-export function wrapHtmlSmartypants($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunk: string): string {
-    return escapeHtml(chunk
-        // em-dashes
-        .replace(/---/g, '\u2014')
-        // en-dashes
-        .replace(/--/g, '\u2013')
-        // opening singles
-        .replace(/(^|[-\u2014/(\[{"\s])'/g, '$1\u2018')
-        // closing singles & apostrophes
-        .replace(/'/g, '\u2019')
-        // opening doubles
-        .replace(/(^|[-\u2014/(\[{\u2018\s])"/g, '$1\u201c')
-        // closing doubles
-        .replace(/"/g, '\u201d')
-        // ellipses
-        .replace(/\.{3}/g, '\u2026'));
 }
 
 export function joinHtml($: RenderHandle<string, ContextMap<UnknownToken, UnknownToken, NoMeta>, ContextTag, NoMeta>, chunks: string[]): string {

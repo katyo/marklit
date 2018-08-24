@@ -1,6 +1,7 @@
 import { TokenType, TokensType } from '../model';
 
 export const enum InlineTag {
+    Text,
     Link,
     Image,
     Strong,
@@ -75,7 +76,9 @@ export interface InlinePhrase<InlineTokenMap> {
 }
 
 export interface InlineText {
-    '': string;
+    [InlineTag.Text]: {
+        _: string;
+    };
 }
 
 export interface InlineTokenMap<InlineTokenMap> extends

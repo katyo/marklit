@@ -212,16 +212,15 @@ function procHeading($: BlockHandle<BlockHeading<UnknownToken>, MetaHeadings<Unk
     heading.t = extractText(token._);
 }
 
-interface TokenWithNested {
-    _?: string | (TokenWithNested | string)[];
+export interface TokenWithNested {
+    _?: string | TokenWithNested[];
 }
 
-function extractText(tokens: (TokenWithNested | string)[]): string {
+export function extractText(tokens: TokenWithNested[]): string {
     const chunks: string[] = [];
     for (const token of tokens) {
-        chunks.push(typeof token == 'string' ? token :
-            typeof token._ == 'string' ? token._ :
-                token._ ? extractText(token._) : '');
+        chunks.push(typeof token._ == 'string' ? token._ :
+            token._ ? extractText(token._) : '');
     }
     return chunks.join('');
 }

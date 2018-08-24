@@ -31,7 +31,7 @@ import {
     InlineGfmHtml,
     InlineGfmXHtml,
 
-    initRenderHtml, initRenderHtmlSmartypants, render
+    initRenderHtml, render, TextSpanSmartyPants
 } from '../src/index';
 
 interface Meta extends MetaHeadings<InlineToken>, MetaLinks { }
@@ -88,7 +88,8 @@ export function htmlEq(actual_html: string, expected_html: string, actual_adt?: 
 function doTest({ pedantic, gfm, breaks, tables, headerIds, xhtml, smartypants/*, baseUrl, mangle, sanitize*/ }: Options, source_md: string, expected_html: string) {
     const parser = init<Context>(
         ...(pedantic ? BlockPedantic : tables ? BlockGfmTables : gfm ? BlockGfm : BlockNormal),
-        ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal)
+        ...(pedantic ? InlinePedantic : breaks ? InlineGfmBreaks : gfm ? InlineGfm : InlineNormal),
+        ...(smartypants ? [TextSpanSmartyPants] : [])
     );
 
     const render_rules = [
@@ -97,9 +98,7 @@ function doTest({ pedantic, gfm, breaks, tables, headerIds, xhtml, smartypants/*
         ...(gfm ? (xhtml ? InlineGfmXHtml : InlineGfmHtml) : (xhtml ? InlineXHtml : InlineHtml)),
     ];
 
-    const renderer = smartypants ?
-        initRenderHtmlSmartypants<Context>(...render_rules) :
-        initRenderHtml<Context>(...render_rules);
+    const renderer = initRenderHtml<Context>(...render_rules);
 
     const actual_adt = parse(parser, source_md);
 

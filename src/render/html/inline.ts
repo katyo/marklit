@@ -9,7 +9,7 @@ import {
     InlineLink, InlineImage,
     InlineStrong, InlineEm, InlineDel,
     InlineCode, InlineMath,
-    InlineBr
+    InlineBr, InlineText
 } from '../../inline/model';
 import {
     InlineRenderRuleStr,
@@ -99,6 +99,12 @@ export const MathSpanHtml: InlineRenderRuleStr<InlineMath, NoMeta> = [
     ({ }, { _ }) => '<math>' + escapeCode(_) + '</math>'
 ];
 
+export const TextHtml: InlineRenderRuleStr<InlineText, NoMeta> = [
+    ContextTag.Inline,
+    InlineTag.Text,
+    ({ }, { _ }) => escapeHtml(_)
+];
+
 export const BrHtml: InlineRenderRuleStr<InlineBr, NoMeta> = [
     ContextTag.Inline,
     InlineTag.Br,
@@ -111,10 +117,10 @@ export const BrXHtml: InlineRenderRuleStr<InlineBr, NoMeta> = [
     () => '<br />'
 ];
 
-export const InlineHtml = [LinkHtml, ImageHtml, StrongHtml, EmHtml, CodeSpanHtml, BrHtml];
+export const InlineHtml = [LinkHtml, ImageHtml, StrongHtml, EmHtml, CodeSpanHtml, BrHtml, TextHtml];
 
-export const InlineXHtml = [LinkHtml, ImageXHtml, StrongHtml, EmHtml, CodeSpanHtml, BrXHtml];
+export const InlineXHtml = [LinkHtml, ImageXHtml, StrongHtml, EmHtml, CodeSpanHtml, BrXHtml, TextHtml];
 
-export const InlineGfmHtml = [...InlineHtml, DelHtml];
+export const InlineGfmHtml = [LinkHtml, ImageHtml, StrongHtml, EmHtml, CodeSpanHtml, BrHtml, DelHtml, TextHtml];
 
-export const InlineGfmXHtml = [...InlineXHtml, DelHtml];
+export const InlineGfmXHtml = [LinkHtml, ImageXHtml, StrongHtml, EmHtml, CodeSpanHtml, BrXHtml, DelHtml, TextHtml];

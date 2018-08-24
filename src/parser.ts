@@ -226,8 +226,7 @@ export function procNest<CtxMap extends HasContexts & HasMeta, Ctx extends Conte
 }
 
 export function lastToken<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>): ContextToken<CtxMap, Ctx> | void {
-    if (tokens.length &&
-        typeof tokens[tokens.length - 1] != 'string') {
+    if (tokens.length) {
         return tokens[tokens.length - 1];
     }
 }
@@ -236,13 +235,18 @@ export function pushToken<CtxMap extends HasContexts, Ctx extends ContextKey<Ctx
     tokens.push(token);
 }
 
-export function pushText<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta, Token extends string & ContextToken<CtxMap, Ctx>>({ t: tokens }: ParserHandle<CtxMap, Ctx, Meta>, token: string) {
-    if (token.length) {
-        if (tokens.length &&
-            typeof tokens[tokens.length - 1] == 'string') {
-            (tokens[tokens.length - 1] as any as string) += token;
+export interface TextToken {
+    $: keyof any;
+    _: string;
+}
+
+export function pushText<CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta, Token extends TextToken & ContextToken<CtxMap, Ctx>>($: ParserHandle<CtxMap, Ctx, Meta>, tag: TokenTag<Token>, chunk: string) {
+    if (chunk.length) {
+        const token = lastToken($) as TextToken | void;
+        if (token && token.$ == tag) {
+            token._ += chunk;
         } else {
-            tokens.push(token as Token);
+            $.t.push({ $: tag, _: chunk } as any as Token);
         }
     }
 }

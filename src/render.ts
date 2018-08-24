@@ -13,13 +13,8 @@ export interface JoinFunc<Type, CtxMap extends HasContexts, Ctx extends ContextK
     <MetaType extends Meta>(handle: RenderHandle<Type, CtxMap, Ctx, MetaType>, elms: Type[]): Type;
 }
 
-export interface WrapFunc<Type, CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> {
-    <MetaType extends Meta>(handle: RenderHandle<Type, CtxMap, Ctx, MetaType>, str: string): Type;
-}
-
 export interface RenderHandle<Type, CtxMap extends HasContexts, Ctx extends ContextKey<CtxMap>, Meta> {
     r: RenderMethods<Type, CtxMap, Meta>; // render methods
-    w: WrapFunc<Type, CtxMap, Ctx, Meta>; // wrap method
     j: JoinFunc<Type, CtxMap, Ctx, Meta>; // join method
     c: Ctx; // current context
     m: Meta; // render meta
@@ -46,7 +41,6 @@ export type RenderRules<Type, CtxMap extends HasContexts & HasMeta> = RenderRule
 
 export interface Renderer<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>> {
     r: RenderMethods<Type, CtxMap, ContextMeta<CtxMap>>;
-    w: WrapFunc<Type, CtxMap, Ctx, ContextMeta<CtxMap>>;
     j: JoinFunc<Type, CtxMap, Ctx, ContextMeta<CtxMap>>;
     s: Ctx;
 }
@@ -56,13 +50,13 @@ export interface InitRender<Type> {
     <CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>(start: Ctx, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, Ctx>;
 }
 
-export function makeRender<Type>(wrap: WrapFunc<Type, any, any, any>, join: JoinFunc<Type, any, any, any>): InitRender<Type> {
-    return ((...rules: any[]) => initRender(wrap, join, ...rules)) as InitRender<Type>;
+export function makeRender<Type>(join: JoinFunc<Type, any, any, any>): InitRender<Type> {
+    return ((...rules: any[]) => initRender(join, ...rules)) as InitRender<Type>;
 }
 
-function initRender<Type, CtxMap extends HasContexts & HasMeta & HasInit>(wrap: WrapFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, join: JoinFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, InitTag>;
-function initRender<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>(wrap: WrapFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, join: JoinFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, start: Ctx, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, Ctx>;
-function initRender<Type, CtxMap extends HasContexts & HasMeta>(wrap: WrapFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, join: JoinFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, any> {
+function initRender<Type, CtxMap extends HasContexts & HasMeta & HasInit>(join: JoinFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, InitTag>;
+function initRender<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>(join: JoinFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, start: Ctx, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, Ctx>;
+function initRender<Type, CtxMap extends HasContexts & HasMeta>(join: JoinFunc<Type, CtxMap, ContextKey<CtxMap>, ContextMeta<CtxMap>>, ...rules: RenderRules<Type, CtxMap>): Renderer<Type, CtxMap, any> {
     let start = typeof rules[0] == 'number' ? rules.shift() : 0;
 
     const ctxs: (ContextKey<CtxMap>)[] = [];
@@ -85,12 +79,12 @@ function initRender<Type, CtxMap extends HasContexts & HasMeta>(wrap: WrapFunc<T
         renderers[context] = funcs;
     }
 
-    return { r: renderers, w: wrap, j: join, s: start };
+    return { r: renderers, j: join, s: start };
 }
 
-export function render<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>({ r, w, j, s }: Renderer<Type, CtxMap, Ctx>, [meta, tokens]: ParserResult<CtxMap, Ctx>): Type {
+export function render<Type, CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>({ r, j, s }: Renderer<Type, CtxMap, Ctx>, [meta, tokens]: ParserResult<CtxMap, Ctx>): Type {
     const $: RenderHandle<Type, CtxMap, Ctx, ContextMeta<CtxMap>> = {
-        r, w, j, m: meta, c: s
+        r, j, m: meta, c: s
     };
     return renderNest($, tokens);
 }
@@ -101,9 +95,7 @@ export function renderNest<Type, CtxMap extends HasContexts & HasMeta, Ctx exten
     const $$ = $.c === ctx ? $ : { ...$, c: ctx };
     const elms: Type[] = [];
     for (const token of tokens) {
-        elms.push(typeof token == 'string' ?
-            $$.w($$, token) :
-            ($$.r[$$.c] as any)[(token as any as TaggedToken<number>).$]($$, token));
+        elms.push(($$.r[$$.c] as any)[(token as any as TaggedToken<number>).$]($$, token));
     }
     return $$.j($$, elms);
 }
