@@ -535,7 +535,7 @@ export const AbbrevBlock: BlockRule<void, MetaAbbrevs> = [
     ({ m: { a } }, { }, word, desc) => {
         if (!a[word]) a[word] = desc;
     },
-    m => { m.a = {}; }
+    (m: MetaAbbrevs) => { m.a = {}; }
 ];
 
 export const FootnotesBlock: BlockRule<BlockFootnotes<UnknownToken>, MetaFootnotes> = [
@@ -564,7 +564,7 @@ export const FootnotesBlock: BlockRule<BlockFootnotes<UnknownToken>, MetaFootnot
             f.push(anchor);
         }
     },
-    m => { m.f = []; },
+    (m: MetaFootnotes) => { m.f = []; },
     [BlockTag.Footnotes],
     procList
 ];

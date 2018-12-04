@@ -198,10 +198,10 @@ export function parse<CtxMap extends HasContexts & HasMeta, Ctx extends ContextK
 export function parseNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>, NestedCtx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, src: string, ctx: NestedCtx): ContextToken<CtxMap, NestedCtx>[];
 export function parseNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, src: string): ContextToken<CtxMap, Ctx>[];
 export function parseNest<CtxMap extends HasContexts & HasMeta, Ctx extends ContextKey<CtxMap>, NestedCtx extends ContextKey<CtxMap>>($: ParserHandle<CtxMap, Ctx, ContextMeta<CtxMap>>, src: string, ctx: Ctx | NestedCtx = $.c): ContextToken<CtxMap, Ctx | NestedCtx>[] {
-    const $$ = {
+    const $$: ParserHandle<CtxMap, NestedCtx, CtxMap["_"]> = {
         ...$,
         t: [],
-        c: ctx,
+        c: ctx as NestedCtx,
         s: src.replace(/^ +$/gm, ''), // remove spaces on empty lines which has spaces only
         r: true
     };

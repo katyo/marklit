@@ -5,16 +5,24 @@ import {
     UnknownToken
 } from '../../model';
 import {
-    MetaLinks, MetaLink,
-    MetaAbbrevs, MetaFootnotes
+    MetaLinks,
+    MetaLink,
+    MetaAbbrevs,
+    MetaFootnotes
 } from '../../block/model';
 import {
     InlineTag,
-    InlineLink, InlineImage,
-    InlineStrong, InlineEm, InlineDel,
-    InlineCode, InlineMath,
-    InlineAbbrev, InlineFootnote,
-    InlineBr, InlineText
+    InlineLink,
+    InlineImage,
+    InlineStrong,
+    InlineEm,
+    InlineDel,
+    InlineCode,
+    InlineMath,
+    InlineAbbrev,
+    InlineFootnote,
+    InlineBr,
+    InlineText
 } from '../../inline/model';
 import {
     InlineRenderRuleStr,
